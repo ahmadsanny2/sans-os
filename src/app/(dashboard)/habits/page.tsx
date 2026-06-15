@@ -4,7 +4,7 @@ import React, { useEffect } from "react"
 import { useWorkspaceStore } from "@/store/workspaceStore"
 import { HabitGrid } from "@/components/habits/HabitGrid"
 import { HabitRecaps } from "@/components/habits/HabitRecaps"
-import { format, parseISO, addDays, subDays } from "date-fns"
+import { format, parseISO, addMonths, subMonths } from "date-fns"
 import { Calendar, ChevronLeft, ChevronRight } from "lucide-react"
 
 export default function HabitsPage() {
@@ -19,13 +19,13 @@ export default function HabitsPage() {
   const baseDate = parseISO(activeDate)
 
   // Navigation handlers
-  const handlePrevWeek = (): void => {
-    const newDate = subDays(baseDate, 7)
+  const handlePrevMonth = (): void => {
+    const newDate = subMonths(baseDate, 1)
     setActiveDate(format(newDate, "yyyy-MM-dd"))
   }
 
-  const handleNextWeek = (): void => {
-    const newDate = addDays(baseDate, 7)
+  const handleNextMonth = (): void => {
+    const newDate = addMonths(baseDate, 1)
     setActiveDate(format(newDate, "yyyy-MM-dd"))
   }
 
@@ -33,7 +33,7 @@ export default function HabitsPage() {
     setActiveDate(format(new Date(), "yyyy-MM-dd"))
   }
 
-  const activeDateFormatted = format(baseDate, "MMMM d, yyyy")
+  const activeMonthFormatted = format(baseDate, "MMMM yyyy")
 
   return (
     <div className="mx-auto max-w-6xl space-y-8 py-4">
@@ -45,19 +45,19 @@ export default function HabitsPage() {
           </h1>
           <p className="text-sm text-muted-foreground flex items-center gap-1.5">
             <Calendar className="h-4 w-4 text-violet-500" />
-            Active Week: <span className="font-semibold text-foreground">{activeDateFormatted}</span>
+            Active Month: <span className="font-semibold text-foreground">{activeMonthFormatted}</span>
           </p>
         </div>
 
         {/* Calendar Navigation Buttons */}
         <div className="flex items-center gap-2 self-start sm:self-center">
           <button
-            onClick={handlePrevWeek}
+            onClick={handlePrevMonth}
             className="inline-flex h-9 items-center justify-center rounded-lg border border-border bg-card px-3 text-xs font-semibold hover:bg-muted active:scale-95 transition-all text-muted-foreground hover:text-foreground"
-            aria-label="Previous week"
+            aria-label="Previous month"
           >
             <ChevronLeft className="mr-1 h-4 w-4" />
-            Previous Week
+            Previous Month
           </button>
           
           <button
@@ -69,11 +69,11 @@ export default function HabitsPage() {
           </button>
 
           <button
-            onClick={handleNextWeek}
+            onClick={handleNextMonth}
             className="inline-flex h-9 items-center justify-center rounded-lg border border-border bg-card px-3 text-xs font-semibold hover:bg-muted active:scale-95 transition-all text-muted-foreground hover:text-foreground"
-            aria-label="Next week"
+            aria-label="Next month"
           >
-            Next Week
+            Next Month
             <ChevronRight className="ml-1 h-4 w-4" />
           </button>
         </div>

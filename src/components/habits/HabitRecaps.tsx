@@ -3,7 +3,7 @@
 import React from "react"
 import { useWorkspaceStore } from "@/store/workspaceStore"
 import { useHabitsQuery, useHabitStatsQuery } from "@/hooks/useHabits"
-import { format, parseISO, startOfWeek, addDays, getDaysInMonth } from "date-fns"
+import { format, parseISO, startOfWeek, addDays, getDaysInMonth, startOfMonth, endOfMonth } from "date-fns"
 import {
   BarChart,
   Bar,
@@ -25,24 +25,26 @@ export function HabitRecaps() {
   const activeDate = useWorkspaceStore((state) => state.activeDate)
   const userConfig = useWorkspaceStore((state) => state.userConfig)
 
-  // 1. Calculate Active Week (for the weekly chart)
   const baseDate = parseISO(activeDate)
   const weekStart = startOfWeek(baseDate, { weekStartsOn: userConfig.startOfWeek as 0 | 1 | 2 | 3 | 4 | 5 | 6 })
   const weekDays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i))
 
-  const startDateStr = format(weekDays[0], "yyyy-MM-dd")
-  const endDateStr = format(weekDays[6], "yyyy-MM-dd")
+  // Calculate Active Month boundaries (to match HabitGrid query range exactly)
+  const monthStart = startOfMonth(baseDate)
+  const monthEnd = endOfMonth(baseDate)
+  const startDateStr = format(monthStart, "yyyy-MM-dd")
+  const endDateStr = format(monthEnd, "yyyy-MM-dd")
 
-  const { data: weeklyData } = useHabitsQuery(startDateStr, endDateStr)
+  const { data: monthlyData } = useHabitsQuery(startDateStr, endDateStr)
 
-  // 2. Calculate Active Month (for the monthly stats)
+  // Calculate Active Month stats
   const currentMonthStr = activeDate.substring(0, 7) // "YYYY-MM"
   const { data: monthlyStats, isLoading: statsLoading } = useHabitStatsQuery(currentMonthStr)
 
-  // Prepare weekly chart data
+  // Prepare weekly chart data from monthlyData logs in-memory
   const chartData: ChartDataPoint[] = weekDays.map((day) => {
     const dayStr = format(day, "yyyy-MM-dd")
-    const completions = weeklyData?.logs.filter((l) => l.date === dayStr && l.status === "completed").length || 0
+    const completions = monthlyData?.logs.filter((l) => l.date === dayStr && l.status === "completed").length || 0
     return {
       dayLabel: format(day, "EEE"),
       completions,

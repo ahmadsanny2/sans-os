@@ -8,7 +8,7 @@ import {
   useToggleLogMutation,
   useDeleteHabitMutation,
 } from "@/hooks/useHabits"
-import { format, parseISO, startOfWeek, addDays } from "date-fns"
+import { format, parseISO, startOfMonth, endOfMonth, eachDayOfInterval } from "date-fns"
 import { Plus, Trash2, Check, Loader2, Sparkles } from "lucide-react"
 
 // Category styling lookup
@@ -42,15 +42,15 @@ const CATEGORIES: Record<string, { color: string; bg: string; border: string }> 
 
 export function HabitGrid() {
   const activeDate = useWorkspaceStore((state) => state.activeDate)
-  const userConfig = useWorkspaceStore((state) => state.userConfig)
 
-  // Compute active week dates
+  // Compute active month dates
   const baseDate = parseISO(activeDate)
-  const weekStart = startOfWeek(baseDate, { weekStartsOn: userConfig.startOfWeek as 0 | 1 | 2 | 3 | 4 | 5 | 6 })
-  const weekDays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i))
+  const monthStart = startOfMonth(baseDate)
+  const monthEnd = endOfMonth(baseDate)
+  const monthDays = eachDayOfInterval({ start: monthStart, end: monthEnd })
 
-  const startDateStr = format(weekDays[0], "yyyy-MM-dd")
-  const endDateStr = format(weekDays[6], "yyyy-MM-dd")
+  const startDateStr = format(monthStart, "yyyy-MM-dd")
+  const endDateStr = format(monthEnd, "yyyy-MM-dd")
 
   // React Query Hooks
   const { data, isLoading, isError } = useHabitsQuery(startDateStr, endDateStr)
@@ -199,97 +199,112 @@ export function HabitGrid() {
 
       {/* Habits Grid Table Card */}
       <div className="overflow-x-auto rounded-2xl border border-border bg-card shadow-sm dark:bg-card/50">
-        <div className="min-w-[700px] divide-y divide-border">
-          {/* Header Row */}
-          <div className="grid grid-cols-12 items-center bg-secondary/50 py-3 text-center text-xs font-bold text-muted-foreground">
-            <div className="col-span-5 px-6 text-left">HABIT</div>
-            {weekDays.map((day) => {
-              const isActive = format(day, "yyyy-MM-dd") === activeDate
-              return (
-                <div
-                  key={day.toISOString()}
-                  className={`col-span-1 flex flex-col items-center justify-center gap-0.5 ${
-                    isActive ? "text-sidebar-primary scale-110 font-black" : ""
-                  }`}
-                >
-                  <span className="text-[10px] uppercase tracking-wider">
-                    {format(day, "EEE")}
-                  </span>
-                  <span className={`text-sm h-6 w-6 flex items-center justify-center rounded-full ${
-                    isActive ? "bg-sidebar-primary text-sidebar-primary-foreground" : ""
-                  }`}>
-                    {format(day, "d")}
-                  </span>
-                </div>
-              )
-            })}
-          </div>
-
-          {/* Body Rows */}
-          {listHabits.length === 0 ? (
-            <div className="py-12 text-center text-sm text-muted-foreground">
-              No habits registered yet. Add a new habit above.
-            </div>
-          ) : (
-            <div className="divide-y divide-border/60">
-              {listHabits.map((habit) => {
+        <table className="w-full border-collapse text-center text-sm min-w-[1200px]">
+          <thead>
+            <tr className="bg-secondary/50 text-xs font-bold text-muted-foreground border-b border-border uppercase tracking-wider">
+              <th className="px-6 py-4 text-left font-bold text-muted-foreground w-64 select-none sticky left-0 bg-card z-10 border-r border-border">
+                Habit
+              </th>
+              {monthDays.map((day) => {
+                const isSel = format(day, "yyyy-MM-dd") === activeDate
+                return (
+                  <th
+                    key={day.toISOString()}
+                    className={`px-1 py-3 font-bold select-none min-w-[36px] ${
+                      isSel ? "text-sidebar-primary bg-sidebar-primary/5 dark:bg-sidebar-primary/10 font-black" : ""
+                    }`}
+                  >
+                    <div className="flex flex-col items-center gap-0.5">
+                      <span className="text-[9px] uppercase tracking-normal opacity-75 font-semibold">
+                        {format(day, "EE").slice(0, 2)}
+                      </span>
+                      <span className={`text-xs h-6 w-6 flex items-center justify-center rounded-full ${
+                        isSel ? "bg-sidebar-primary text-sidebar-primary-foreground font-black" : ""
+                      }`}>
+                        {format(day, "d")}
+                      </span>
+                    </div>
+                  </th>
+                )
+              })}
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-border/60">
+            {listHabits.length === 0 ? (
+              <tr>
+                <td colSpan={monthDays.length + 1} className="py-12 text-center text-sm text-muted-foreground bg-card">
+                  No habits registered yet. Add a new habit above.
+                </td>
+              </tr>
+            ) : (
+              listHabits.map((habit) => {
                 const catInfo = CATEGORIES[habit.category] || CATEGORIES.General
                 return (
-                  <div key={habit.id} className="grid grid-cols-12 items-center py-3 text-center transition-colors hover:bg-secondary/20">
-                    {/* Habit Info Cell */}
-                    <div className="col-span-5 flex items-center justify-between px-6 text-left">
-                      <div className="space-y-1 pr-4">
-                        <p className="text-sm font-semibold text-foreground leading-tight">
-                          {habit.name}
-                        </p>
-                        <span className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-bold ${catInfo.bg} ${catInfo.color} border ${catInfo.border}`}>
-                          {habit.category}
-                        </span>
+                  <tr key={habit.id} className="transition-colors hover:bg-secondary/10 group">
+                    {/* Habit Info Cell (Sticky left) */}
+                    <td className="px-6 py-3 text-left w-64 sticky left-0 bg-card/95 backdrop-blur-sm z-10 border-r border-border select-none">
+                      <div className="flex items-center justify-between">
+                        <div className="space-y-1 pr-2 min-w-0">
+                          <p className="text-sm font-semibold text-foreground leading-tight truncate">
+                            {habit.name}
+                          </p>
+                          <span className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-bold ${catInfo.bg} ${catInfo.color} border ${catInfo.border}`}>
+                            {habit.category}
+                          </span>
+                        </div>
+                        <button
+                          onClick={() => handleDeleteHabit(habit.id)}
+                          className="opacity-0 group-hover:opacity-100 focus:opacity-100 p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all shrink-0"
+                          aria-label={`Delete ${habit.name}`}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
                       </div>
-                      <button
-                        onClick={() => handleDeleteHabit(habit.id)}
-                        className="opacity-0 group-hover:opacity-100 focus:opacity-100 md:opacity-20 hover:!opacity-100 p-1 text-muted-foreground hover:text-destructive transition-all"
-                        aria-label={`Delete ${habit.name}`}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
-                    </div>
+                    </td>
 
-                    {/* Weekly Matrix Checkboxes */}
-                    {weekDays.map((day) => {
+                    {/* Checkbox columns */}
+                    {monthDays.map((day) => {
                       const dayStr = format(day, "yyyy-MM-dd")
                       const checked = isLogged(habit.id, dayStr)
                       const isPending = toggleLogMutation.isPending && 
                         toggleLogMutation.variables?.habitId === habit.id && 
                         toggleLogMutation.variables?.date === dayStr
+                      const isSelColumn = dayStr === activeDate
 
                       return (
-                        <div key={dayStr} className="col-span-1 flex items-center justify-center">
-                          <button
-                            onClick={() => handleToggleLog(habit.id, dayStr)}
-                            disabled={isPending}
-                            className={`flex h-8 w-8 items-center justify-center rounded-lg border text-transparent transition-all hover:scale-105 active:scale-95 disabled:opacity-50 ${
-                              checked
-                                ? `${catInfo.bg} ${catInfo.color} ${catInfo.border.replace("border-", "border-")} border-2 !text-current`
-                                : "border-border hover:border-sidebar-primary/50 dark:hover:bg-slate-800"
-                            }`}
-                            aria-label={`Mark ${habit.name} check-in`}
-                          >
-                            {isPending ? (
-                              <Loader2 className="h-4 w-4 animate-spin text-sidebar-primary" />
-                            ) : checked ? (
-                              <Check className="h-4 w-4 stroke-[3]" />
-                            ) : null}
-                          </button>
-                        </div>
+                        <td
+                          key={dayStr}
+                          className={`px-1 py-3 text-center ${
+                            isSelColumn ? "bg-sidebar-primary/5 dark:bg-sidebar-primary/10" : ""
+                          }`}
+                        >
+                          <div className="flex items-center justify-center">
+                            <button
+                              onClick={() => handleToggleLog(habit.id, dayStr)}
+                              disabled={isPending}
+                              className={`flex h-7 w-7 items-center justify-center rounded-lg border text-transparent transition-all hover:scale-105 active:scale-95 disabled:opacity-50 ${
+                                checked
+                                  ? `${catInfo.bg} ${catInfo.color} ${catInfo.border} border-2 !text-current`
+                                  : "border-border hover:border-sidebar-primary/50 dark:hover:bg-slate-800"
+                              }`}
+                              aria-label={`Mark ${habit.name} check-in`}
+                            >
+                              {isPending ? (
+                                <Loader2 className="h-4 w-4 animate-spin text-sidebar-primary" />
+                              ) : checked ? (
+                                <Check className="h-3.5 w-3.5 stroke-[3]" />
+                              ) : null}
+                            </button>
+                          </div>
+                        </td>
                       )
                     })}
-                  </div>
+                  </tr>
                 )
-              })}
-            </div>
-          )}
-        </div>
+              })
+            )}
+          </tbody>
+        </table>
       </div>
     </div>
   )
