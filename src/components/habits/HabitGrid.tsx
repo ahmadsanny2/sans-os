@@ -11,33 +11,11 @@ import {
 import { format, parseISO, startOfMonth, endOfMonth, eachDayOfInterval } from "date-fns"
 import { Plus, Trash2, Check, Loader2, Sparkles } from "lucide-react"
 
-// Category styling lookup
-const CATEGORIES: Record<string, { color: string; bg: string; border: string }> = {
-  Health: {
-    color: "text-emerald-500 dark:text-emerald-400",
-    bg: "bg-emerald-500/10",
-    border: "border-emerald-500/20",
-  },
-  Work: {
-    color: "text-blue-500 dark:text-blue-400",
-    bg: "bg-blue-500/10",
-    border: "border-blue-500/20",
-  },
-  Mind: {
-    color: "text-purple-500 dark:text-purple-400",
-    bg: "bg-purple-500/10",
-    border: "border-purple-500/20",
-  },
-  Finance: {
-    color: "text-amber-500 dark:text-amber-400",
-    bg: "bg-amber-500/10",
-    border: "border-amber-500/20",
-  },
-  General: {
-    color: "text-slate-500 dark:text-slate-400",
-    bg: "bg-slate-500/10",
-    border: "border-slate-500/20",
-  },
+// Checked styling default theme
+const CHECKED_THEME = {
+  color: "text-sidebar-primary dark:text-violet-400",
+  bg: "bg-sidebar-primary/10 dark:bg-violet-500/10",
+  border: "border-sidebar-primary/20 dark:border-violet-500/20",
 }
 
 export function HabitGrid() {
@@ -60,7 +38,6 @@ export function HabitGrid() {
 
   // Form states
   const [newHabitName, setNewHabitName] = useState("")
-  const [newHabitCategory, setNewHabitCategory] = useState("General")
   const [showAddForm, setShowAddForm] = useState(false)
 
   const handleAddHabit = async (e: React.FormEvent): Promise<void> => {
@@ -70,7 +47,6 @@ export function HabitGrid() {
     try {
       await createHabitMutation.mutateAsync({
         name: newHabitName,
-        category: newHabitCategory,
       })
       setNewHabitName("")
       setShowAddForm(false)
@@ -139,39 +115,19 @@ export function HabitGrid() {
           onSubmit={handleAddHabit}
           className="rounded-xl border border-border bg-card/60 p-4 shadow-sm backdrop-blur-md space-y-4 animate-in slide-in-from-top-4 duration-200"
         >
-          <div className="grid gap-4 sm:grid-cols-3">
-            <div className="sm:col-span-2 space-y-1.5">
-              <label htmlFor="habitName" className="text-xs font-bold text-muted-foreground">
-                Habit Name
-              </label>
-              <input
-                id="habitName"
-                type="text"
-                required
-                value={newHabitName}
-                onChange={(e) => setNewHabitName(e.target.value)}
-                placeholder="e.g. Workout, Read books 15 mins..."
-                className="w-full rounded-lg border border-border bg-background px-3 py-1.5 text-sm outline-none transition-all focus:border-sidebar-primary focus:ring-2 focus:ring-sidebar-primary/10"
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <label htmlFor="habitCategory" className="text-xs font-bold text-muted-foreground">
-                Category
-              </label>
-              <select
-                id="habitCategory"
-                value={newHabitCategory}
-                onChange={(e) => setNewHabitCategory(e.target.value)}
-                className="w-full rounded-lg border border-border bg-background px-3 py-1.5 text-sm outline-none transition-all focus:border-sidebar-primary focus:ring-2 focus:ring-sidebar-primary/10"
-              >
-                {Object.keys(CATEGORIES).map((cat) => (
-                  <option key={cat} value={cat}>
-                    {cat}
-                  </option>
-                ))}
-              </select>
-            </div>
+          <div className="space-y-1.5">
+            <label htmlFor="habitName" className="text-xs font-bold text-muted-foreground">
+              Habit Name
+            </label>
+            <input
+              id="habitName"
+              type="text"
+              required
+              value={newHabitName}
+              onChange={(e) => setNewHabitName(e.target.value)}
+              placeholder="e.g. Workout, Read books 15 mins..."
+              className="w-full rounded-lg border border-border bg-background px-3.5 py-2 text-sm outline-none transition-all focus:border-sidebar-primary focus:ring-2 focus:ring-sidebar-primary/10"
+            />
           </div>
 
           <div className="flex justify-end gap-2">
@@ -238,7 +194,6 @@ export function HabitGrid() {
               </tr>
             ) : (
               listHabits.map((habit) => {
-                const catInfo = CATEGORIES[habit.category] || CATEGORIES.General
                 return (
                   <tr key={habit.id} className="transition-colors hover:bg-secondary/10 group">
                     {/* Habit Info Cell (Sticky left) */}
@@ -248,9 +203,6 @@ export function HabitGrid() {
                           <p className="text-sm font-semibold text-foreground leading-tight truncate">
                             {habit.name}
                           </p>
-                          <span className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-bold ${catInfo.bg} ${catInfo.color} border ${catInfo.border}`}>
-                            {habit.category}
-                          </span>
                         </div>
                         <button
                           onClick={() => handleDeleteHabit(habit.id)}
@@ -284,7 +236,7 @@ export function HabitGrid() {
                               disabled={isPending}
                               className={`flex h-7 w-7 items-center justify-center rounded-lg border text-transparent transition-all hover:scale-105 active:scale-95 disabled:opacity-50 ${
                                 checked
-                                  ? `${catInfo.bg} ${catInfo.color} ${catInfo.border} border-2 !text-current`
+                                  ? `${CHECKED_THEME.bg} ${CHECKED_THEME.color} ${CHECKED_THEME.border} border-2 !text-current`
                                   : "border-border hover:border-sidebar-primary/50 dark:hover:bg-slate-800"
                               }`}
                               aria-label={`Mark ${habit.name} check-in`}
