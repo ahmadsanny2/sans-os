@@ -21,6 +21,7 @@ import {
   Sun,
   Moon,
   Clock,
+  Trophy,
 } from "lucide-react"
 
 interface SidebarItem {
@@ -38,6 +39,7 @@ const SIDEBAR_ITEMS: SidebarItem[] = [
   { name: "Reading Journal", href: "/reading", icon: BookOpen },
   { name: "Language Logs", href: "/language", icon: Languages },
   { name: "Vision Board", href: "/vision-board", icon: ImageIcon },
+  { name: "Bucket List", href: "/bucket-list", icon: Trophy },
 ]
 
 export function AppLayout({ children }: { children: React.ReactNode }) {

@@ -146,3 +146,14 @@ export const projectTasksRelations = relations(projectTasks, ({ one }) => ({
     references: [projects.id],
   }),
 }))
+
+// 11. Bucket List
+export const bucketList = pgTable("bucket_list", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: text("user_id").notNull(),
+  title: text("title").notNull(),
+  imageUrl: text("image_url"),
+  completed: boolean("completed").default(false).notNull(),
+  completedAt: timestamp("completed_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+})
