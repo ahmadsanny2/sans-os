@@ -13,6 +13,7 @@ import {
   useToggleDailyTodoMutation,
   useDailyLogQuery,
 } from "@/hooks/useDailyLogs"
+import { useHabitsQuery, useToggleLogMutation } from "@/hooks/useHabits"
 import { parseISO } from "date-fns"
 
 export function useDashboardPage() {
@@ -42,9 +43,29 @@ export function useDashboardPage() {
     isLoading: logLoading,
   } = useDailyLogQuery(activeDate)
 
-  // 2. Mutations
+  // 2. Habits data
+  const {
+    data: habitsData,
+    isLoading: habitsLoading,
+    isError: habitsError,
+  } = useHabitsQuery(activeDate, activeDate)
+
+  const todayHabits = (habitsData?.habits || []).map((habit) => {
+    const isCompleted = (habitsData?.logs || []).some(
+      (log) => log.habitId === habit.id && log.date === activeDate
+    )
+    return {
+      id: habit.id,
+      name: habit.name,
+      completed: isCompleted,
+      isHabit: true as const,
+    }
+  })
+
+  // 3. Mutations
   const togglePriorityMutation = useTogglePriorityMutation(activeDate)
   const toggleTodoMutation = useToggleDailyTodoMutation(activeDate)
+  const toggleHabitMutation = useToggleLogMutation()
 
   // 3. Greeting determination
   const [greeting, setGreeting] = useState("Good Morning")
@@ -104,6 +125,10 @@ export function useDashboardPage() {
     toggleTodoMutation.mutate({ id, completed: !completed })
   }
 
+  const handleToggleHabit = (habitId: string): void => {
+    toggleHabitMutation.mutate({ habitId, date: activeDate })
+  }
+
   return {
     activeDate,
     activeDateStr,
@@ -120,6 +145,12 @@ export function useDashboardPage() {
     todosError,
     handleToggleTodo,
     isPendingToggleTodo: toggleTodoMutation.isPending,
+    // Habits
+    habits: todayHabits,
+    habitsLoading,
+    habitsError,
+    handleToggleHabit,
+    isPendingToggleHabit: toggleHabitMutation.isPending,
     // Timetable
     activeDayBlocks,
     timetableLoading,

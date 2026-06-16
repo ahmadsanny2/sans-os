@@ -34,6 +34,12 @@ interface DashboardViewProps {
   todosError: boolean
   handleToggleTodo: (id: string, completed: boolean) => void
   isPendingToggleTodo: boolean
+  // Habits
+  habits: { id: string; name: string; completed: boolean; isHabit: true }[]
+  habitsLoading: boolean
+  habitsError: boolean
+  handleToggleHabit: (id: string) => void
+  isPendingToggleHabit: boolean
   // Timetable
   activeDayBlocks: TimetableBlock[]
   timetableLoading: boolean
@@ -56,6 +62,11 @@ export function DashboardView({
   todosError,
   handleToggleTodo,
   isPendingToggleTodo,
+  habits,
+  habitsLoading,
+  habitsError,
+  handleToggleHabit,
+  isPendingToggleHabit,
   activeDayBlocks,
   timetableLoading,
   timetableError,
@@ -133,10 +144,13 @@ export function DashboardView({
           />
           <TodosWidget
             todos={todos}
-            isLoading={todosLoading}
-            isError={todosError}
+            isLoading={todosLoading || habitsLoading}
+            isError={todosError || habitsError}
             handleToggle={handleToggleTodo}
             isPendingToggle={isPendingToggleTodo}
+            habits={habits}
+            handleToggleHabit={handleToggleHabit}
+            isPendingToggleHabit={isPendingToggleHabit}
           />
 
            <MemoryBoxWidget

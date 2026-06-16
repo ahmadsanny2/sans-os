@@ -26,6 +26,11 @@ export default function DashboardComponent() {
       todosError={dashboardData.todosError}
       handleToggleTodo={dashboardData.handleToggleTodo}
       isPendingToggleTodo={dashboardData.isPendingToggleTodo}
+      habits={dashboardData.habits}
+      habitsLoading={dashboardData.habitsLoading}
+      habitsError={dashboardData.habitsError}
+      handleToggleHabit={dashboardData.handleToggleHabit}
+      isPendingToggleHabit={dashboardData.isPendingToggleHabit}
       activeDayBlocks={dashboardData.activeDayBlocks}
       timetableLoading={dashboardData.timetableLoading}
       timetableError={dashboardData.timetableError}
