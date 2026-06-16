@@ -531,7 +531,7 @@ export function ProjectBoard() {
                             <button
                               onClick={() => handleToggleTask(task.id, task.completed)}
                               disabled={toggleTaskMutation.isPending}
-                              className={`flex h-5.5 w-5.5 shrink-0 items-center justify-center rounded-lg border transition-all active:scale-95 ${
+                              className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-lg border transition-all active:scale-95 ${
                                 task.completed
                                   ? "bg-sidebar-primary border-sidebar-primary text-sidebar-primary-foreground"
                                   : "border-border hover:border-sidebar-primary/50"
