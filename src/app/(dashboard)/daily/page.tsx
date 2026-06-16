@@ -63,7 +63,7 @@ export default function DailyPage() {
             <ChevronLeft className="h-4 w-4 sm:mr-1 shrink-0" />
             <span className="hidden sm:inline">Previous Day</span>
           </button>
-          
+
           <button
             onClick={handleGoToToday}
             className="inline-flex h-8 px-3 items-center justify-center rounded-lg bg-background text-foreground shadow-sm border border-border/40 hover:bg-background/80 transition-all duration-200 active:scale-95 text-xs font-semibold"
@@ -83,33 +83,37 @@ export default function DailyPage() {
         </div>
       </div>
 
-      {/* Main Grid Content */}
+      {/* Main Content */}
       <div className="grid gap-8 lg:grid-cols-12">
+
         {/* Priorities Section */}
-        <div className="lg:col-span-5 border border-border bg-card/25 dark:bg-card/10 rounded-2xl p-6 shadow-sm">
+        <div className="lg:col-span-6 border border-border bg-card/25 dark:bg-card/10 rounded-2xl p-6 shadow-sm">
           <PrioritiesList />
         </div>
 
-        {/* Timetable Section */}
-        <div className="lg:col-span-7 border border-border bg-card/25 dark:bg-card/10 rounded-2xl p-6 shadow-sm">
-          <Timetable />
-        </div>
-      </div>
-
-      {/* Row 2: To-Dos, Reflections & Pics */}
-      <div className="grid gap-8 lg:grid-cols-12">
         {/* To-Dos Section */}
-        <div className="lg:col-span-5 border border-border bg-card/25 dark:bg-card/10 rounded-2xl p-6 shadow-sm">
+        <div className="lg:col-span-6 border border-border bg-card/25 dark:bg-card/10 rounded-2xl p-6 shadow-sm">
           <DailyTodos />
         </div>
 
-        {/* Reflections & Pics of the Day Section */}
-        <div className="lg:col-span-7 border border-border bg-card/25 dark:bg-card/10 rounded-2xl p-6 shadow-sm space-y-8">
+      </div>
+
+      {/* Timetable Section */}
+      <div className="lg:col-span-7 border border-border bg-card/25 dark:bg-card/10 rounded-2xl p-6 shadow-sm">
+        <Timetable />
+      </div>
+
+      {/* Reflections & Pics of the Day Section */}
+      <div className="grid gap-8 lg:grid-cols-12">
+
+        <div className="lg:col-span-6 border border-border bg-card/25 dark:bg-card/10 rounded-2xl p-6 shadow-sm">
           <DailyReflections />
-          <div className="border-t border-border/60 pt-6">
-            <DailyPics />
-          </div>
         </div>
+
+        <div className="lg:col-span-6 border border-border bg-card/25 dark:bg-card/10 rounded-2xl p-6 shadow-sm">
+          <DailyPics />
+        </div>
+
       </div>
     </div>
   )
