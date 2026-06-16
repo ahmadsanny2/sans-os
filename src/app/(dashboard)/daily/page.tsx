@@ -39,9 +39,9 @@ export default function DailyPage() {
 
 
   return (
-    <div className="mx-auto max-w-6xl space-y-8 py-4">
+    <div className="mx-auto max-w-7xl space-y-8 py-4">
       {/* Date Navigation Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-border/60 pb-6">
+      <div className="sticky top-0 z-20 bg-background/95 backdrop-blur-md pt-2 pb-6 border-b border-border/60 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="space-y-2">
           <h1 className="text-3xl font-extrabold tracking-tight text-foreground">
             Daily Flow

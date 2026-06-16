@@ -404,7 +404,7 @@ export default function DashboardPage() {
   }, [])
 
   return (
-    <div className="mx-auto max-w-6xl space-y-8 py-4">
+    <div className="mx-auto max-w-7xl space-y-8 py-4">
       {/* Header welcome banner */}
       <div className="relative overflow-hidden rounded-2xl border border-border/80 bg-gradient-to-br from-violet-500/10 via-transparent to-indigo-500/5 p-8 shadow-sm">
         <div className="absolute right-0 top-0 -mr-16 -mt-16 h-64 w-64 rounded-full bg-violet-500/5 blur-3xl" />
