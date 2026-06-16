@@ -174,10 +174,10 @@ export default function CalendarPage() {
                       <button
                         onClick={() => handleTogglePriority(priority.id, priority.completed)}
                         disabled={togglePriorityMutation.isPending}
-                        className={`flex h-4.5 w-4.5 shrink-0 items-center justify-center rounded border transition-all mt-0.5 ${
+                        className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border transition-all mt-0.5 cursor-pointer disabled:cursor-not-allowed ${
                           priority.completed
                             ? "bg-sidebar-primary border-sidebar-primary text-sidebar-primary-foreground"
-                            : "border-border hover:border-sidebar-primary/50"
+                            : "border-border hover:border-sidebar-primary hover:bg-sidebar-primary/10"
                         }`}
                         aria-label="Toggle completed"
                       >
