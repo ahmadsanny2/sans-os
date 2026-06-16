@@ -138,6 +138,11 @@ export function DashboardView({
             handleToggle={handleToggleTodo}
             isPendingToggle={isPendingToggleTodo}
           />
+
+           <MemoryBoxWidget
+            picUrl={picUrl}
+            isLoading={logLoading}
+          />
         </div>
 
         {/* Right Column (lg:col-span-7) - Timetable & Memory Box */}
@@ -147,10 +152,7 @@ export function DashboardView({
             isLoading={timetableLoading}
             isError={timetableError}
           />
-          <MemoryBoxWidget
-            picUrl={picUrl}
-            isLoading={logLoading}
-          />
+         
         </div>
       </div>
     </div>
