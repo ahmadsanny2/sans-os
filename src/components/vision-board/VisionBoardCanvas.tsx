@@ -60,8 +60,8 @@ export function VisionBoardCanvas() {
       await createItemMutation.mutateAsync({
         type: itemType,
         content: content.trim(),
-        xOffset: 50 + Math.random() * 80,
-        yOffset: 60 + Math.random() * 80,
+        xOffset: Math.round(50 + Math.random() * 80),
+        yOffset: Math.round(60 + Math.random() * 80),
         width: Number(width),
         height: Number(height),
       })

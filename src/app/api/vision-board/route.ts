@@ -53,15 +53,16 @@ export async function POST(request: Request): Promise<NextResponse> {
         userId: user.id,
         type,
         content,
-        xOffset: xOffset !== undefined ? Number(xOffset) : 0,
-        yOffset: yOffset !== undefined ? Number(yOffset) : 0,
-        width: width !== undefined ? Number(width) : 200,
-        height: height !== undefined ? Number(height) : 200,
+        xOffset: xOffset !== undefined ? Math.round(Number(xOffset)) : 0,
+        yOffset: yOffset !== undefined ? Math.round(Number(yOffset)) : 0,
+        width: width !== undefined ? Math.round(Number(width)) : 200,
+        height: height !== undefined ? Math.round(Number(height)) : 200,
       })
       .returning()
 
     return NextResponse.json(newItem)
   } catch (error) {
+    console.error("POST /api/vision-board error:", error)
     const errorMessage = error instanceof Error ? error.message : "Server Error"
     return NextResponse.json({ error: errorMessage }, { status: 500 })
   }
@@ -86,10 +87,10 @@ export async function PATCH(request: Request): Promise<NextResponse> {
     }
 
     const updateData: Partial<typeof visionBoardItems.$inferInsert> = {}
-    if (xOffset !== undefined) updateData.xOffset = Number(xOffset)
-    if (yOffset !== undefined) updateData.yOffset = Number(yOffset)
-    if (width !== undefined) updateData.width = Number(width)
-    if (height !== undefined) updateData.height = Number(height)
+    if (xOffset !== undefined) updateData.xOffset = Math.round(Number(xOffset))
+    if (yOffset !== undefined) updateData.yOffset = Math.round(Number(yOffset))
+    if (width !== undefined) updateData.width = Math.round(Number(width))
+    if (height !== undefined) updateData.height = Math.round(Number(height))
 
     const [updatedItem] = await db
       .update(visionBoardItems)
