@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useRef, useEffect } from "react"
+import React, { useState, useRef } from "react"
 import {
   useVisionBoardQuery,
   useCreateVisionBoardItemMutation,
@@ -9,6 +9,7 @@ import {
   VisionBoardItem,
 } from "@/hooks/useVisionBoard"
 import { motion, PanInfo } from "framer-motion"
+import { useQueryClient } from "@tanstack/react-query"
 import {
   Plus,
   Trash2,
@@ -30,6 +31,7 @@ const IMAGE_PRESETS = [
 ]
 
 export function VisionBoardCanvas() {
+  const queryClient = useQueryClient()
   const { data: boardItems = [], isLoading, isError } = useVisionBoardQuery()
   const createItemMutation = useCreateVisionBoardItemMutation()
   const updateItemMutation = useUpdateVisionBoardItemMutation()
@@ -37,17 +39,6 @@ export function VisionBoardCanvas() {
 
   // References
   const canvasRef = useRef<HTMLDivElement>(null)
-
-  // Local state to prevent coordinate jumping during drag-and-drop
-  const [localItems, setLocalItems] = useState<VisionBoardItem[]>([])
-
-  // Keep local state in sync when database queries reload
-  useEffect(() => {
-    if (boardItems) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setLocalItems(boardItems)
-    }
-  }, [boardItems])
 
   // Floating controls popup state
   const [showAddMenu, setShowAddMenu] = useState(false)
@@ -114,12 +105,13 @@ export function VisionBoardCanvas() {
     const constrainedX = Math.max(0, Math.min(maxBoundX, newX))
     const constrainedY = Math.max(0, Math.min(maxBoundY, newY))
 
-    // Optimistically update coordinates in local state instantly
-    setLocalItems((prev) =>
-      prev.map((i) =>
+    // Optimistically update coordinates in React Query cache instantly
+    queryClient.setQueryData<VisionBoardItem[]>(["vision-board"], (old) => {
+      if (!old) return []
+      return old.map((i) =>
         i.id === item.id ? { ...i, xOffset: constrainedX, yOffset: constrainedY } : i
       )
-    )
+    })
 
     updateItemMutation.mutate({
       id: item.id,
@@ -318,7 +310,7 @@ export function VisionBoardCanvas() {
         ref={canvasRef}
         className="relative w-full h-[650px] bg-secondary/10 dark:bg-slate-950/20 border border-border/80 rounded-2xl overflow-hidden shadow-inner backdrop-blur-[2px] select-none bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"
       >
-        {localItems.length === 0 ? (
+        {boardItems.length === 0 ? (
           <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-8 select-none pointer-events-none">
             <div className="rounded-full bg-secondary p-4 mb-3 text-muted-foreground/60">
               <Lightbulb className="h-9 w-9 text-violet-500" />
@@ -329,7 +321,7 @@ export function VisionBoardCanvas() {
             </p>
           </div>
         ) : (
-          localItems.map((item: VisionBoardItem) => {
+          boardItems.map((item: VisionBoardItem) => {
             const isText = item.type === "text"
 
             return (
