@@ -4,6 +4,7 @@ import React, { useState, useRef } from "react"
 import { useWorkspaceStore } from "@/store/workspaceStore"
 import { useDailyLogQuery, useSaveDailyLogMutation } from "@/hooks/useDailyLogs"
 import { Image as ImageIcon, Camera, Trash2, Loader2, UploadCloud, AlertCircle } from "lucide-react"
+import { confirmDestructive, showError, showSuccessToast } from "@/lib/sweetalert"
 
 export function DailyPics() {
   const activeDate = useWorkspaceStore((state) => state.activeDate)
@@ -58,16 +59,22 @@ export function DailyPics() {
   }
 
   const handleDelete = async (): Promise<void> => {
-    if (!confirm("Are you sure you want to remove today's photo?")) return
+    const isConfirmed = await confirmDestructive(
+      "Remove Photo",
+      "Are you sure you want to remove today's photo?"
+    )
+    if (!isConfirmed) return
     setErrorMsg(null)
     try {
       await saveLogMutation.mutateAsync({
         date: activeDate,
         picUrl: "", // setting to empty string to clear the value
       })
+      showSuccessToast("Photo removed successfully")
     } catch (err) {
       console.error(err)
       setErrorMsg("Failed to remove photo")
+      showError("Error", "Failed to remove photo")
     }
   }
 

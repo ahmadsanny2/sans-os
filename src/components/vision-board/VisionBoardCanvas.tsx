@@ -20,6 +20,7 @@ import {
   Compass,
   Lightbulb,
 } from "lucide-react"
+import { confirmDestructive, showError, showSuccessToast } from "@/lib/sweetalert"
 
 // PREDEFINED VISUAL WALLPAPER PRESETS FOR PROMPT WORKSPACE DEMONSTRATIONS
 const IMAGE_PRESETS = [
@@ -83,10 +84,16 @@ export function VisionBoardCanvas() {
 
   const handleDeleteItem = async (id: string, e: React.MouseEvent): Promise<void> => {
     e.stopPropagation()
+    const confirmed = await confirmDestructive(
+      "Delete Item?",
+      "Are you sure you want to delete this vision board item?"
+    )
+    if (!confirmed) return
     try {
       await deleteItemMutation.mutateAsync(id)
+      showSuccessToast("Item deleted successfully")
     } catch {
-      alert("Failed to delete vision item.")
+      await showError("Deletion Failed", "Failed to delete vision item.")
     }
   }
 

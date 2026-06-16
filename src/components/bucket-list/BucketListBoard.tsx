@@ -25,6 +25,7 @@ import {
   Heart,
 } from "lucide-react"
 import { ImageCardSkeleton } from "@/components/ui/Skeletons"
+import { confirmDestructive, showError, showSuccessToast } from "@/lib/sweetalert"
 
 // PRESET BEAUTIFUL IMAGES FOR CONVENIENCE
 const BUCKET_PRESETS = [
@@ -113,11 +114,16 @@ export function BucketListBoard() {
   }
 
   const handleDeleteItem = async (id: string, titleStr: string): Promise<void> => {
-    if (!confirm(`Are you sure you want to delete "${titleStr}"?`)) return
+    const isConfirmed = await confirmDestructive(
+      "Delete Bucket Goal",
+      `Are you sure you want to delete "${titleStr}"?`
+    )
+    if (!isConfirmed) return
     try {
       await deleteItemMutation.mutateAsync(id)
+      showSuccessToast("Dream deleted successfully")
     } catch {
-      alert("Failed to delete item.")
+      showError("Delete Error", "Failed to delete item.")
     }
   }
 
@@ -138,10 +144,11 @@ export function BucketListBoard() {
         id: item.id,
         completed: nextCompleted,
       })
+      showSuccessToast(nextCompleted ? "Goal achieved! Congratulations!" : "Goal set back to active")
     } catch {
       // Revert if mutation fails
       queryClient.invalidateQueries({ queryKey: ["bucket-list"] })
-      alert("Failed to toggle completion status.")
+      showError("Error", "Failed to toggle completion status.")
     }
   }
 

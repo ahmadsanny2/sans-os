@@ -27,6 +27,7 @@ import {
   AlertTriangle,
 } from "lucide-react"
 import { ListSkeleton } from "@/components/ui/Skeletons"
+import { confirmDestructive, showError, showSuccessToast } from "@/lib/sweetalert"
 
 // Priority badge color themes
 const PRIORITY_THEMES: Record<string, { bg: string; text: string; border: string }> = {
@@ -148,14 +149,19 @@ export function ProjectBoard() {
 
   const handleDeleteProject = async (id: string, e: React.MouseEvent): Promise<void> => {
     e.stopPropagation()
-    if (!confirm("Are you sure you want to delete this project? All associated tasks will be permanently removed.")) return
+    const confirmed = await confirmDestructive(
+      "Delete Project?",
+      "Are you sure you want to delete this project? All associated tasks will be permanently removed."
+    )
+    if (!confirmed) return
     try {
       await deleteProjectMutation.mutateAsync(id)
       if (selectedProjectId === id) {
         setSelectedProjectId(null)
       }
+      showSuccessToast("Project deleted successfully")
     } catch {
-      alert("Failed to delete project.")
+      await showError("Deletion Failed", "Failed to delete project.")
     }
   }
 
@@ -180,10 +186,16 @@ export function ProjectBoard() {
   }
 
   const handleDeleteTask = async (id: string): Promise<void> => {
+    const confirmed = await confirmDestructive(
+      "Delete Task?",
+      "Are you sure you want to delete this task?"
+    )
+    if (!confirmed) return
     try {
       await deleteTaskMutation.mutateAsync(id)
+      showSuccessToast("Task deleted successfully")
     } catch {
-      alert("Failed to delete task.")
+      await showError("Deletion Failed", "Failed to delete task.")
     }
   }
 

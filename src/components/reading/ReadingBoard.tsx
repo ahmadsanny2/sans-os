@@ -26,6 +26,7 @@ import {
   X,
 } from "lucide-react"
 import { GridCardSkeleton } from "@/components/ui/Skeletons"
+import { confirmDestructive, showError, showSuccessToast } from "@/lib/sweetalert"
 
 // Status badge styling themes
 const STATUS_THEMES: Record<string, { bg: string; text: string; border: string }> = {
@@ -157,11 +158,16 @@ export function ReadingBoard() {
   }
 
   const handleDeleteBook = async (id: string, titleStr: string): Promise<void> => {
-    if (!confirm(`Are you sure you want to delete the book "${titleStr}"?`)) return
+    const confirmed = await confirmDestructive(
+      "Delete Book?",
+      `Are you sure you want to delete the book "${titleStr}"?`
+    )
+    if (!confirmed) return
     try {
       await deleteBookMutation.mutateAsync(id)
+      showSuccessToast("Book deleted successfully")
     } catch {
-      alert("Failed to delete book log.")
+      await showError("Deletion Failed", "Failed to delete book log.")
     }
   }
 
@@ -171,8 +177,9 @@ export function ReadingBoard() {
         id,
         status: "Reading",
       })
+      showSuccessToast("Status updated to Reading")
     } catch {
-      alert("Failed to update status.")
+      await showError("Update Failed", "Failed to update status.")
     }
   }
 

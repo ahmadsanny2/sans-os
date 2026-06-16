@@ -22,6 +22,7 @@ import {
   Lightbulb,
 } from "lucide-react"
 import { GridCardSkeleton } from "@/components/ui/Skeletons"
+import { confirmDestructive, showError, showSuccessToast } from "@/lib/sweetalert"
 
 // Part of Speech tag styling themes
 const POS_THEMES: Record<string, { bg: string; text: string; border: string }> = {
@@ -89,11 +90,16 @@ export function LanguageBoard() {
   }
 
   const handleDeleteVocabulary = async (id: string, wordStr: string): Promise<void> => {
-    if (!confirm(`Are you sure you want to delete the word "${wordStr}"?`)) return
+    const isConfirmed = await confirmDestructive(
+      "Delete Vocabulary",
+      `Are you sure you want to delete the word "${wordStr}"?`
+    )
+    if (!isConfirmed) return
     try {
       await deleteVocabMutation.mutateAsync(id)
+      showSuccessToast("Vocabulary deleted successfully")
     } catch {
-      alert("Failed to delete vocabulary log.")
+      showError("Delete Error", "Failed to delete vocabulary log.")
     }
   }
 

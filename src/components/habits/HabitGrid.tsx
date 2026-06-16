@@ -10,6 +10,7 @@ import {
 } from "@/hooks/useHabits"
 import { format, parseISO, startOfMonth, endOfMonth, eachDayOfInterval } from "date-fns"
 import { Plus, Trash2, Check, Loader2, Sparkles } from "lucide-react"
+import { confirmDestructive, showError, showSuccessToast } from "@/lib/sweetalert"
 
 // Checked styling default theme
 const CHECKED_THEME = {
@@ -56,11 +57,17 @@ export function HabitGrid() {
   }
 
   const handleDeleteHabit = async (id: string): Promise<void> => {
-    if (!confirm("Are you sure you want to delete this habit? All check-ins will be deleted.")) return
+    const isConfirmed = await confirmDestructive(
+      "Delete Habit",
+      "Are you sure you want to delete this habit? All check-ins will be deleted."
+    )
+    if (!isConfirmed) return
     try {
       await deleteHabitMutation.mutateAsync(id)
+      showSuccessToast("Habit deleted successfully")
     } catch (err) {
       console.error(err)
+      showError("Error", "Failed to delete habit.")
     }
   }
 
