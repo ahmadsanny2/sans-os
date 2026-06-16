@@ -155,15 +155,15 @@ export function PrioritiesList() {
                   <button
                     onClick={() => handleToggleCompleted(priority.id, priority.completed)}
                     disabled={togglePriorityMutation.isPending}
-                    className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border transition-all active:scale-95 ${
+                    className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-lg border transition-all active:scale-95 cursor-pointer disabled:cursor-not-allowed ${
                       priority.completed
                         ? "bg-sidebar-primary border-sidebar-primary text-sidebar-primary-foreground"
-                        : "border-border hover:border-sidebar-primary/50"
+                        : "border-border hover:border-sidebar-primary/50 hover:bg-sidebar-primary/10"
                     }`}
                     aria-label="Toggle task completed"
                   >
                     {priority.completed ? (
-                      <Check className="h-4 w-4 stroke-[3]" />
+                      <Check className="h-3.5 w-3.5 stroke-[3]" />
                     ) : null}
                   </button>
 

@@ -137,7 +137,7 @@ function PrioritiesWidget({ activeDate }: { activeDate: string }) {
                   }`}
                   aria-label="Toggle completed"
                 >
-                  {priority.completed ? <Check className="h-3 w-3 stroke-[3]" /> : null}
+                  {priority.completed ? <Check className="h-3.5 w-3.5 stroke-[3]" /> : null}
                 </button>
                 <span
                   className={`text-xs font-semibold truncate leading-tight ${
@@ -212,7 +212,7 @@ function TodosWidget({ activeDate }: { activeDate: string }) {
                   }`}
                   aria-label="Toggle todo status"
                 >
-                  {todo.completed ? <Check className="h-3 w-3 stroke-[3]" /> : null}
+                  {todo.completed ? <Check className="h-3.5 w-3.5 stroke-[3]" /> : null}
                 </button>
                 <span
                   className={`text-xs font-semibold truncate leading-tight ${
