@@ -1,9 +1,6 @@
 "use client"
 
 import React from "react"
-import { useWorkspaceStore } from "@/store/workspaceStore"
-import { useHabitsQuery, useHabitStatsQuery } from "@/hooks/useHabits"
-import { format, parseISO, startOfWeek, addDays, getDaysInMonth, startOfMonth, endOfMonth } from "date-fns"
 import {
   BarChart,
   Bar,
@@ -15,53 +12,26 @@ import {
 } from "recharts"
 import { Activity, Award, CalendarDays, Percent } from "lucide-react"
 
-// Types
 interface ChartDataPoint {
   dayLabel: string
   completions: number
 }
 
-export function HabitRecaps() {
-  const activeDate = useWorkspaceStore((state) => state.activeDate)
-  const userConfig = useWorkspaceStore((state) => state.userConfig)
+interface HabitRecapsProps {
+  isStatsLoading: boolean
+  totalHabits: number
+  completedLogsCount: number
+  successRate: number
+  chartData: ChartDataPoint[]
+}
 
-  const baseDate = parseISO(activeDate)
-  const weekStart = startOfWeek(baseDate, { weekStartsOn: userConfig.startOfWeek as 0 | 1 | 2 | 3 | 4 | 5 | 6 })
-  const weekDays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i))
-
-  // Calculate Active Month boundaries (to match HabitGrid query range exactly)
-  const monthStart = startOfMonth(baseDate)
-  const monthEnd = endOfMonth(baseDate)
-  const startDateStr = format(monthStart, "yyyy-MM-dd")
-  const endDateStr = format(monthEnd, "yyyy-MM-dd")
-
-  const { data: monthlyData, isLoading: habitsLoading } = useHabitsQuery(startDateStr, endDateStr)
-
-  // Calculate Active Month stats
-  const currentMonthStr = activeDate.substring(0, 7) // "YYYY-MM"
-  const { data: monthlyStats, isLoading: statsLoading } = useHabitStatsQuery(currentMonthStr)
-
-  const isLoading = statsLoading || habitsLoading
-
-  // Prepare weekly chart data from monthlyData logs in-memory
-  const chartData: ChartDataPoint[] = weekDays.map((day) => {
-    const dayStr = format(day, "yyyy-MM-dd")
-    const completions = monthlyData?.logs.filter((l) => l.date === dayStr && l.status === "completed").length || 0
-    return {
-      dayLabel: format(day, "EEE"),
-      completions,
-    }
-  })
-
-  // Calculate monthly metrics
-  const daysInMonth = getDaysInMonth(baseDate)
-  const totalHabits = monthlyStats?.totalHabits || 0
-  const completedLogsCount = monthlyStats?.completedCount || 0
-  const totalTargetOpportunity = totalHabits * daysInMonth
-  const successRate = totalTargetOpportunity > 0 
-    ? Math.round((completedLogsCount / totalTargetOpportunity) * 100) 
-    : 0
-
+export function HabitRecaps({
+  isStatsLoading,
+  totalHabits,
+  completedLogsCount,
+  successRate,
+  chartData,
+}: HabitRecapsProps) {
   return (
     <div className="grid gap-6 md:grid-cols-3">
       {/* 1. Monthly Statistics Card */}
@@ -71,7 +41,7 @@ export function HabitRecaps() {
           MONTHLY RECAP
         </h4>
         
-        {isLoading ? (
+        {isStatsLoading ? (
           <div className="mt-4 space-y-4 flex-1 flex flex-col justify-center animate-pulse">
             <div className="flex items-center justify-between border-b border-border/40 pb-2.5">
               <span className="text-sm text-muted-foreground flex items-center gap-2">
@@ -132,7 +102,7 @@ export function HabitRecaps() {
         </div>
 
         <div className="h-48 w-full">
-          {isLoading ? (
+          {isStatsLoading ? (
             <div className="h-full w-full flex items-end justify-between gap-4 px-2 pt-6">
               {Array.from({ length: 7 }).map((_, idx) => (
                 <div
@@ -180,4 +150,3 @@ export function HabitRecaps() {
     </div>
   )
 }
-

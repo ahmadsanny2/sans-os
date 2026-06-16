@@ -1,90 +1,53 @@
 "use client"
 
-import React, { useState } from "react"
-import { useWorkspaceStore } from "@/store/workspaceStore"
-import {
-  useHabitsQuery,
-  useCreateHabitMutation,
-  useToggleLogMutation,
-  useDeleteHabitMutation,
-} from "@/hooks/useHabits"
-import { format, parseISO, startOfMonth, endOfMonth, eachDayOfInterval } from "date-fns"
+import React from "react"
+import { Habit } from "@/hooks/useHabits"
+import { format } from "date-fns"
 import { Plus, Trash2, Check, Loader2, Sparkles } from "lucide-react"
-import { confirmDestructive, showError, showSuccessToast } from "@/lib/sweetalert"
 
-// Checked styling default theme
 const CHECKED_THEME = {
   color: "text-sidebar-primary dark:text-violet-400",
   bg: "bg-sidebar-primary/10 dark:bg-violet-500/10",
   border: "border-sidebar-primary/20 dark:border-violet-500/20",
 }
 
-export function HabitGrid() {
-  const activeDate = useWorkspaceStore((state) => state.activeDate)
+interface HabitGridProps {
+  activeDate: string
+  monthDays: Date[]
+  isLoadingHabits: boolean
+  isErrorHabits: boolean
+  listHabits: Habit[]
+  isLogged: (habitId: string, dateStr: string) => boolean
+  newHabitName: string
+  setNewHabitName: (name: string) => void
+  showAddForm: boolean
+  setShowAddForm: (show: boolean) => void
+  handleAddHabit: (e: React.FormEvent) => Promise<void>
+  handleDeleteHabit: (id: string) => Promise<void>
+  handleToggleLog: (habitId: string, date: string) => void
+  isPendingToggle: boolean
+  toggleLogVariables: { habitId: string; date: string; status?: string } | undefined
+  isPendingCreate: boolean
+}
 
-  // Compute active month dates
-  const baseDate = parseISO(activeDate)
-  const monthStart = startOfMonth(baseDate)
-  const monthEnd = endOfMonth(baseDate)
-  const monthDays = eachDayOfInterval({ start: monthStart, end: monthEnd })
-
-  const startDateStr = format(monthStart, "yyyy-MM-dd")
-  const endDateStr = format(monthEnd, "yyyy-MM-dd")
-
-  // React Query Hooks
-  const { data, isLoading, isError } = useHabitsQuery(startDateStr, endDateStr)
-  const createHabitMutation = useCreateHabitMutation()
-  const toggleLogMutation = useToggleLogMutation()
-  const deleteHabitMutation = useDeleteHabitMutation()
-
-  // Form states
-  const [newHabitName, setNewHabitName] = useState("")
-  const [showAddForm, setShowAddForm] = useState(false)
-
-  const handleAddHabit = async (e: React.FormEvent): Promise<void> => {
-    e.preventDefault()
-    if (!newHabitName.trim()) return
-
-    try {
-      await createHabitMutation.mutateAsync({
-        name: newHabitName,
-      })
-      setNewHabitName("")
-      setShowAddForm(false)
-      showSuccessToast("Habit added successfully")
-    } catch (err) {
-      console.error(err)
-      showError("Error", "Failed to add habit.")
-    }
-  }
-
-  const handleDeleteHabit = async (id: string): Promise<void> => {
-    const isConfirmed = await confirmDestructive(
-      "Delete Habit",
-      "Are you sure you want to delete this habit? All check-ins will be deleted."
-    )
-    if (!isConfirmed) return
-    try {
-      await deleteHabitMutation.mutateAsync(id)
-      showSuccessToast("Habit deleted successfully")
-    } catch (err) {
-      console.error(err)
-      showError("Error", "Failed to delete habit.")
-    }
-  }
-
-  const handleToggleLog = (habitId: string, date: string): void => {
-    toggleLogMutation.mutate({ habitId, date })
-  }
-
-  const listHabits = data?.habits || []
-  const logs = data?.logs || []
-
-  // Helper check-in check
-  const isLogged = (habitId: string, dateStr: string): boolean => {
-    return logs.some((l) => l.habitId === habitId && l.date === dateStr && l.status === "completed")
-  }
-
+export function HabitGrid({
+  activeDate,
+  monthDays,
+  isLoadingHabits,
+  isErrorHabits,
+  listHabits,
+  isLogged,
+  newHabitName,
+  setNewHabitName,
+  showAddForm,
+  setShowAddForm,
+  handleAddHabit,
+  handleDeleteHabit,
+  handleToggleLog,
+  isPendingToggle,
+  toggleLogVariables,
+  isPendingCreate,
+}: HabitGridProps) {
   return (
     <div className="space-y-6">
       {/* Header and Toggle Button */}
@@ -133,10 +96,10 @@ export function HabitGrid() {
             </button>
             <button
               type="submit"
-              disabled={createHabitMutation.isPending}
+              disabled={isPendingCreate}
               className="rounded-lg bg-sidebar-primary px-3 py-1.5 text-xs font-semibold text-sidebar-primary-foreground hover:bg-sidebar-primary/95 flex items-center gap-1"
             >
-              {createHabitMutation.isPending ? (
+              {isPendingCreate ? (
                 <Loader2 className="h-3.5 w-3.5 animate-spin" />
               ) : (
                 "Save"
@@ -179,7 +142,7 @@ export function HabitGrid() {
             </tr>
           </thead>
           <tbody className="divide-y divide-border/60">
-            {isLoading ? (
+            {isLoadingHabits ? (
               Array.from({ length: 3 }).map((_, rIdx) => (
                 <tr key={rIdx} className="animate-pulse">
                   <td className="p-3 text-left">
@@ -192,7 +155,7 @@ export function HabitGrid() {
                   ))}
                 </tr>
               ))
-            ) : isError || !data ? (
+            ) : isErrorHabits ? (
               <tr>
                 <td colSpan={monthDays.length + 1} className="py-24 text-center text-sm text-destructive bg-card font-semibold">
                   Error loading habits. Please check database configuration.
@@ -230,9 +193,9 @@ export function HabitGrid() {
                     {monthDays.map((day) => {
                       const dayStr = format(day, "yyyy-MM-dd")
                       const checked = isLogged(habit.id, dayStr)
-                      const isPending = toggleLogMutation.isPending && 
-                        toggleLogMutation.variables?.habitId === habit.id && 
-                        toggleLogMutation.variables?.date === dayStr
+                      const isPending = isPendingToggle && 
+                        toggleLogVariables?.habitId === habit.id && 
+                        toggleLogVariables?.date === dayStr
                       const isSelColumn = dayStr === activeDate
 
                       return (
