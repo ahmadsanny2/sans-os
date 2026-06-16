@@ -345,7 +345,7 @@ export function ProjectBoard() {
         {/* Project Cards Grid */}
         <div className="space-y-3.5">
           {projectsList.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-border py-12 text-center text-sm text-muted-foreground bg-card/10">
+            <div className="rounded-2xl p-2 border border-dashed border-border py-12 text-center text-sm text-muted-foreground bg-card/10">
               No projects added yet. Create a project to start planning.
             </div>
           ) : (
@@ -363,7 +363,7 @@ export function ProjectBoard() {
                 <div
                   key={project.id}
                   onClick={() => setSelectedProjectId(project.id)}
-                  className={`group relative rounded-xl border p-4.5 bg-card/45 hover:bg-card dark:bg-card/25 dark:hover:bg-card/40 transition-all duration-300 cursor-pointer select-none ${
+                  className={`group relative rounded-xl border p-4.5 p-2 bg-card/45 hover:bg-card dark:bg-card/25 dark:hover:bg-card/40 transition-all duration-300 cursor-pointer select-none ${
                     isSelected
                       ? "border-sidebar-primary ring-1 ring-sidebar-primary/30 shadow-md"
                       : "border-border shadow-sm hover:border-border-hover"
