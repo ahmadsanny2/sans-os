@@ -352,7 +352,7 @@ export function VisionBoardCanvas() {
                 whileDrag={{ scale: 1.03, cursor: "grabbing", zIndex: 50 }}
                 className={`group rounded-xl overflow-hidden shadow-md flex flex-col justify-between border ${
                   isText
-                    ? "bg-gradient-to-br from-yellow-500/10 to-amber-500/5 dark:from-yellow-500/15 dark:to-transparent border-yellow-500/30 text-yellow-800 dark:text-yellow-200 p-4.5"
+                    ? "bg-gradient-to-br from-yellow-500/10 to-amber-500/5 dark:from-yellow-500/15 dark:to-transparent border-yellow-500/30 text-yellow-800 dark:text-yellow-200 p-2"
                     : "bg-card border-border/60"
                 }`}
               >

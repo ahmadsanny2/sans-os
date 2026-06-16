@@ -50,7 +50,6 @@ export function LanguageBoard() {
   const [activeTab, setActiveTab] = useState<"vocab" | "writing">("vocab")
   const [showAddForm, setShowAddForm] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
-  const [selectedPOSFilter, setSelectedPOSFilter] = useState("All")
 
   // Click to reveal translations state mapping
   const [revealedTranslationIds, setRevealedTranslationIds] = useState<Record<string, boolean>>({})
@@ -103,9 +102,7 @@ export function LanguageBoard() {
     }
   }
 
-  const handleStarClick = (id: string, level: number): void => {
-    updateVocabularyMutation.mutate({ id, masteryLevel: level })
-  }
+
 
   const handleToggleMemorized = (id: string, currentMemorized: boolean): void => {
     updateVocabularyMutation.mutate({ id, memorized: !currentMemorized })
@@ -144,13 +141,8 @@ export function LanguageBoard() {
       v.translation.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (v.definition !== "n/a" && v.definition.toLowerCase().includes(searchQuery.toLowerCase()))
 
-    const matchesPOS = selectedPOSFilter === "All" || v.partOfSpeech === selectedPOSFilter
-
-    return matchesQuery && matchesPOS
+    return matchesQuery
   })
-
-  // List of POS categories for filter badges
-  const POS_CATEGORIES = ["All", "Noun", "Verb", "Adjective", "Adverb", "Preposition", "Conjunction", "Pronoun", "Interjection"]
 
   return (
     <div className="space-y-6">
@@ -367,27 +359,7 @@ export function LanguageBoard() {
             </form>
           )}
 
-          {/* 4. POS Categories horizontal tabs scroll filter (Only show filter if there are items with POS) */}
-          <div className="overflow-x-auto pb-2 border-b border-border/30 animate-in fade-in duration-200">
-            <div className="flex gap-2 min-w-max">
-              {POS_CATEGORIES.map((p) => {
-                const isActive = selectedPOSFilter === p
-                return (
-                  <button
-                    key={p}
-                    onClick={() => setSelectedPOSFilter(p)}
-                    className={`px-3 py-1 rounded-full text-xs font-bold transition-all border ${
-                      isActive
-                        ? "bg-sidebar-primary text-sidebar-primary-foreground border-sidebar-primary font-bold shadow-sm"
-                        : "bg-secondary/20 hover:bg-secondary/50 border-border text-muted-foreground"
-                    }`}
-                  >
-                    {p}
-                  </button>
-                )
-              })}
-            </div>
-          </div>
+
 
           {/* 5. Vocabulary Cards Grid */}
           {isLoading ? (
@@ -507,32 +479,6 @@ export function LanguageBoard() {
                         </div>
                       )}
                     </div>
-
-                    {/* Footer interactive Mastery Selector */}
-                    <div className="border-t border-border/40 pt-3 flex flex-col gap-1 select-none">
-                      <span className="text-[9px] font-extrabold uppercase tracking-widest text-muted-foreground">Mastery Level</span>
-                      <div className="flex items-center gap-1.5 pt-0.5">
-                        {[1, 2, 3, 4, 5].map((level) => {
-                          const isGold = level <= vocab.masteryLevel
-                          return (
-                            <button
-                              key={level}
-                              type="button"
-                              onClick={() => handleStarClick(vocab.id, level)}
-                              className="p-0.5 rounded transition-transform active:scale-95"
-                              aria-label={`Rate mastery level ${level}`}
-                            >
-                              <Star className={`h-4.5 w-4.5 ${
-                                isGold
-                                  ? "text-amber-500 fill-amber-500 hover:scale-110"
-                                  : "text-muted/60 hover:text-amber-500/50"
-                              } transition-all`} />
-                            </button>
-                          )
-                        })}
-                      </div>
-                    </div>
-
                   </div>
                 )
               })}
