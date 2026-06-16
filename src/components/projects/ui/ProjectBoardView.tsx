@@ -1,17 +1,8 @@
 "use client"
 
-import React, { useState } from "react"
-import {
-  useProjectsQuery,
-  useCreateProjectMutation,
-  useDeleteProjectMutation,
-  useCreateTaskMutation,
-  useDeleteTaskMutation,
-  useToggleTaskMutation,
-  Project,
-  ProjectTask,
-} from "@/hooks/useProjects"
-import { format, isPast, isToday } from "date-fns"
+import React from "react"
+import { Project, ProjectTask } from "@/hooks/useProjects"
+import { formatDate, isOverdue } from "@/hooks/useProjectsPage"
 import {
   Plus,
   Trash2,
@@ -27,9 +18,7 @@ import {
   AlertTriangle,
 } from "lucide-react"
 import { ListSkeleton } from "@/components/ui/Skeletons"
-import { confirmDestructive, showError, showSuccessToast } from "@/lib/sweetalert"
 
-// Priority badge color themes
 const PRIORITY_THEMES: Record<string, { bg: string; text: string; border: string }> = {
   High: {
     bg: "bg-rose-500/10",
@@ -48,7 +37,6 @@ const PRIORITY_THEMES: Record<string, { bg: string; text: string; border: string
   },
 }
 
-// Status badge color themes
 const STATUS_THEMES: Record<string, { bg: string; text: string; border: string }> = {
   Planning: {
     bg: "bg-slate-500/10",
@@ -72,143 +60,85 @@ const STATUS_THEMES: Record<string, { bg: string; text: string; border: string }
   },
 }
 
-function formatDate(dateStr: string | null | undefined): string {
-  if (!dateStr) return "No deadline"
-  try {
-    const d = new Date(dateStr)
-    return format(d, "MMM d, yyyy")
-  } catch {
-    return "Invalid date"
-  }
+interface ProjectBoardViewProps {
+  projectsList: Project[]
+  isLoading: boolean
+  isError: boolean
+  selectedProjectId: string | null
+  setSelectedProjectId: (id: string | null) => void
+  showAddProject: boolean
+  setShowAddProject: (show: boolean) => void
+  projectName: string
+  setProjectName: (name: string) => void
+  projectDesc: string
+  setProjectDesc: (desc: string) => void
+  projectPriority: string
+  setProjectPriority: (priority: string) => void
+  projectStatus: string
+  setProjectStatus: (status: string) => void
+  projectDeadline: string
+  setProjectDeadline: (deadline: string) => void
+  projectError: string | null
+  taskName: string
+  setTaskName: (name: string) => void
+  taskPriority: string
+  setTaskPriority: (priority: string) => void
+  taskDeadline: string
+  setTaskDeadline: (deadline: string) => void
+  taskError: string | null
+  activeProject: Project | null
+  handleAddProject: (e: React.FormEvent) => Promise<void>
+  handleDeleteProject: (id: string, e: React.MouseEvent) => Promise<void>
+  handleAddTask: (e: React.FormEvent) => Promise<void>
+  handleDeleteTask: (id: string) => Promise<void>
+  handleToggleTask: (id: string, completed: boolean) => void
+  isPendingProjectCreate: boolean
+  isPendingProjectDelete: boolean
+  isPendingTaskCreate: boolean
+  isPendingTaskDelete: boolean
+  isPendingTaskToggle: boolean
 }
 
-function isOverdue(dateStr: string | null | undefined, completed: boolean = false): boolean {
-  if (!dateStr || completed) return false
-  try {
-    const d = new Date(dateStr)
-    // Overdue if in past and not today
-    return isPast(d) && !isToday(d)
-  } catch {
-    return false
-  }
-}
-
-export function ProjectBoard() {
-  const { data: projectsList = [], isLoading, isError } = useProjectsQuery()
-  const createProjectMutation = useCreateProjectMutation()
-  const deleteProjectMutation = useDeleteProjectMutation()
-  const createTaskMutation = useCreateTaskMutation()
-  const deleteTaskMutation = useDeleteTaskMutation()
-  const toggleTaskMutation = useToggleTaskMutation()
-
-  // Selected project ID
-  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null)
-
-  // Forms states
-  const [showAddProject, setShowAddProject] = useState(false)
-  const [projectName, setProjectName] = useState("")
-  const [projectDesc, setProjectDesc] = useState("")
-  const [projectPriority, setProjectPriority] = useState("Medium")
-  const [projectStatus, setProjectStatus] = useState("Planning")
-  const [projectDeadline, setProjectDeadline] = useState("")
-  const [projectError, setProjectError] = useState<string | null>(null)
-
-  // Task form states
-  const [taskName, setTaskName] = useState("")
-  const [taskPriority, setTaskPriority] = useState("Medium")
-  const [taskDeadline, setTaskDeadline] = useState("")
-  const [taskError, setTaskError] = useState<string | null>(null)
-
-  // Filter project query list
-  const activeProject = projectsList.find((p) => p.id === selectedProjectId) || null
-
-  const handleAddProject = async (e: React.FormEvent): Promise<void> => {
-    e.preventDefault()
-    setProjectError(null)
-    if (!projectName.trim()) return
-
-    try {
-      const newProj = await createProjectMutation.mutateAsync({
-        name: projectName,
-        description: projectDesc,
-        priority: projectPriority,
-        status: projectStatus,
-        deadline: projectDeadline || undefined,
-      })
-      setProjectName("")
-      setProjectDesc("")
-      setProjectPriority("Medium")
-      setProjectStatus("Planning")
-      setProjectDeadline("")
-      setShowAddProject(false)
-      setSelectedProjectId(newProj.id)
-      showSuccessToast("Project created successfully")
-    } catch {
-      setProjectError("Failed to create project.")
-    }
-  }
-
-  const handleDeleteProject = async (id: string, e: React.MouseEvent): Promise<void> => {
-    e.stopPropagation()
-    const confirmed = await confirmDestructive(
-      "Delete Project?",
-      "Are you sure you want to delete this project? All associated tasks will be permanently removed."
-    )
-    if (!confirmed) return
-    try {
-      await deleteProjectMutation.mutateAsync(id)
-      if (selectedProjectId === id) {
-        setSelectedProjectId(null)
-      }
-      showSuccessToast("Project deleted successfully")
-    } catch {
-      await showError("Deletion Failed", "Failed to delete project.")
-    }
-  }
-
-  const handleAddTask = async (e: React.FormEvent): Promise<void> => {
-    e.preventDefault()
-    setTaskError(null)
-    if (!selectedProjectId || !taskName.trim()) return
-
-    try {
-      await createTaskMutation.mutateAsync({
-        projectId: selectedProjectId,
-        name: taskName,
-        priority: taskPriority,
-        deadline: taskDeadline || undefined,
-      })
-      setTaskName("")
-      setTaskPriority("Medium")
-      setTaskDeadline("")
-      showSuccessToast("Task added to project")
-    } catch {
-      setTaskError("Failed to add task.")
-    }
-  }
-
-  const handleDeleteTask = async (id: string): Promise<void> => {
-    const confirmed = await confirmDestructive(
-      "Delete Task?",
-      "Are you sure you want to delete this task?"
-    )
-    if (!confirmed) return
-    try {
-      await deleteTaskMutation.mutateAsync(id)
-      showSuccessToast("Task deleted successfully")
-    } catch {
-      await showError("Deletion Failed", "Failed to delete task.")
-    }
-  }
-
-  const handleToggleTask = (id: string, completed: boolean): void => {
-    toggleTaskMutation.mutate({ id, completed: !completed })
-  }
-
-
-
+export function ProjectBoardView({
+  projectsList,
+  isLoading,
+  isError,
+  selectedProjectId,
+  setSelectedProjectId,
+  showAddProject,
+  setShowAddProject,
+  projectName,
+  setProjectName,
+  projectDesc,
+  setProjectDesc,
+  projectPriority,
+  setProjectPriority,
+  projectStatus,
+  setProjectStatus,
+  projectDeadline,
+  setProjectDeadline,
+  projectError,
+  taskName,
+  setTaskName,
+  taskPriority,
+  setTaskPriority,
+  taskDeadline,
+  setTaskDeadline,
+  taskError,
+  activeProject,
+  handleAddProject,
+  handleDeleteProject,
+  handleAddTask,
+  handleDeleteTask,
+  handleToggleTask,
+  isPendingProjectCreate,
+  isPendingProjectDelete,
+  isPendingTaskCreate,
+  isPendingTaskDelete,
+  isPendingTaskToggle,
+}: ProjectBoardViewProps) {
   return (
-    <div className="grid gap-8 lg:grid-cols-12">
+    <div className="grid gap-8 lg:grid-cols-12 animate-in fade-in duration-200">
       {/* Left Column: Projects List */}
       <div className="lg:col-span-5 xl:col-span-4 space-y-6">
         <div className="flex items-center justify-between">
@@ -222,7 +152,7 @@ export function ProjectBoard() {
           </div>
           <button
             onClick={() => setShowAddProject(!showAddProject)}
-            className="inline-flex items-center gap-1.5 rounded-lg bg-sidebar-primary px-3 py-1.5 text-xs font-semibold text-sidebar-primary-foreground shadow-sm transition-all hover:bg-sidebar-primary/90 hover:scale-[1.02]"
+            className="inline-flex items-center gap-1.5 rounded-lg bg-sidebar-primary px-3.5 py-1.5 text-xs font-semibold text-sidebar-primary-foreground shadow-sm transition-all hover:bg-sidebar-primary/90 hover:scale-[1.02]"
           >
             <Plus className="h-4 w-4" />
             {showAddProject ? "Cancel" : "Add Project"}
@@ -329,10 +259,10 @@ export function ProjectBoard() {
               </button>
               <button
                 type="submit"
-                disabled={createProjectMutation.isPending}
+                disabled={isPendingProjectCreate}
                 className="rounded-lg bg-sidebar-primary px-3 py-1.5 text-xs font-semibold text-sidebar-primary-foreground hover:bg-sidebar-primary/95 flex items-center gap-1"
               >
-                {createProjectMutation.isPending ? (
+                {isPendingProjectCreate ? (
                   <Loader2 className="h-3.5 w-3.5 animate-spin" />
                 ) : (
                   "Create Workspace"
@@ -372,7 +302,7 @@ export function ProjectBoard() {
                 <div
                   key={project.id}
                   onClick={() => setSelectedProjectId(project.id)}
-                  className={`group relative rounded-xl border p-4.5 p-2 bg-card/45 hover:bg-card dark:bg-card/25 dark:hover:bg-card/40 transition-all duration-300 cursor-pointer select-none ${
+                  className={`group relative rounded-xl border p-4.5 bg-card/45 hover:bg-card dark:bg-card/25 dark:hover:bg-card/40 transition-all duration-300 cursor-pointer select-none ${
                     isSelected
                       ? "border-sidebar-primary ring-1 ring-sidebar-primary/30 shadow-md"
                       : "border-border shadow-sm hover:border-border-hover"
@@ -396,11 +326,10 @@ export function ProjectBoard() {
                         )}
                       </div>
 
-                      {/* Project deletion trigger */}
                       <button
                         onClick={(e) => handleDeleteProject(project.id, e)}
-                        disabled={deleteProjectMutation.isPending}
-                        className="opacity-0 group-hover:opacity-100 focus:opacity-100 p-1 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all shrink-0"
+                        disabled={isPendingProjectDelete}
+                        className="opacity-0 group-hover:opacity-100 focus:opacity-100 p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all shrink-0"
                         aria-label={`Delete project ${project.name}`}
                       >
                         <Trash2 className="h-3.5 w-3.5" />
@@ -475,7 +404,7 @@ export function ProjectBoard() {
             </p>
           </div>
         ) : (
-          <div className="border border-border bg-card dark:bg-card/50 rounded-2xl p-6 shadow-sm space-y-6 animate-in fade-in duration-200">
+          <div className="border border-border bg-card dark:bg-card/50 rounded-2xl p-6 shadow-sm space-y-6">
             {/* Project Header details */}
             <div className="border-b border-border pb-5 space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
@@ -530,7 +459,6 @@ export function ProjectBoard() {
                 </div>
               ) : (
                 <div className="space-y-2.5">
-                  {/* Sort tasks: uncompleted first, then by priority/deadline */}
                   {[...activeProject.tasks]
                     .sort((a, b) => {
                       if (a.completed !== b.completed) return a.completed ? 1 : -1
@@ -552,7 +480,7 @@ export function ProjectBoard() {
                           <div className="flex items-center gap-3.5 flex-1 min-w-0">
                             <button
                               onClick={() => handleToggleTask(task.id, task.completed)}
-                              disabled={toggleTaskMutation.isPending}
+                              disabled={isPendingTaskToggle}
                               className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-lg border transition-all active:scale-95 ${
                                 task.completed
                                   ? "bg-sidebar-primary border-sidebar-primary text-sidebar-primary-foreground"
@@ -592,7 +520,7 @@ export function ProjectBoard() {
 
                           <button
                             onClick={() => handleDeleteTask(task.id)}
-                            disabled={deleteTaskMutation.isPending}
+                            disabled={isPendingTaskDelete}
                             className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors shrink-0"
                             aria-label="Delete task"
                           >
@@ -639,10 +567,10 @@ export function ProjectBoard() {
 
                   <button
                     type="submit"
-                    disabled={createTaskMutation.isPending || !taskName.trim()}
+                    disabled={isPendingTaskCreate || !taskName.trim()}
                     className="inline-flex items-center justify-center rounded-lg bg-sidebar-primary px-3 py-2 text-xs font-semibold text-sidebar-primary-foreground shadow-sm transition-all hover:bg-sidebar-primary/95 disabled:opacity-50"
                   >
-                    {createTaskMutation.isPending ? (
+                    {isPendingTaskCreate ? (
                       <Loader2 className="h-4.5 w-4.5 animate-spin" />
                     ) : (
                       <Plus className="h-4.5 w-4.5" />
