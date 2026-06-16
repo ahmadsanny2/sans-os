@@ -107,6 +107,19 @@ export const vocabularyLogs = pgTable("vocabulary_logs", {
   translation: text("translation").notNull(),
   exampleSentence: text("example_sentence"),
   masteryLevel: integer("mastery_level").default(1).notNull(), // scale 1-5
+  memorized: boolean("memorized").default(false).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+})
+
+// 8.2 Writing Logs (Sentence practice logs)
+export const writingLogs = pgTable("writing_logs", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: text("user_id").notNull(),
+  vocabId: uuid("vocab_id"), // Nullable link to vocabulary log
+  vocabWord: text("vocab_word"), // Store word text directly for quick access
+  sentenceType: text("sentence_type"), // 'Positive', 'Negative', 'Interrogative'
+  englishSentence: text("english_sentence").notNull(),
+  indonesianTranslation: text("indonesian_translation").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 })
 

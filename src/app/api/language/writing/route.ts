@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import { db } from "@/lib/db"
-import { vocabularyLogs } from "@/types/schema"
+import { writingLogs } from "@/types/schema"
 import { eq, and, desc } from "drizzle-orm"
 import { createServerSupabaseClient } from "@/lib/supabase/server"
 
@@ -17,9 +17,9 @@ export async function GET(): Promise<NextResponse> {
 
     const logs = await db
       .select()
-      .from(vocabularyLogs)
-      .where(eq(vocabularyLogs.userId, user.id))
-      .orderBy(desc(vocabularyLogs.createdAt))
+      .from(writingLogs)
+      .where(eq(writingLogs.userId, user.id))
+      .orderBy(desc(writingLogs.createdAt))
 
     return NextResponse.json(logs)
   } catch (error) {
@@ -40,69 +40,25 @@ export async function POST(request: Request): Promise<NextResponse> {
     }
 
     const body = await request.json()
-    const { word, partOfSpeech, definition, translation, exampleSentence, masteryLevel } = body
+    const { vocabId, vocabWord, sentenceType, englishSentence, indonesianTranslation } = body
 
-    if (!word || !translation) {
+    if (!englishSentence || !indonesianTranslation) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
     }
 
     const [newLog] = await db
-      .insert(vocabularyLogs)
+      .insert(writingLogs)
       .values({
         userId: user.id,
-        word,
-        partOfSpeech: partOfSpeech || "n/a",
-        definition: definition || "n/a",
-        translation,
-        exampleSentence: exampleSentence || null,
-        masteryLevel: masteryLevel !== undefined ? Number(masteryLevel) : 3,
-        memorized: false,
+        vocabId: vocabId || null,
+        vocabWord: vocabWord || null,
+        sentenceType: sentenceType || null,
+        englishSentence,
+        indonesianTranslation,
       })
       .returning()
 
     return NextResponse.json(newLog)
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : "Server Error"
-    return NextResponse.json({ error: errorMessage }, { status: 500 })
-  }
-}
-
-export async function PATCH(request: Request): Promise<NextResponse> {
-  try {
-    const supabase = await createServerSupabaseClient()
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
-
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    }
-
-    const body = await request.json()
-    const { id, masteryLevel, memorized } = body
-
-    if (!id) {
-      return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
-    }
-
-    const updateData: {
-      masteryLevel?: number
-      memorized?: boolean
-    } = {}
-    if (masteryLevel !== undefined) updateData.masteryLevel = Number(masteryLevel)
-    if (memorized !== undefined) updateData.memorized = Boolean(memorized)
-
-    const [updatedLog] = await db
-      .update(vocabularyLogs)
-      .set(updateData)
-      .where(and(eq(vocabularyLogs.id, id), eq(vocabularyLogs.userId, user.id)))
-      .returning()
-
-    if (!updatedLog) {
-      return NextResponse.json({ error: "Log not found" }, { status: 404 })
-    }
-
-    return NextResponse.json(updatedLog)
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "Server Error"
     return NextResponse.json({ error: errorMessage }, { status: 500 })
@@ -128,8 +84,8 @@ export async function DELETE(request: Request): Promise<NextResponse> {
     }
 
     const [deletedLog] = await db
-      .delete(vocabularyLogs)
-      .where(and(eq(vocabularyLogs.id, id), eq(vocabularyLogs.userId, user.id)))
+      .delete(writingLogs)
+      .where(and(eq(writingLogs.id, id), eq(writingLogs.userId, user.id)))
       .returning()
 
     if (!deletedLog) {

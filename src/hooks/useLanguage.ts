@@ -9,6 +9,18 @@ export interface VocabularyLog {
   translation: string
   exampleSentence: string | null
   masteryLevel: number
+  memorized: boolean
+  createdAt: string
+}
+
+export interface WritingLog {
+  id: string
+  userId: string
+  vocabId: string | null
+  vocabWord: string | null
+  sentenceType: "Positive" | "Negative" | "Interrogative" | null
+  englishSentence: string
+  indonesianTranslation: string
   createdAt: string
 }
 
@@ -31,8 +43,8 @@ export function useVocabularyQuery() {
 // 2. Create vocabulary log
 async function createVocabulary(body: {
   word: string
-  partOfSpeech: string
-  definition: string
+  partOfSpeech?: string
+  definition?: string
   translation: string
   exampleSentence?: string
   masteryLevel?: number
@@ -50,14 +62,18 @@ async function createVocabulary(body: {
 
 export function useCreateVocabularyMutation() {
   const queryClient = useQueryClient()
-  return useMutation<VocabularyLog, Error, {
-    word: string
-    partOfSpeech: string
-    definition: string
-    translation: string
-    exampleSentence?: string
-    masteryLevel?: number
-  }>({
+  return useMutation<
+    VocabularyLog,
+    Error,
+    {
+      word: string
+      partOfSpeech?: string
+      definition?: string
+      translation: string
+      exampleSentence?: string
+      masteryLevel?: number
+    }
+  >({
     mutationFn: createVocabulary,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["vocabulary"] })
@@ -65,23 +81,31 @@ export function useCreateVocabularyMutation() {
   })
 }
 
-// 3. Update word mastery level
-async function updateMastery(body: { id: string; masteryLevel: number }): Promise<VocabularyLog> {
+// 3. Update word mastery level or memorized state
+async function updateVocabulary(body: {
+  id: string
+  masteryLevel?: number
+  memorized?: boolean
+}): Promise<VocabularyLog> {
   const res = await fetch("/api/language", {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
   })
   if (!res.ok) {
-    throw new Error("Failed to update mastery level")
+    throw new Error("Failed to update vocabulary log")
   }
   return res.json()
 }
 
-export function useUpdateMasteryMutation() {
+export function useUpdateVocabularyMutation() {
   const queryClient = useQueryClient()
-  return useMutation<VocabularyLog, Error, { id: string; masteryLevel: number }>({
-    mutationFn: updateMastery,
+  return useMutation<
+    VocabularyLog,
+    Error,
+    { id: string; masteryLevel?: number; memorized?: boolean }
+  >({
+    mutationFn: updateVocabulary,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["vocabulary"] })
     },
@@ -105,6 +129,82 @@ export function useDeleteVocabularyMutation() {
     mutationFn: deleteVocabulary,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["vocabulary"] })
+    },
+  })
+}
+
+// 5. Fetch writing logs list
+async function fetchWritingLogs(): Promise<WritingLog[]> {
+  const res = await fetch("/api/language/writing")
+  if (!res.ok) {
+    throw new Error("Failed to fetch writing logs")
+  }
+  return res.json()
+}
+
+export function useWritingQuery() {
+  return useQuery<WritingLog[]>({
+    queryKey: ["writingLogs"],
+    queryFn: fetchWritingLogs,
+  })
+}
+
+// 6. Create writing log
+async function createWritingLog(body: {
+  vocabId?: string | null
+  vocabWord?: string | null
+  sentenceType?: "Positive" | "Negative" | "Interrogative" | null
+  englishSentence: string
+  indonesianTranslation: string
+}): Promise<WritingLog> {
+  const res = await fetch("/api/language/writing", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  })
+  if (!res.ok) {
+    throw new Error("Failed to create writing log")
+  }
+  return res.json()
+}
+
+export function useCreateWritingMutation() {
+  const queryClient = useQueryClient()
+  return useMutation<
+    WritingLog,
+    Error,
+    {
+      vocabId?: string | null
+      vocabWord?: string | null
+      sentenceType?: "Positive" | "Negative" | "Interrogative" | null
+      englishSentence: string
+      indonesianTranslation: string
+    }
+  >({
+    mutationFn: createWritingLog,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["writingLogs"] })
+    },
+  })
+}
+
+// 7. Delete writing log
+async function deleteWritingLog(id: string): Promise<{ success: boolean }> {
+  const res = await fetch(`/api/language/writing?id=${id}`, {
+    method: "DELETE",
+  })
+  if (!res.ok) {
+    throw new Error("Failed to delete writing log")
+  }
+  return res.json()
+}
+
+export function useDeleteWritingMutation() {
+  const queryClient = useQueryClient()
+  return useMutation<{ success: boolean }, Error, string>({
+    mutationFn: deleteWritingLog,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["writingLogs"] })
     },
   })
 }
