@@ -142,11 +142,11 @@ export function PomodoroModal() {
 
   // --- Adjust for elapsed time on mount/load & tab focus ---
   useEffect(() => {
-    adjustForElapsedTime()
+    adjustForElapsedTime(timetableList)
 
     const handleVisibilityChange = () => {
       if (document.visibilityState === "visible") {
-        adjustForElapsedTime()
+        adjustForElapsedTime(timetableList)
       }
     }
 
@@ -154,14 +154,14 @@ export function PomodoroModal() {
     return () => {
       document.removeEventListener("visibilitychange", handleVisibilityChange)
     }
-  }, [adjustForElapsedTime])
+  }, [adjustForElapsedTime, timetableList])
 
   // --- Countdown interval ---
   useEffect(() => {
     if (!isRunning) return
-    const id = setInterval(() => tick(), 1000)
+    const id = setInterval(() => tick(timetableList), 1000)
     return () => clearInterval(id)
-  }, [isRunning, tick])
+  }, [isRunning, tick, timetableList])
 
   // --- Sound on phase change ---
   const prevPhaseRef = useRef<PomodoroPhase>(phase)
