@@ -26,6 +26,8 @@ interface PomodoroState {
   sessionCount: number // completed focus sessions
   isModalOpen: boolean
   lastActiveTimestamp: number | null
+  isPipActive: boolean
+  isPipExpanded: boolean
 
   // --- Actions ---
   setConfig: (patch: Partial<PomodoroConfig>) => void
@@ -42,6 +44,8 @@ interface PomodoroState {
   closeModal: () => void
   toggleModal: () => void
   adjustForElapsedTime: () => void
+  setIsPipActive: (active: boolean) => void
+  setIsPipExpanded: (expanded: boolean) => void
 }
 
 export const usePomodoroStore = create<PomodoroState>()(
@@ -64,6 +68,8 @@ export const usePomodoroStore = create<PomodoroState>()(
       sessionCount: 0,
       isModalOpen: false,
       lastActiveTimestamp: null,
+      isPipActive: false,
+      isPipExpanded: false,
 
       // Config actions
       setConfig: (patch) =>
@@ -171,6 +177,8 @@ export const usePomodoroStore = create<PomodoroState>()(
       openModal: () => set({ isModalOpen: true }),
       closeModal: () => set({ isModalOpen: false }),
       toggleModal: () => set((s) => ({ isModalOpen: !s.isModalOpen })),
+      setIsPipActive: (isPipActive) => set({ isPipActive }),
+      setIsPipExpanded: (isPipExpanded) => set({ isPipExpanded }),
 
       adjustForElapsedTime: () => {
         const { isRunning, phase, remainingSeconds, lastActiveTimestamp, config, sessionCount } = get()

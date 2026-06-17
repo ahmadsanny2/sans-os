@@ -13,8 +13,10 @@ import {
   X,
   Timer,
   ExternalLink,
+  Tv,
 } from "lucide-react"
 import Link from "next/link"
+import { PomodoroPipController, startPip } from "./PomodoroPipController"
 
 // ---------- Helpers ----------
 
@@ -129,6 +131,11 @@ export function PomodoroModal() {
   const tick = usePomodoroStore((s) => s.tick)
   const closeModal = usePomodoroStore((s) => s.closeModal)
   const adjustForElapsedTime = usePomodoroStore((s) => s.adjustForElapsedTime)
+  const isPipActive = usePomodoroStore((s) => s.isPipActive)
+  const setIsPipActive = usePomodoroStore((s) => s.setIsPipActive)
+  const setIsPipExpanded = usePomodoroStore((s) => s.setIsPipExpanded)
+
+  const isPipSupported = typeof window !== "undefined" && "documentPictureInPicture" in window
 
   const activeDate = useWorkspaceStore((s) => s.activeDate)
   const { data: timetableList = [] } = useTimetableQuery()
@@ -238,6 +245,26 @@ export function PomodoroModal() {
           )}
         </div>
         <div className="flex items-center gap-1">
+          {isPipSupported && (
+            <button
+              onClick={() => {
+                if (isPipActive) {
+                  setIsPipActive(false)
+                } else {
+                  startPip(setIsPipActive, setIsPipExpanded)
+                }
+              }}
+              className={`rounded p-1 transition-colors ${
+                isPipActive
+                  ? "text-violet-400 bg-white/10"
+                  : "text-white/40 hover:text-white/70 hover:bg-white/10"
+              }`}
+              aria-label={isPipActive ? "Close floating window" : "Open floating window"}
+              title={isPipActive ? "Close floating window" : "Open floating window (Picture-in-Picture)"}
+            >
+              <Tv className="h-3.5 w-3.5" />
+            </button>
+          )}
           <Link
             href="/pomodoro"
             className="rounded p-1 hover:bg-white/10 transition-colors"
@@ -357,6 +384,8 @@ export function PomodoroModal() {
           )}
         </div>
       </div>
+      {/* Picture-in-Picture Controller */}
+      <PomodoroPipController />
     </div>
   )
 }
