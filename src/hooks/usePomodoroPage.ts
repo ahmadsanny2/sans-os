@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 import {
   usePomodoroStore,
   PomodoroConfig,
@@ -33,6 +33,16 @@ export function usePomodoroPage() {
   const startTimer = usePomodoroStore((s) => s.startTimer)
   const openModal = usePomodoroStore((s) => s.openModal)
 
+  // Real-time ticking state to trigger recalculations
+  const [currentTime, setCurrentTime] = useState(() => new Date())
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date())
+    }, 1000)
+    return () => clearInterval(timer)
+  }, [])
+
   // Timetable query
   const { data: timetableList = [], isLoading: timetableLoading } =
     useTimetableQuery()
@@ -40,7 +50,7 @@ export function usePomodoroPage() {
   // Today's blocks — matches the same logic as the dashboard widget:
   // - One-off blocks: date matches todayString
   // - Fixed blocks: dayOfWeek === -1
-  const todayString = format(new Date(), "yyyy-MM-dd")
+  const todayString = useMemo(() => format(currentTime, "yyyy-MM-dd"), [currentTime])
 
   const todayBlocks = useMemo(
     () =>
@@ -50,15 +60,14 @@ export function usePomodoroPage() {
 
   // Auto mode: detect currently active block by real-time clock
   const autoActiveBlock = useMemo((): TimetableBlock | undefined => {
-    const now = new Date()
     const currentMins =
-      now.getHours() * 60 + now.getMinutes()
+      currentTime.getHours() * 60 + currentTime.getMinutes()
     return todayBlocks.find(
       (b) =>
         timeToMinutes(b.startTime) <= currentMins &&
         timeToMinutes(b.endTime) > currentMins
     )
-  }, [todayBlocks])
+  }, [todayBlocks, currentTime])
 
   // Manual mode: selected block object
   const selectedBlock = useMemo(

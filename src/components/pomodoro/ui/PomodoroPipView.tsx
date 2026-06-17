@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useMemo } from "react"
+import React, { useMemo, useState, useEffect } from "react"
 import { usePomodoroStore, PomodoroPhase } from "@/store/pomodoroStore"
 import { useTimetableQuery, TimetableBlock } from "@/hooks/useDaily"
 import { showErrorToast } from "@/lib/sweetalert"
@@ -85,14 +85,22 @@ export function PomodoroPipView() {
   const { data: timetableList = [] } = useTimetableQuery()
 
   // --- Determine active block ---
-  const todayStr = new Date().toISOString().split("T")[0]
+  const [currentTime, setCurrentTime] = useState(() => new Date())
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date())
+    }, 1000)
+    return () => clearInterval(timer)
+  }, [])
+
+  const todayStr = useMemo(() => currentTime.toISOString().split("T")[0], [currentTime])
 
   const activeBlock = useMemo((): TimetableBlock | undefined => {
     if (integrationMode === "manual") {
       return timetableList.find((b) => b.id === selectedBlockId)
     }
-    const now = new Date()
-    const currentMins = now.getHours() * 60 + now.getMinutes()
+    const currentMins = currentTime.getHours() * 60 + currentTime.getMinutes()
     return timetableList.find((b) => {
       const isForToday = b.dayOfWeek === -1 || b.date === todayStr
       if (!isForToday) return false
@@ -101,7 +109,7 @@ export function PomodoroPipView() {
         timeToMinutes(b.endTime) > currentMins
       )
     })
-  }, [timetableList, integrationMode, selectedBlockId, todayStr])
+  }, [timetableList, integrationMode, selectedBlockId, todayStr, currentTime])
 
   const meta = PHASE_META[phase]
   const displaySession = Math.max(1, sessionCount + (phase === "focus" ? 1 : 0))

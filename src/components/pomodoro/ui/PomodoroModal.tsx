@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useEffect, useRef, useMemo } from "react"
+import React, { useEffect, useRef, useMemo, useState } from "react"
 import { usePomodoroStore, PomodoroPhase } from "@/store/pomodoroStore"
 import { useTimetableQuery, TimetableBlock } from "@/hooks/useDaily"
 import { playPomodoroSound } from "@/lib/pomodoroSound"
@@ -188,15 +188,23 @@ export function PomodoroModal() {
   }, [isRunning, phase, remainingSeconds])
 
   // --- Determine active block ---
-  const todayStr = new Date().toISOString().split("T")[0]
+  const [currentTime, setCurrentTime] = useState(() => new Date())
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date())
+    }, 1000)
+    return () => clearInterval(timer)
+  }, [])
+
+  const todayStr = useMemo(() => currentTime.toISOString().split("T")[0], [currentTime])
 
   const activeBlock = useMemo((): TimetableBlock | undefined => {
     if (integrationMode === "manual") {
       return timetableList.find((b) => b.id === selectedBlockId)
     }
     // Auto: find block active right now
-    const now = new Date()
-    const currentMins = now.getHours() * 60 + now.getMinutes()
+    const currentMins = currentTime.getHours() * 60 + currentTime.getMinutes()
     return timetableList.find((b) => {
       const isForToday = b.dayOfWeek === -1 || b.date === todayStr
       if (!isForToday) return false
@@ -205,7 +213,7 @@ export function PomodoroModal() {
         timeToMinutes(b.endTime) > currentMins
       )
     })
-  }, [timetableList, integrationMode, selectedBlockId, todayStr])
+  }, [timetableList, integrationMode, selectedBlockId, todayStr, currentTime])
 
   // --- Progress calculation ---
   const totalSeconds = useMemo(() => {
