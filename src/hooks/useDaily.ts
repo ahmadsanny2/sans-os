@@ -104,9 +104,32 @@ async function togglePriority(body: { id: string; completed: boolean }): Promise
 
 export function useTogglePriorityMutation(date: string) {
   const queryClient = useQueryClient()
-  return useMutation<Priority, Error, { id: string; completed: boolean }>({
+  return useMutation<
+    Priority,
+    Error,
+    { id: string; completed: boolean },
+    { previousPriorities: Priority[] | undefined }
+  >({
     mutationFn: togglePriority,
-    onSuccess: () => {
+    onMutate: async (variables) => {
+      await queryClient.cancelQueries({ queryKey: ["priorities", date] })
+      const previousPriorities = queryClient.getQueryData<Priority[]>(["priorities", date])
+      if (previousPriorities) {
+        queryClient.setQueryData<Priority[]>(
+          ["priorities", date],
+          previousPriorities.map((p) =>
+            p.id === variables.id ? { ...p, completed: variables.completed } : p
+          )
+        )
+      }
+      return { previousPriorities }
+    },
+    onError: (err, variables, context) => {
+      if (context?.previousPriorities) {
+        queryClient.setQueryData(["priorities", date], context.previousPriorities)
+      }
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["priorities", date] })
     },
   })

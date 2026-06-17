@@ -78,9 +78,32 @@ async function toggleDailyTodo(body: { id: string; completed: boolean }): Promis
 
 export function useToggleDailyTodoMutation(date: string) {
   const queryClient = useQueryClient()
-  return useMutation<DailyTodo, Error, { id: string; completed: boolean }>({
+  return useMutation<
+    DailyTodo,
+    Error,
+    { id: string; completed: boolean },
+    { previousTodos: DailyTodo[] | undefined }
+  >({
     mutationFn: toggleDailyTodo,
-    onSuccess: () => {
+    onMutate: async (variables) => {
+      await queryClient.cancelQueries({ queryKey: ["daily-todos", date] })
+      const previousTodos = queryClient.getQueryData<DailyTodo[]>(["daily-todos", date])
+      if (previousTodos) {
+        queryClient.setQueryData<DailyTodo[]>(
+          ["daily-todos", date],
+          previousTodos.map((t) =>
+            t.id === variables.id ? { ...t, completed: variables.completed } : t
+          )
+        )
+      }
+      return { previousTodos }
+    },
+    onError: (err, variables, context) => {
+      if (context?.previousTodos) {
+        queryClient.setQueryData(["daily-todos", date], context.previousTodos)
+      }
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["daily-todos", date] })
     },
   })

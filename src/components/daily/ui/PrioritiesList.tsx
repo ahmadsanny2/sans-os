@@ -15,6 +15,7 @@ interface PrioritiesListProps {
   handleToggleCompleted: (id: string, completed: boolean) => void
   handleDeletePriority: (id: string) => Promise<void>
   isPendingCreate: boolean
+  isPendingToggle?: boolean
 }
 
 export function PrioritiesList({
@@ -28,6 +29,7 @@ export function PrioritiesList({
   handleToggleCompleted,
   handleDeletePriority,
   isPendingCreate,
+  isPendingToggle = false,
 }: PrioritiesListProps) {
   return (
     <div className="space-y-6">
@@ -117,12 +119,13 @@ export function PrioritiesList({
               >
                 <div className="flex items-center gap-3.5 flex-1 min-w-0">
                   <button
+                    disabled={isPendingToggle}
                     onClick={() => handleToggleCompleted(priority.id, priority.completed)}
-                    className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-lg border transition-all active:scale-95 cursor-pointer ${
+                    className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-lg border transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed ${
                       priority.completed
                         ? "bg-sidebar-primary border-sidebar-primary text-sidebar-primary-foreground"
                         : "border-border hover:border-sidebar-primary/50 hover:bg-sidebar-primary/10"
-                    }`}
+                    } ${isPendingToggle ? "cursor-not-allowed" : "cursor-pointer"}`}
                     aria-label="Toggle task completed"
                   >
                     {priority.completed && <Check className="h-3.5 w-3.5 stroke-[3]" />}

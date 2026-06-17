@@ -358,6 +358,7 @@ export function useDailyPage() {
     handleTogglePriority,
     handleDeletePriority,
     priorityCreatePending: createPriorityMutation.isPending,
+    priorityTogglePending: togglePriorityMutation.isPending,
 
     // Todos
     todos,
@@ -370,6 +371,7 @@ export function useDailyPage() {
     handleToggleTodo,
     handleDeleteTodo,
     todoCreatePending: createTodoMutation.isPending,
+    todoTogglePending: toggleTodoMutation.isPending,
 
     // Timetable
     timetableList,

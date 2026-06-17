@@ -22,6 +22,7 @@ interface DailyTodosProps {
   handleToggleCompleted: (id: string, completed: boolean) => void
   handleDeleteTodo: (id: string) => Promise<void>
   isPendingCreate: boolean
+  isPendingToggleTodo?: boolean
   habits?: HabitItem[]
   handleToggleHabit?: (id: string) => void
   isPendingToggleHabit?: boolean
@@ -38,6 +39,7 @@ export function DailyTodos({
   handleToggleCompleted,
   handleDeleteTodo,
   isPendingCreate,
+  isPendingToggleTodo = false,
   habits = [],
   handleToggleHabit,
   isPendingToggleHabit = false,
@@ -181,12 +183,13 @@ export function DailyTodos({
                     >
                       <div className="flex items-center gap-3 flex-1 min-w-0">
                         <button
+                          disabled={isPendingToggleTodo}
                           onClick={() => handleToggleCompleted(todo.id, todo.completed)}
-                          className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-lg border transition-all active:scale-95 ${
+                          className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-lg border transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed ${
                             todo.completed
                               ? "bg-sidebar-primary border-sidebar-primary text-sidebar-primary-foreground"
                               : "border-border hover:border-sidebar-primary/50"
-                          }`}
+                          } ${isPendingToggleTodo ? "cursor-not-allowed" : "cursor-pointer"}`}
                           aria-label="Toggle task completion"
                         >
                           {todo.completed && <Check className="h-3.5 w-3.5 stroke-[3]" />}
