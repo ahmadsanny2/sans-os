@@ -42,6 +42,8 @@ interface TimetableProps {
   setStartTime: (t: string) => void
   endTime: string
   setEndTime: (t: string) => void
+  duration: string
+  setDuration: (t: string) => void
   category: string
   setCategory: (c: string) => void
   scheduleType: "fixed" | "custom"
@@ -64,6 +66,8 @@ export function Timetable({
   setStartTime,
   endTime,
   setEndTime,
+  duration,
+  setDuration,
   category,
   setCategory,
   scheduleType,
@@ -100,8 +104,8 @@ export function Timetable({
           onSubmit={handleAddBlock}
           className="rounded-xl border border-border bg-card/60 p-4 shadow-sm backdrop-blur-md space-y-4 animate-in slide-in-from-top-4 duration-200"
         >
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <div className="sm:col-span-2 space-y-1.5">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+            <div className="sm:col-span-2 lg:col-span-2 space-y-1.5">
               <label htmlFor="blockTitle" className="text-xs font-bold text-muted-foreground">
                 Block Title
               </label>
@@ -126,6 +130,22 @@ export function Timetable({
                 required
                 value={startTime}
                 onChange={(e) => setStartTime(e.target.value)}
+                className="w-full rounded-lg border border-border bg-background px-3 py-1.5 text-sm outline-none transition-all focus:border-sidebar-primary focus:ring-2 focus:ring-sidebar-primary/10"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label htmlFor="duration" className="text-xs font-bold text-muted-foreground">
+                Duration (minutes)
+              </label>
+              <input
+                id="duration"
+                type="number"
+                min="1"
+                required
+                value={duration}
+                onChange={(e) => setDuration(e.target.value)}
+                placeholder="Minutes"
                 className="w-full rounded-lg border border-border bg-background px-3 py-1.5 text-sm outline-none transition-all focus:border-sidebar-primary focus:ring-2 focus:ring-sidebar-primary/10"
               />
             </div>

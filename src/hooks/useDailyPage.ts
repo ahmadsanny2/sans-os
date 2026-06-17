@@ -28,6 +28,19 @@ import { confirmDestructive, showError, showSuccessToast } from "@/lib/sweetaler
 
 type TabType = "journal" | "gratitude" | "notes"
 
+function timeToMinutes(t: string): number {
+  const [h, m] = t.split(":").map(Number)
+  return h * 60 + m
+}
+
+function minutesToTime(mins: number): string {
+  const h = Math.floor(mins / 60) % 24
+  const m = mins % 60
+  const hStr = h.toString().padStart(2, "0")
+  const mStr = m.toString().padStart(2, "0")
+  return `${hStr}:${mStr}`
+}
+
 export function useDailyPage() {
   const activeDate = useWorkspaceStore((state) => state.activeDate)
   const setActiveDate = useWorkspaceStore((state) => state.setActiveDate)
@@ -178,11 +191,45 @@ export function useDailyPage() {
 
   const [showTimetableAddForm, setShowTimetableAddForm] = useState(false)
   const [timetableTitle, setTimetableTitle] = useState("")
-  const [timetableStartTime, setTimetableStartTime] = useState("08:00")
-  const [timetableEndTime, setTimetableEndTime] = useState("09:00")
+  const [timetableStartTime, _setTimetableStartTime] = useState("08:00")
+  const [timetableEndTime, _setTimetableEndTime] = useState("09:00")
+  const [timetableDuration, _setTimetableDuration] = useState("60")
   const [timetableCategory, setTimetableCategory] = useState("General")
   const [timetableErrorMsg, setTimetableErrorMsg] = useState<string | null>(null)
   const [timetableScheduleType, setTimetableScheduleType] = useState<"fixed" | "custom">("custom")
+
+  const setTimetableStartTime = (newVal: string) => {
+    _setTimetableStartTime(newVal)
+    if (timetableDuration) {
+      const dur = parseInt(timetableDuration, 10)
+      if (!isNaN(dur) && dur > 0) {
+        const startMins = timeToMinutes(newVal)
+        const endMins = startMins + dur
+        _setTimetableEndTime(minutesToTime(endMins))
+      }
+    }
+  }
+
+  const setTimetableEndTime = (newVal: string) => {
+    _setTimetableEndTime(newVal)
+    if (timetableStartTime) {
+      const startMins = timeToMinutes(timetableStartTime)
+      const endMins = timeToMinutes(newVal)
+      let diff = endMins - startMins
+      if (diff < 0) diff += 24 * 60
+      _setTimetableDuration(diff.toString())
+    }
+  }
+
+  const setTimetableDuration = (newVal: string) => {
+    _setTimetableDuration(newVal)
+    const dur = parseInt(newVal, 10)
+    if (!isNaN(dur) && dur > 0 && timetableStartTime) {
+      const startMins = timeToMinutes(timetableStartTime)
+      const endMins = startMins + dur
+      _setTimetableEndTime(minutesToTime(endMins))
+    }
+  }
 
   const activeDayOfWeek = parseISO(activeDate).getDay()
   const activeDayBlocks = timetableList
@@ -385,6 +432,8 @@ export function useDailyPage() {
     setTimetableStartTime,
     timetableEndTime,
     setTimetableEndTime,
+    timetableDuration,
+    setTimetableDuration,
     timetableCategory,
     setTimetableCategory,
     timetableErrorMsg,
