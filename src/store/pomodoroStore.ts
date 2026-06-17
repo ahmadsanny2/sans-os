@@ -24,6 +24,7 @@ interface PomodoroState {
   selectedBlockId: string | null // for manual mode
   activeBlockEndTime: string | null // for auto mode boundary check
   activeBlockDate: string | null // for auto mode boundary check
+  isLongBreakAfterBlock: boolean
 
   // --- Runtime / Persistent ---
   isRunning: boolean
@@ -71,6 +72,7 @@ export const usePomodoroStore = create<PomodoroState>()(
       selectedBlockId: null,
       activeBlockEndTime: null,
       activeBlockDate: null,
+      isLongBreakAfterBlock: false,
 
       // Runtime defaults
       isRunning: false,
@@ -153,6 +155,7 @@ export const usePomodoroStore = create<PomodoroState>()(
               lastActiveTimestamp: now,
               activeBlockEndTime: activeBlock.endTime,
               activeBlockDate: todayStr,
+              isLongBreakAfterBlock: false,
             })
             return true
           }
@@ -167,6 +170,7 @@ export const usePomodoroStore = create<PomodoroState>()(
             lastActiveTimestamp: now,
             activeBlockEndTime: null,
             activeBlockDate: null,
+            isLongBreakAfterBlock: false,
           })
           return true
         }
@@ -184,16 +188,35 @@ export const usePomodoroStore = create<PomodoroState>()(
           const endMins = endH * 60 + endM
 
           if (todayStr !== activeBlockDate || currentMins >= endMins) {
-            set({
-              isRunning: false,
-              phase: "idle",
-              remainingSeconds: config.focusDuration * 60,
-              sessionCount: 0,
-              lastActiveTimestamp: null,
-              activeBlockEndTime: null,
-              activeBlockDate: null,
-            })
-            return false
+            const blockEndMilli = new Date(nowDate.getFullYear(), nowDate.getMonth(), nowDate.getDate(), endH, endM, 0, 0).getTime()
+            const diffSeconds = Math.floor((now - blockEndMilli) / 1000)
+            const longBreakSeconds = config.longBreakDuration * 60
+
+            if (diffSeconds < longBreakSeconds) {
+              set({
+                phase: "long-break",
+                remainingSeconds: longBreakSeconds - diffSeconds,
+                isRunning: true,
+                isModalOpen: true,
+                lastActiveTimestamp: now,
+                activeBlockEndTime: null,
+                activeBlockDate: null,
+                isLongBreakAfterBlock: true,
+              })
+              return true
+            } else {
+              set({
+                isRunning: false,
+                phase: "idle",
+                remainingSeconds: config.focusDuration * 60,
+                sessionCount: 0,
+                lastActiveTimestamp: null,
+                activeBlockEndTime: null,
+                activeBlockDate: null,
+                isLongBreakAfterBlock: false,
+              })
+              return false
+            }
           }
         }
 
@@ -217,6 +240,7 @@ export const usePomodoroStore = create<PomodoroState>()(
           lastActiveTimestamp: null,
           activeBlockEndTime: null,
           activeBlockDate: null,
+          isLongBreakAfterBlock: false,
         })
       },
 
@@ -236,16 +260,33 @@ export const usePomodoroStore = create<PomodoroState>()(
           const endMins = endH * 60 + endM
 
           if (todayStr !== activeBlockDate || currentMins >= endMins) {
-            set({
-              isRunning: false,
-              phase: "idle",
-              remainingSeconds: config.focusDuration * 60,
-              sessionCount: 0,
-              lastActiveTimestamp: null,
-              activeBlockEndTime: null,
-              activeBlockDate: null,
-            })
-            return
+            const blockEndMilli = new Date(nowDate.getFullYear(), nowDate.getMonth(), nowDate.getDate(), endH, endM, 0, 0).getTime()
+            const diffSeconds = Math.floor((now - blockEndMilli) / 1000)
+            const longBreakSeconds = config.longBreakDuration * 60
+
+            if (diffSeconds < longBreakSeconds) {
+              set({
+                phase: "long-break",
+                remainingSeconds: longBreakSeconds - diffSeconds,
+                lastActiveTimestamp: isRunning ? now : null,
+                activeBlockEndTime: null,
+                activeBlockDate: null,
+                isLongBreakAfterBlock: true,
+              })
+              return
+            } else {
+              set({
+                isRunning: false,
+                phase: "idle",
+                remainingSeconds: config.focusDuration * 60,
+                sessionCount: 0,
+                lastActiveTimestamp: null,
+                activeBlockEndTime: null,
+                activeBlockDate: null,
+                isLongBreakAfterBlock: false,
+              })
+              return
+            }
           }
         }
 
@@ -265,6 +306,7 @@ export const usePomodoroStore = create<PomodoroState>()(
             phase: "focus",
             remainingSeconds: config.focusDuration * 60,
             lastActiveTimestamp: isRunning ? now : null,
+            isLongBreakAfterBlock: false,
           })
         }
       },
@@ -279,12 +321,13 @@ export const usePomodoroStore = create<PomodoroState>()(
           integrationMode,
           activeBlockEndTime,
           activeBlockDate,
+          isLongBreakAfterBlock,
         } = get()
         if (!isRunning || phase === "idle") return
 
         const now = Date.now()
 
-        // Auto mode boundary check: if active block has ended, stop the timer
+        // Auto mode boundary check: if active block has ended, transition to long break
         if (integrationMode === "auto" && activeBlockEndTime && activeBlockDate) {
           const nowDate = new Date()
           const year = nowDate.getFullYear()
@@ -298,13 +341,13 @@ export const usePomodoroStore = create<PomodoroState>()(
 
           if (todayStr !== activeBlockDate || currentMins >= endMins) {
             set({
-              isRunning: false,
-              phase: "idle",
-              remainingSeconds: config.focusDuration * 60,
+              phase: "long-break",
+              remainingSeconds: config.longBreakDuration * 60,
               sessionCount: 0,
-              lastActiveTimestamp: null,
+              lastActiveTimestamp: now,
               activeBlockEndTime: null,
               activeBlockDate: null,
+              isLongBreakAfterBlock: true,
             })
             return
           }
@@ -329,6 +372,16 @@ export const usePomodoroStore = create<PomodoroState>()(
               (isLong ? config.longBreakDuration : config.breakDuration) * 60,
             sessionCount: newCount,
             lastActiveTimestamp: now,
+          })
+        } else if (phase === "long-break" && isLongBreakAfterBlock) {
+          // Finished the post-block long break! Stop the timer.
+          set({
+            phase: "idle",
+            remainingSeconds: config.focusDuration * 60,
+            sessionCount: 0,
+            isRunning: false,
+            lastActiveTimestamp: null,
+            isLongBreakAfterBlock: false,
           })
         } else {
           set({
@@ -375,16 +428,33 @@ export const usePomodoroStore = create<PomodoroState>()(
           const endMins = endH * 60 + endM
 
           if (todayStr !== activeBlockDate || currentMins >= endMins) {
-            set({
-              isRunning: false,
-              phase: "idle",
-              remainingSeconds: config.focusDuration * 60,
-              sessionCount: 0,
-              lastActiveTimestamp: null,
-              activeBlockEndTime: null,
-              activeBlockDate: null,
-            })
-            return
+            const blockEndMilli = new Date(nowDate.getFullYear(), nowDate.getMonth(), nowDate.getDate(), endH, endM, 0, 0).getTime()
+            const diffSeconds = Math.floor((now - blockEndMilli) / 1000)
+            const longBreakSeconds = config.longBreakDuration * 60
+
+            if (diffSeconds < longBreakSeconds) {
+              set({
+                phase: "long-break",
+                remainingSeconds: longBreakSeconds - diffSeconds,
+                lastActiveTimestamp: now,
+                activeBlockEndTime: null,
+                activeBlockDate: null,
+                isLongBreakAfterBlock: true,
+              })
+              return
+            } else {
+              set({
+                isRunning: false,
+                phase: "idle",
+                remainingSeconds: config.focusDuration * 60,
+                sessionCount: 0,
+                lastActiveTimestamp: null,
+                activeBlockEndTime: null,
+                activeBlockDate: null,
+                isLongBreakAfterBlock: false,
+              })
+              return
+            }
           }
         }
 
@@ -442,6 +512,7 @@ export const usePomodoroStore = create<PomodoroState>()(
         selectedBlockId: state.selectedBlockId,
         activeBlockEndTime: state.activeBlockEndTime,
         activeBlockDate: state.activeBlockDate,
+        isLongBreakAfterBlock: state.isLongBreakAfterBlock,
         isRunning: state.isRunning,
         phase: state.phase,
         remainingSeconds: state.remainingSeconds,
