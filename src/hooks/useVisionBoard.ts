@@ -59,7 +59,11 @@ export function useCreateVisionBoardItemMutation() {
     height?: number
   }>({
     mutationFn: createVisionBoardItem,
-    onSuccess: () => {
+    onSuccess: (newItem) => {
+      queryClient.setQueryData<VisionBoardItem[]>(["vision-board"], (old) => {
+        if (!old) return [newItem]
+        return [...old.filter((item) => item.id !== newItem.id), newItem]
+      })
       queryClient.invalidateQueries({ queryKey: ["vision-board"] })
     },
   })
@@ -86,15 +90,38 @@ async function updateVisionBoardItem(body: {
 
 export function useUpdateVisionBoardItemMutation() {
   const queryClient = useQueryClient()
-  return useMutation<VisionBoardItem, Error, {
-    id: string
-    xOffset?: number
-    yOffset?: number
-    width?: number
-    height?: number
-  }>({
+  return useMutation<
+    VisionBoardItem,
+    Error,
+    {
+      id: string
+      xOffset?: number
+      yOffset?: number
+      width?: number
+      height?: number
+    },
+    { previous: VisionBoardItem[] | undefined }
+  >({
     mutationFn: updateVisionBoardItem,
-    onSuccess: () => {
+    onMutate: async (variables) => {
+      await queryClient.cancelQueries({ queryKey: ["vision-board"] })
+      const previous = queryClient.getQueryData<VisionBoardItem[]>(["vision-board"])
+      if (previous) {
+        queryClient.setQueryData<VisionBoardItem[]>(
+          ["vision-board"],
+          previous.map((item) =>
+            item.id === variables.id ? { ...item, ...variables } : item
+          )
+        )
+      }
+      return { previous }
+    },
+    onError: (err, variables, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(["vision-board"], context.previous)
+      }
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["vision-board"] })
     },
   })
@@ -113,9 +140,30 @@ async function deleteVisionBoardItem(id: string): Promise<{ success: boolean }> 
 
 export function useDeleteVisionBoardItemMutation() {
   const queryClient = useQueryClient()
-  return useMutation<{ success: boolean }, Error, string>({
+  return useMutation<
+    { success: boolean },
+    Error,
+    string,
+    { previous: VisionBoardItem[] | undefined }
+  >({
     mutationFn: deleteVisionBoardItem,
-    onSuccess: () => {
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: ["vision-board"] })
+      const previous = queryClient.getQueryData<VisionBoardItem[]>(["vision-board"])
+      if (previous) {
+        queryClient.setQueryData<VisionBoardItem[]>(
+          ["vision-board"],
+          previous.filter((item) => item.id !== id)
+        )
+      }
+      return { previous }
+    },
+    onError: (err, id, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(["vision-board"], context.previous)
+      }
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["vision-board"] })
     },
   })

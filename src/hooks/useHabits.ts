@@ -81,7 +81,20 @@ export function useCreateHabitMutation() {
   const queryClient = useQueryClient()
   return useMutation<Habit, Error, { name: string; category?: string; frequency?: string }>({
     mutationFn: createHabit,
-    onSuccess: () => {
+    onSuccess: (newHabit) => {
+      const queryCache = queryClient.getQueryCache()
+      const queries = queryCache.findAll({ queryKey: ["habits"], exact: false })
+      queries.forEach((q) => {
+        if (q.queryKey.length === 3 && q.queryKey[1] !== "stats") {
+          const oldData = q.state.data as HabitsResponse | undefined
+          if (oldData) {
+            queryClient.setQueryData(q.queryKey, {
+              ...oldData,
+              habits: [...oldData.habits.filter((h) => h.id !== newHabit.id), newHabit],
+            })
+          }
+        }
+      })
       queryClient.invalidateQueries({ queryKey: ["habits"] })
     },
   })
@@ -102,9 +115,65 @@ async function toggleHabitLog(body: { habitId: string; date: string; status?: st
 
 export function useToggleLogMutation() {
   const queryClient = useQueryClient()
-  return useMutation<{ toggled: boolean; log?: HabitLog }, Error, { habitId: string; date: string; status?: string }>({
+  return useMutation<
+    { toggled: boolean; log?: HabitLog },
+    Error,
+    { habitId: string; date: string; status?: string },
+    { previousQueriesData: { queryKey: readonly unknown[]; data: unknown }[] }
+  >({
     mutationFn: toggleHabitLog,
-    onSuccess: () => {
+    onMutate: async (variables) => {
+      await queryClient.cancelQueries({ queryKey: ["habits"] })
+      const queryCache = queryClient.getQueryCache()
+      const queries = queryCache.findAll({ queryKey: ["habits"], exact: false })
+
+      const previousQueriesData = queries.map((q) => ({
+        queryKey: q.queryKey,
+        data: q.state.data,
+      }))
+
+      queries.forEach((q) => {
+        if (q.queryKey.length === 3 && q.queryKey[1] !== "stats") {
+          const oldData = q.state.data as HabitsResponse | undefined
+          if (oldData) {
+            const hasLog = oldData.logs.some(
+              (l) => l.habitId === variables.habitId && l.date === variables.date
+            )
+            let newLogs: HabitLog[]
+            if (hasLog) {
+              newLogs = oldData.logs.filter(
+                (l) => !(l.habitId === variables.habitId && l.date === variables.date)
+              )
+            } else {
+              const tempLog: HabitLog = {
+                id: `temp-${variables.habitId}-${variables.date}`,
+                userId: "",
+                habitId: variables.habitId,
+                date: variables.date,
+                status: variables.status || "Completed",
+                notes: null,
+                loggedAt: new Date().toISOString(),
+              }
+              newLogs = [...oldData.logs, tempLog]
+            }
+            queryClient.setQueryData(q.queryKey, {
+              ...oldData,
+              logs: newLogs,
+            })
+          }
+        }
+      })
+
+      return { previousQueriesData }
+    },
+    onError: (err, variables, context) => {
+      if (context?.previousQueriesData) {
+        context.previousQueriesData.forEach((q) => {
+          queryClient.setQueryData(q.queryKey, q.data)
+        })
+      }
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["habits"] })
     },
   })
@@ -123,9 +192,46 @@ async function deleteHabit(id: string): Promise<{ success: boolean }> {
 
 export function useDeleteHabitMutation() {
   const queryClient = useQueryClient()
-  return useMutation<{ success: boolean }, Error, string>({
+  return useMutation<
+    { success: boolean },
+    Error,
+    string,
+    { previousQueriesData: { queryKey: readonly unknown[]; data: unknown }[] }
+  >({
     mutationFn: deleteHabit,
-    onSuccess: () => {
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: ["habits"] })
+      const queryCache = queryClient.getQueryCache()
+      const queries = queryCache.findAll({ queryKey: ["habits"], exact: false })
+
+      const previousQueriesData = queries.map((q) => ({
+        queryKey: q.queryKey,
+        data: q.state.data,
+      }))
+
+      queries.forEach((q) => {
+        if (q.queryKey.length === 3 && q.queryKey[1] !== "stats") {
+          const oldData = q.state.data as HabitsResponse | undefined
+          if (oldData) {
+            queryClient.setQueryData(q.queryKey, {
+              ...oldData,
+              habits: oldData.habits.filter((h) => h.id !== id),
+              logs: oldData.logs.filter((l) => l.habitId !== id),
+            })
+          }
+        }
+      })
+
+      return { previousQueriesData }
+    },
+    onError: (err, id, context) => {
+      if (context?.previousQueriesData) {
+        context.previousQueriesData.forEach((q) => {
+          queryClient.setQueryData(q.queryKey, q.data)
+        })
+      }
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["habits"] })
     },
   })

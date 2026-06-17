@@ -57,6 +57,10 @@ export function useCreateDailyTodoMutation() {
   return useMutation<DailyTodo, Error, { date: string; text: string }>({
     mutationFn: createDailyTodo,
     onSuccess: (newTodo) => {
+      queryClient.setQueryData<DailyTodo[]>(["daily-todos", newTodo.date], (old) => {
+        if (!old) return [newTodo]
+        return [...old.filter((t) => t.id !== newTodo.id), newTodo]
+      })
       queryClient.invalidateQueries({ queryKey: ["daily-todos", newTodo.date] })
     },
   })
@@ -123,9 +127,25 @@ async function deleteDailyTodo(id: string): Promise<{ success: boolean }> {
 
 export function useDeleteDailyTodoMutation(date: string) {
   const queryClient = useQueryClient()
-  return useMutation<{ success: boolean }, Error, string>({
+  return useMutation<{ success: boolean }, Error, string, { previous: DailyTodo[] | undefined }>({
     mutationFn: deleteDailyTodo,
-    onSuccess: () => {
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: ["daily-todos", date] })
+      const previous = queryClient.getQueryData<DailyTodo[]>(["daily-todos", date])
+      if (previous) {
+        queryClient.setQueryData<DailyTodo[]>(
+          ["daily-todos", date],
+          previous.filter((t) => t.id !== id)
+        )
+      }
+      return { previous }
+    },
+    onError: (err, id, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(["daily-todos", date], context.previous)
+      }
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["daily-todos", date] })
     },
   })

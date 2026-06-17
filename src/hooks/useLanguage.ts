@@ -75,7 +75,11 @@ export function useCreateVocabularyMutation() {
     }
   >({
     mutationFn: createVocabulary,
-    onSuccess: () => {
+    onSuccess: (newVocab) => {
+      queryClient.setQueryData<VocabularyLog[]>(["vocabulary"], (old) => {
+        if (!old) return [newVocab]
+        return [...old.filter((v) => v.id !== newVocab.id), newVocab]
+      })
       queryClient.invalidateQueries({ queryKey: ["vocabulary"] })
     },
   })
@@ -103,10 +107,29 @@ export function useUpdateVocabularyMutation() {
   return useMutation<
     VocabularyLog,
     Error,
-    { id: string; masteryLevel?: number; memorized?: boolean }
+    { id: string; masteryLevel?: number; memorized?: boolean },
+    { previous: VocabularyLog[] | undefined }
   >({
     mutationFn: updateVocabulary,
-    onSuccess: () => {
+    onMutate: async (variables) => {
+      await queryClient.cancelQueries({ queryKey: ["vocabulary"] })
+      const previous = queryClient.getQueryData<VocabularyLog[]>(["vocabulary"])
+      if (previous) {
+        queryClient.setQueryData<VocabularyLog[]>(
+          ["vocabulary"],
+          previous.map((item) =>
+            item.id === variables.id ? { ...item, ...variables } : item
+          )
+        )
+      }
+      return { previous }
+    },
+    onError: (err, variables, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(["vocabulary"], context.previous)
+      }
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["vocabulary"] })
     },
   })
@@ -125,9 +148,25 @@ async function deleteVocabulary(id: string): Promise<{ success: boolean }> {
 
 export function useDeleteVocabularyMutation() {
   const queryClient = useQueryClient()
-  return useMutation<{ success: boolean }, Error, string>({
+  return useMutation<{ success: boolean }, Error, string, { previous: VocabularyLog[] | undefined }>({
     mutationFn: deleteVocabulary,
-    onSuccess: () => {
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: ["vocabulary"] })
+      const previous = queryClient.getQueryData<VocabularyLog[]>(["vocabulary"])
+      if (previous) {
+        queryClient.setQueryData<VocabularyLog[]>(
+          ["vocabulary"],
+          previous.filter((v) => v.id !== id)
+        )
+      }
+      return { previous }
+    },
+    onError: (err, id, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(["vocabulary"], context.previous)
+      }
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["vocabulary"] })
     },
   })
@@ -182,7 +221,11 @@ export function useCreateWritingMutation() {
     }
   >({
     mutationFn: createWritingLog,
-    onSuccess: () => {
+    onSuccess: (newLog) => {
+      queryClient.setQueryData<WritingLog[]>(["writingLogs"], (old) => {
+        if (!old) return [newLog]
+        return [...old.filter((l) => l.id !== newLog.id), newLog]
+      })
       queryClient.invalidateQueries({ queryKey: ["writingLogs"] })
     },
   })
@@ -201,9 +244,25 @@ async function deleteWritingLog(id: string): Promise<{ success: boolean }> {
 
 export function useDeleteWritingMutation() {
   const queryClient = useQueryClient()
-  return useMutation<{ success: boolean }, Error, string>({
+  return useMutation<{ success: boolean }, Error, string, { previous: WritingLog[] | undefined }>({
     mutationFn: deleteWritingLog,
-    onSuccess: () => {
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: ["writingLogs"] })
+      const previous = queryClient.getQueryData<WritingLog[]>(["writingLogs"])
+      if (previous) {
+        queryClient.setQueryData<WritingLog[]>(
+          ["writingLogs"],
+          previous.filter((l) => l.id !== id)
+        )
+      }
+      return { previous }
+    },
+    onError: (err, id, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(["writingLogs"], context.previous)
+      }
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["writingLogs"] })
     },
   })

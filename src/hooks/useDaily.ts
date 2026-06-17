@@ -84,7 +84,11 @@ export function useCreatePriorityMutation() {
   const queryClient = useQueryClient()
   return useMutation<Priority, Error, { date: string; text: string; orderIndex: number }>({
     mutationFn: createPriority,
-    onSuccess: (_, variables) => {
+    onSuccess: (newPriority, variables) => {
+      queryClient.setQueryData<Priority[]>(["priorities", variables.date], (old) => {
+        if (!old) return [newPriority]
+        return [...old.filter((p) => p.id !== newPriority.id), newPriority].sort((a, b) => a.orderIndex - b.orderIndex)
+      })
       queryClient.invalidateQueries({ queryKey: ["priorities", variables.date] })
     },
   })
@@ -147,9 +151,40 @@ async function deletePriority(id: string): Promise<{ success: boolean }> {
 
 export function useDeletePriorityMutation() {
   const queryClient = useQueryClient()
-  return useMutation<{ success: boolean }, Error, string>({
+  return useMutation<
+    { success: boolean },
+    Error,
+    string,
+    { previousQueriesData: { queryKey: readonly unknown[]; data: unknown }[] }
+  >({
     mutationFn: deletePriority,
-    onSuccess: () => {
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: ["priorities"] })
+      const queryCache = queryClient.getQueryCache()
+      const queries = queryCache.findAll({ queryKey: ["priorities"], exact: false })
+
+      const previousQueriesData = queries.map((q) => ({
+        queryKey: q.queryKey,
+        data: q.state.data,
+      }))
+
+      queries.forEach((q) => {
+        const oldData = q.state.data as Priority[] | undefined
+        if (Array.isArray(oldData)) {
+          queryClient.setQueryData(q.queryKey, oldData.filter((p) => p.id !== id))
+        }
+      })
+
+      return { previousQueriesData }
+    },
+    onError: (err, id, context) => {
+      if (context?.previousQueriesData) {
+        context.previousQueriesData.forEach((q) => {
+          queryClient.setQueryData(q.queryKey, q.data)
+        })
+      }
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["priorities"] })
       queryClient.invalidateQueries({ queryKey: ["timetable"] })
     },
@@ -209,10 +244,14 @@ export function useCreateTimetableBlockMutation() {
     }
   >({
     mutationFn: createTimetableBlock,
-    onSuccess: (_, variables) => {
+    onSuccess: (newBlock) => {
+      queryClient.setQueryData<TimetableBlock[]>(["timetable"], (old) => {
+        if (!old) return [newBlock]
+        return [...old.filter((b) => b.id !== newBlock.id), newBlock]
+      })
       queryClient.invalidateQueries({ queryKey: ["timetable"] })
-      if (variables.date) {
-        queryClient.invalidateQueries({ queryKey: ["priorities", variables.date] })
+      if (newBlock.date) {
+        queryClient.invalidateQueries({ queryKey: ["priorities", newBlock.date] })
         queryClient.invalidateQueries({ queryKey: ["priorities-range"] })
       }
     },
@@ -231,9 +270,25 @@ async function deleteTimetableBlock(id: string): Promise<{ success: boolean }> {
 
 export function useDeleteTimetableBlockMutation() {
   const queryClient = useQueryClient()
-  return useMutation<{ success: boolean }, Error, string>({
+  return useMutation<{ success: boolean }, Error, string, { previous: TimetableBlock[] | undefined }>({
     mutationFn: deleteTimetableBlock,
-    onSuccess: () => {
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: ["timetable"] })
+      const previous = queryClient.getQueryData<TimetableBlock[]>(["timetable"])
+      if (previous) {
+        queryClient.setQueryData<TimetableBlock[]>(
+          ["timetable"],
+          previous.filter((b) => b.id !== id)
+        )
+      }
+      return { previous }
+    },
+    onError: (err, id, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(["timetable"], context.previous)
+      }
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["timetable"] })
       queryClient.invalidateQueries({ queryKey: ["priorities"] })
     },

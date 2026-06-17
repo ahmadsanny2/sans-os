@@ -62,7 +62,11 @@ export function useCreateReadingMutation() {
     currentProgress?: string | null
   }>({
     mutationFn: createReadingItem,
-    onSuccess: () => {
+    onSuccess: (newItem) => {
+      queryClient.setQueryData<ReadingItem[]>(["reading"], (old) => {
+        if (!old) return [newItem]
+        return [...old.filter((b) => b.id !== newItem.id), newItem]
+      })
       queryClient.invalidateQueries({ queryKey: ["reading"] })
     },
   })
@@ -92,18 +96,41 @@ async function updateReadingItem(body: {
 
 export function useUpdateReadingMutation() {
   const queryClient = useQueryClient()
-  return useMutation<ReadingItem, Error, {
-    id: string
-    title?: string
-    author?: string
-    status?: string
-    rating?: number | null
-    review?: string | null
-    finishedAt?: string | null
-    currentProgress?: string | null
-  }>({
+  return useMutation<
+    ReadingItem,
+    Error,
+    {
+      id: string
+      title?: string
+      author?: string
+      status?: string
+      rating?: number | null
+      review?: string | null
+      finishedAt?: string | null
+      currentProgress?: string | null
+    },
+    { previous: ReadingItem[] | undefined }
+  >({
     mutationFn: updateReadingItem,
-    onSuccess: () => {
+    onMutate: async (variables) => {
+      await queryClient.cancelQueries({ queryKey: ["reading"] })
+      const previous = queryClient.getQueryData<ReadingItem[]>(["reading"])
+      if (previous) {
+        queryClient.setQueryData<ReadingItem[]>(
+          ["reading"],
+          previous.map((item) =>
+            item.id === variables.id ? { ...item, ...variables } : item
+          )
+        )
+      }
+      return { previous }
+    },
+    onError: (err, variables, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(["reading"], context.previous)
+      }
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["reading"] })
     },
   })
@@ -122,9 +149,25 @@ async function deleteReadingItem(id: string): Promise<{ success: boolean }> {
 
 export function useDeleteReadingMutation() {
   const queryClient = useQueryClient()
-  return useMutation<{ success: boolean }, Error, string>({
+  return useMutation<{ success: boolean }, Error, string, { previous: ReadingItem[] | undefined }>({
     mutationFn: deleteReadingItem,
-    onSuccess: () => {
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: ["reading"] })
+      const previous = queryClient.getQueryData<ReadingItem[]>(["reading"])
+      if (previous) {
+        queryClient.setQueryData<ReadingItem[]>(
+          ["reading"],
+          previous.filter((item) => item.id !== id)
+        )
+      }
+      return { previous }
+    },
+    onError: (err, id, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(["reading"], context.previous)
+      }
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["reading"] })
     },
   })

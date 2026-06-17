@@ -46,7 +46,11 @@ export function useCreateBucketItemMutation() {
   const queryClient = useQueryClient()
   return useMutation<BucketItem, Error, { title: string; imageUrl?: string | null }>({
     mutationFn: createBucketItem,
-    onSuccess: () => {
+    onSuccess: (newItem) => {
+      queryClient.setQueryData<BucketItem[]>(["bucket-list"], (old) => {
+        if (!old) return [newItem]
+        return [...old.filter((item) => item.id !== newItem.id), newItem]
+      })
       queryClient.invalidateQueries({ queryKey: ["bucket-list"] })
     },
   })
@@ -72,19 +76,37 @@ async function updateBucketItem(body: {
 
 export function useUpdateBucketItemMutation() {
   const queryClient = useQueryClient()
-  return useMutation<BucketItem, Error, {
-    id: string
-    title?: string
-    imageUrl?: string | null
-    completed?: boolean
-  }>({
+  return useMutation<
+    BucketItem,
+    Error,
+    {
+      id: string
+      title?: string
+      imageUrl?: string | null
+      completed?: boolean
+    },
+    { previous: BucketItem[] | undefined }
+  >({
     mutationFn: updateBucketItem,
-    onSuccess: (updated) => {
-      // Optimistic cache update for fast responsiveness
-      queryClient.setQueryData<BucketItem[]>(["bucket-list"], (old) => {
-        if (!old) return []
-        return old.map((item) => (item.id === updated.id ? updated : item))
-      })
+    onMutate: async (variables) => {
+      await queryClient.cancelQueries({ queryKey: ["bucket-list"] })
+      const previous = queryClient.getQueryData<BucketItem[]>(["bucket-list"])
+      if (previous) {
+        queryClient.setQueryData<BucketItem[]>(
+          ["bucket-list"],
+          previous.map((item) =>
+            item.id === variables.id ? { ...item, ...variables } : item
+          )
+        )
+      }
+      return { previous }
+    },
+    onError: (err, variables, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(["bucket-list"], context.previous)
+      }
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["bucket-list"] })
     },
   })
@@ -103,9 +125,30 @@ async function deleteBucketItem(id: string): Promise<{ success: boolean }> {
 
 export function useDeleteBucketItemMutation() {
   const queryClient = useQueryClient()
-  return useMutation<{ success: boolean }, Error, string>({
+  return useMutation<
+    { success: boolean },
+    Error,
+    string,
+    { previous: BucketItem[] | undefined }
+  >({
     mutationFn: deleteBucketItem,
-    onSuccess: () => {
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: ["bucket-list"] })
+      const previous = queryClient.getQueryData<BucketItem[]>(["bucket-list"])
+      if (previous) {
+        queryClient.setQueryData<BucketItem[]>(
+          ["bucket-list"],
+          previous.filter((item) => item.id !== id)
+        )
+      }
+      return { previous }
+    },
+    onError: (err, id, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(["bucket-list"], context.previous)
+      }
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["bucket-list"] })
     },
   })

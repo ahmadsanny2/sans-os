@@ -68,7 +68,11 @@ export function useCreateProjectMutation() {
     deadline?: string
   }>({
     mutationFn: createProject,
-    onSuccess: () => {
+    onSuccess: (newProject) => {
+      queryClient.setQueryData<Project[]>(["projects"], (old) => {
+        if (!old) return [{ ...newProject, tasks: [] }]
+        return [...old.filter((p) => p.id !== newProject.id), { ...newProject, tasks: [] }]
+      })
       queryClient.invalidateQueries({ queryKey: ["projects"] })
     },
   })
@@ -87,9 +91,25 @@ async function deleteProject(id: string): Promise<{ success: boolean }> {
 
 export function useDeleteProjectMutation() {
   const queryClient = useQueryClient()
-  return useMutation<{ success: boolean }, Error, string>({
+  return useMutation<{ success: boolean }, Error, string, { previous: Project[] | undefined }>({
     mutationFn: deleteProject,
-    onSuccess: () => {
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: ["projects"] })
+      const previous = queryClient.getQueryData<Project[]>(["projects"])
+      if (previous) {
+        queryClient.setQueryData<Project[]>(
+          ["projects"],
+          previous.filter((p) => p.id !== id)
+        )
+      }
+      return { previous }
+    },
+    onError: (err, id, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(["projects"], context.previous)
+      }
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["projects"] })
     },
   })
@@ -122,7 +142,19 @@ export function useCreateTaskMutation() {
     deadline?: string
   }>({
     mutationFn: createTask,
-    onSuccess: () => {
+    onSuccess: (newTask) => {
+      queryClient.setQueryData<Project[]>(["projects"], (old) => {
+        if (!old) return []
+        return old.map((p) => {
+          if (p.id === newTask.projectId) {
+            return {
+              ...p,
+              tasks: [...p.tasks.filter((t) => t.id !== newTask.id), newTask],
+            }
+          }
+          return p
+        })
+      })
       queryClient.invalidateQueries({ queryKey: ["projects"] })
     },
   })
@@ -141,9 +173,28 @@ async function deleteTask(id: string): Promise<{ success: boolean }> {
 
 export function useDeleteTaskMutation() {
   const queryClient = useQueryClient()
-  return useMutation<{ success: boolean }, Error, string>({
+  return useMutation<{ success: boolean }, Error, string, { previous: Project[] | undefined }>({
     mutationFn: deleteTask,
-    onSuccess: () => {
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: ["projects"] })
+      const previous = queryClient.getQueryData<Project[]>(["projects"])
+      if (previous) {
+        queryClient.setQueryData<Project[]>(
+          ["projects"],
+          previous.map((p) => ({
+            ...p,
+            tasks: p.tasks.filter((t) => t.id !== id),
+          }))
+        )
+      }
+      return { previous }
+    },
+    onError: (err, id, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(["projects"], context.previous)
+      }
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["projects"] })
     },
   })
@@ -164,9 +215,30 @@ async function toggleTask(body: { id: string; completed: boolean }): Promise<Pro
 
 export function useToggleTaskMutation() {
   const queryClient = useQueryClient()
-  return useMutation<ProjectTask, Error, { id: string; completed: boolean }>({
+  return useMutation<ProjectTask, Error, { id: string; completed: boolean }, { previous: Project[] | undefined }>({
     mutationFn: toggleTask,
-    onSuccess: () => {
+    onMutate: async (variables) => {
+      await queryClient.cancelQueries({ queryKey: ["projects"] })
+      const previous = queryClient.getQueryData<Project[]>(["projects"])
+      if (previous) {
+        queryClient.setQueryData<Project[]>(
+          ["projects"],
+          previous.map((p) => ({
+            ...p,
+            tasks: p.tasks.map((t) =>
+              t.id === variables.id ? { ...t, completed: variables.completed } : t
+            ),
+          }))
+        )
+      }
+      return { previous }
+    },
+    onError: (err, variables, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(["projects"], context.previous)
+      }
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["projects"] })
     },
   })
