@@ -22,6 +22,8 @@ interface PomodoroState {
   config: PomodoroConfig
   integrationMode: IntegrationMode
   selectedBlockId: string | null // for manual mode
+  activeBlockEndTime: string | null // for auto mode boundary check
+  activeBlockDate: string | null // for auto mode boundary check
 
   // --- Runtime / Persistent ---
   isRunning: boolean
@@ -67,6 +69,8 @@ export const usePomodoroStore = create<PomodoroState>()(
       },
       integrationMode: "auto",
       selectedBlockId: null,
+      activeBlockEndTime: null,
+      activeBlockDate: null,
 
       // Runtime defaults
       isRunning: false,
@@ -88,7 +92,7 @@ export const usePomodoroStore = create<PomodoroState>()(
 
       // Timer actions
       startTimer: (timetableList) => {
-        const { phase, config, integrationMode } = get()
+        const { phase, config, integrationMode, activeBlockEndTime, activeBlockDate } = get()
         const now = Date.now()
 
         if (phase === "idle") {
@@ -147,6 +151,8 @@ export const usePomodoroStore = create<PomodoroState>()(
               isRunning: true,
               isModalOpen: true,
               lastActiveTimestamp: now,
+              activeBlockEndTime: activeBlock.endTime,
+              activeBlockDate: todayStr,
             })
             return true
           }
@@ -159,11 +165,38 @@ export const usePomodoroStore = create<PomodoroState>()(
             isRunning: true,
             isModalOpen: true,
             lastActiveTimestamp: now,
+            activeBlockEndTime: null,
+            activeBlockDate: null,
           })
           return true
         }
 
         // Resume from paused
+        if (integrationMode === "auto" && activeBlockEndTime && activeBlockDate) {
+          const nowDate = new Date()
+          const year = nowDate.getFullYear()
+          const month = String(nowDate.getMonth() + 1).padStart(2, "0")
+          const day = String(nowDate.getDate()).padStart(2, "0")
+          const todayStr = `${year}-${month}-${day}`
+
+          const currentMins = nowDate.getHours() * 60 + nowDate.getMinutes()
+          const [endH, endM] = activeBlockEndTime.split(":").map(Number)
+          const endMins = endH * 60 + endM
+
+          if (todayStr !== activeBlockDate || currentMins >= endMins) {
+            set({
+              isRunning: false,
+              phase: "idle",
+              remainingSeconds: config.focusDuration * 60,
+              sessionCount: 0,
+              lastActiveTimestamp: null,
+              activeBlockEndTime: null,
+              activeBlockDate: null,
+            })
+            return false
+          }
+        }
+
         set({ 
           isRunning: true, 
           isModalOpen: true,
@@ -182,12 +215,40 @@ export const usePomodoroStore = create<PomodoroState>()(
           remainingSeconds: config.focusDuration * 60,
           sessionCount: 0,
           lastActiveTimestamp: null,
+          activeBlockEndTime: null,
+          activeBlockDate: null,
         })
       },
 
       skipPhase: () => {
-        const { phase, config, sessionCount, isRunning } = get()
+        const { phase, config, sessionCount, isRunning, integrationMode, activeBlockEndTime, activeBlockDate } = get()
         const now = Date.now()
+
+        if (integrationMode === "auto" && activeBlockEndTime && activeBlockDate) {
+          const nowDate = new Date()
+          const year = nowDate.getFullYear()
+          const month = String(nowDate.getMonth() + 1).padStart(2, "0")
+          const day = String(nowDate.getDate()).padStart(2, "0")
+          const todayStr = `${year}-${month}-${day}`
+
+          const currentMins = nowDate.getHours() * 60 + nowDate.getMinutes()
+          const [endH, endM] = activeBlockEndTime.split(":").map(Number)
+          const endMins = endH * 60 + endM
+
+          if (todayStr !== activeBlockDate || currentMins >= endMins) {
+            set({
+              isRunning: false,
+              phase: "idle",
+              remainingSeconds: config.focusDuration * 60,
+              sessionCount: 0,
+              lastActiveTimestamp: null,
+              activeBlockEndTime: null,
+              activeBlockDate: null,
+            })
+            return
+          }
+        }
+
         if (phase === "focus") {
           const newCount = sessionCount + 1
           const isLong = newCount % config.sessionsBeforeLongBreak === 0
@@ -209,11 +270,45 @@ export const usePomodoroStore = create<PomodoroState>()(
       },
 
       tick: () => {
-        const { isRunning, phase, remainingSeconds, config, sessionCount } =
-          get()
+        const {
+          isRunning,
+          phase,
+          remainingSeconds,
+          config,
+          sessionCount,
+          integrationMode,
+          activeBlockEndTime,
+          activeBlockDate,
+        } = get()
         if (!isRunning || phase === "idle") return
 
         const now = Date.now()
+
+        // Auto mode boundary check: if active block has ended, stop the timer
+        if (integrationMode === "auto" && activeBlockEndTime && activeBlockDate) {
+          const nowDate = new Date()
+          const year = nowDate.getFullYear()
+          const month = String(nowDate.getMonth() + 1).padStart(2, "0")
+          const day = String(nowDate.getDate()).padStart(2, "0")
+          const todayStr = `${year}-${month}-${day}`
+
+          const currentMins = nowDate.getHours() * 60 + nowDate.getMinutes()
+          const [endH, endM] = activeBlockEndTime.split(":").map(Number)
+          const endMins = endH * 60 + endM
+
+          if (todayStr !== activeBlockDate || currentMins >= endMins) {
+            set({
+              isRunning: false,
+              phase: "idle",
+              remainingSeconds: config.focusDuration * 60,
+              sessionCount: 0,
+              lastActiveTimestamp: null,
+              activeBlockEndTime: null,
+              activeBlockDate: null,
+            })
+            return
+          }
+        }
 
         if (remainingSeconds > 1) {
           set({ 
@@ -252,10 +347,47 @@ export const usePomodoroStore = create<PomodoroState>()(
       setIsPipExpanded: (isPipExpanded) => set({ isPipExpanded }),
 
       adjustForElapsedTime: () => {
-        const { isRunning, phase, remainingSeconds, lastActiveTimestamp, config, sessionCount } = get()
+        const {
+          isRunning,
+          phase,
+          remainingSeconds,
+          lastActiveTimestamp,
+          config,
+          sessionCount,
+          integrationMode,
+          activeBlockEndTime,
+          activeBlockDate,
+        } = get()
         if (!isRunning || phase === "idle" || !lastActiveTimestamp) return
 
         const now = Date.now()
+
+        // Auto mode boundary check
+        if (integrationMode === "auto" && activeBlockEndTime && activeBlockDate) {
+          const nowDate = new Date(now)
+          const year = nowDate.getFullYear()
+          const month = String(nowDate.getMonth() + 1).padStart(2, "0")
+          const day = String(nowDate.getDate()).padStart(2, "0")
+          const todayStr = `${year}-${month}-${day}`
+
+          const currentMins = nowDate.getHours() * 60 + nowDate.getMinutes()
+          const [endH, endM] = activeBlockEndTime.split(":").map(Number)
+          const endMins = endH * 60 + endM
+
+          if (todayStr !== activeBlockDate || currentMins >= endMins) {
+            set({
+              isRunning: false,
+              phase: "idle",
+              remainingSeconds: config.focusDuration * 60,
+              sessionCount: 0,
+              lastActiveTimestamp: null,
+              activeBlockEndTime: null,
+              activeBlockDate: null,
+            })
+            return
+          }
+        }
+
         const elapsedSeconds = Math.floor((now - lastActiveTimestamp) / 1000)
 
         if (elapsedSeconds <= 0) return
@@ -308,6 +440,8 @@ export const usePomodoroStore = create<PomodoroState>()(
         config: state.config,
         integrationMode: state.integrationMode,
         selectedBlockId: state.selectedBlockId,
+        activeBlockEndTime: state.activeBlockEndTime,
+        activeBlockDate: state.activeBlockDate,
         isRunning: state.isRunning,
         phase: state.phase,
         remainingSeconds: state.remainingSeconds,
