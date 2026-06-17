@@ -4,6 +4,8 @@ import React, { useState, useEffect } from "react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { useWorkspaceStore } from "@/store/workspaceStore"
+import { usePomodoroStore } from "@/store/pomodoroStore"
+import { PomodoroModal } from "@/components/pomodoro/ui/PomodoroModal"
 import { createBrowserSupabaseClient } from "@/lib/supabase/client"
 import {
   LayoutDashboard,
@@ -22,6 +24,7 @@ import {
   Moon,
   Clock,
   Trophy,
+  Timer,
 } from "lucide-react"
 
 interface SidebarItem {
@@ -40,6 +43,7 @@ const SIDEBAR_ITEMS: SidebarItem[] = [
   { name: "Language Logs", href: "/language", icon: Languages },
   { name: "Vision Board", href: "/vision-board", icon: ImageIcon },
   { name: "Bucket List", href: "/bucket-list", icon: Trophy },
+  { name: "Pomodoro", href: "/pomodoro", icon: Timer },
 ]
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
@@ -52,6 +56,12 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   const toggleSidebar = useWorkspaceStore((state) => state.toggleSidebar)
   const userConfig = useWorkspaceStore((state) => state.userConfig)
   const updateUserConfig = useWorkspaceStore((state) => state.updateUserConfig)
+
+  // Pomodoro store
+  const pomodoroIsRunning = usePomodoroStore((s) => s.isRunning)
+  const pomodoroPhase = usePomodoroStore((s) => s.phase)
+  const toggleModal = usePomodoroStore((s) => s.toggleModal)
+  const pomodoroIsActive = pomodoroPhase !== "idle"
 
   // Mobile menu state
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -127,8 +137,31 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           })}
         </nav>
 
-        {/* Sidebar Footer */}
-        <div className="border-t border-sidebar-border p-2 space-y-1">
+          {/* Sidebar Footer */}
+          <div className="border-t border-sidebar-border p-2 space-y-1">
+            {/* Pomodoro Timer Toggle Button */}
+            <button
+              onClick={toggleModal}
+              className="relative flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium hover:bg-sidebar-accent hover:text-sidebar-accent-foreground text-muted-foreground transition-all"
+              aria-label="Toggle Pomodoro Timer"
+            >
+              <div className="relative">
+                <Timer className={`h-5 w-5 ${pomodoroIsRunning ? "text-violet-400" : "text-muted-foreground"}`} />
+                {pomodoroIsActive && (
+                  <span className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-rose-500 border border-sidebar" />
+                )}
+              </div>
+              {sidebarOpen ? (
+                <span className={pomodoroIsRunning ? "text-violet-400" : ""}>
+                  Pomodoro
+                  {pomodoroIsRunning && (
+                    <span className="ml-1.5 text-[10px] bg-violet-500/20 text-violet-400 px-1.5 py-0.5 rounded-full font-bold border border-violet-500/30">
+                      ON
+                    </span>
+                  )}
+                </span>
+              ) : null}
+            </button>
           <button
             onClick={toggleTheme}
             className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium hover:bg-sidebar-accent hover:text-sidebar-accent-foreground text-muted-foreground"
@@ -270,6 +303,8 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           })}
         </nav>
       </div>
+      {/* Pomodoro Floating Modal (global - persists across pages) */}
+      <PomodoroModal />
     </div>
   )
 }
