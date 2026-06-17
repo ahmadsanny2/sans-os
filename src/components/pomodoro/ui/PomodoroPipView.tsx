@@ -102,9 +102,13 @@ export function PomodoroPipView() {
       return timetableList.find((b) => b.id === selectedBlockId)
     }
     const currentMins = currentTime.getHours() * 60 + currentTime.getMinutes()
-    return timetableList.find((b) => {
-      const isForToday = b.dayOfWeek === -1 || b.date === todayStr
-      if (!isForToday) return false
+    const todayBlocks = timetableList.filter((b) => b.dayOfWeek === -1 || b.date === todayStr)
+    const sortedBlocks = [...todayBlocks].sort((a, b) => {
+      if (a.dayOfWeek !== -1 && b.dayOfWeek === -1) return -1
+      if (a.dayOfWeek === -1 && b.dayOfWeek !== -1) return 1
+      return 0
+    })
+    return sortedBlocks.find((b) => {
       return (
         timeToMinutes(b.startTime) <= currentMins &&
         timeToMinutes(b.endTime) > currentMins

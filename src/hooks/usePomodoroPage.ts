@@ -62,7 +62,12 @@ export function usePomodoroPage() {
   const autoActiveBlock = useMemo((): TimetableBlock | undefined => {
     const currentMins =
       currentTime.getHours() * 60 + currentTime.getMinutes()
-    return todayBlocks.find(
+    const sortedBlocks = [...todayBlocks].sort((a, b) => {
+      if (a.dayOfWeek !== -1 && b.dayOfWeek === -1) return -1
+      if (a.dayOfWeek === -1 && b.dayOfWeek !== -1) return 1
+      return 0
+    })
+    return sortedBlocks.find(
       (b) =>
         timeToMinutes(b.startTime) <= currentMins &&
         timeToMinutes(b.endTime) > currentMins

@@ -78,8 +78,15 @@ function getAutoState(
   const currentSecs = nowDate.getHours() * 3600 + nowDate.getMinutes() * 60 + nowDate.getSeconds()
   const currentMins = nowDate.getHours() * 60 + nowDate.getMinutes()
 
+  // Prioritize "This Day Only" (Custom) blocks over "Every Day" (Fixed) blocks
+  const sortedBlocks = [...todayBlocks].sort((a, b) => {
+    if (a.dayOfWeek !== -1 && b.dayOfWeek === -1) return -1
+    if (a.dayOfWeek === -1 && b.dayOfWeek !== -1) return 1
+    return 0
+  })
+
   // 1. Check if there is an active block right now
-  const activeBlock = todayBlocks.find(
+  const activeBlock = sortedBlocks.find(
     (b) =>
       timeToMinutes(b.startTime) <= currentMins &&
       timeToMinutes(b.endTime) > currentMins
