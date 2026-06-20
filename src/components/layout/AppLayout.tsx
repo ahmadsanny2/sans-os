@@ -50,6 +50,7 @@ const SIDEBAR_ITEMS: SidebarItem[] = [
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
   const rootRef = useRef<HTMLDivElement>(null)
+  const isDraggingRef = useRef(false)
   const pathname = usePathname()
   const router = useRouter()
   const supabase = createBrowserSupabaseClient()
@@ -291,9 +292,24 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           dragConstraints={rootRef}
           dragElastic={0.1}
           dragMomentum={false}
+          onDragStart={() => {
+            isDraggingRef.current = true
+          }}
+          onDragEnd={() => {
+            setTimeout(() => {
+              isDraggingRef.current = false
+            }, 50)
+          }}
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          onClick={toggleModal}
+          onClick={(e) => {
+            if (isDraggingRef.current) {
+              e.preventDefault()
+              e.stopPropagation()
+              return
+            }
+            toggleModal()
+          }}
           className={`fixed bottom-6 right-6 z-40 h-10 w-10 rounded-full flex items-center justify-center border bg-zinc-900/90 text-white backdrop-blur-md transition-colors duration-300 shadow-lg cursor-pointer ${
             pomodoroIsRunning
               ? pomodoroPhase === "focus"
