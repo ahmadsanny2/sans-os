@@ -92,39 +92,16 @@ export function usePomodoroPage() {
     return Math.floor(duration / cycleTime)
   }, [activeBlock, config.focusDuration, config.breakDuration])
 
-  // Local form state: holds overrides only. If null, page reads directly from store config.
-  const [localConfig, setLocalConfig] = useState<PomodoroConfig | null>(null)
-
-  const displayConfig = useMemo(() => {
-    return localConfig || config
-  }, [localConfig, config])
-
-  const isDirty = useMemo((): boolean => {
-    if (!localConfig) return false
-    return (
-      localConfig.focusDuration !== config.focusDuration ||
-      localConfig.breakDuration !== config.breakDuration ||
-      localConfig.longBreakDuration !== config.longBreakDuration ||
-      localConfig.sessionsBeforeLongBreak !== config.sessionsBeforeLongBreak ||
-      localConfig.soundEnabled !== config.soundEnabled ||
-      localConfig.soundVolume !== config.soundVolume ||
-      localConfig.soundType !== config.soundType
-    )
-  }, [localConfig, config])
+  // Display config reads directly from store config for auto-saving
+  const displayConfig = config
+  const isDirty = false
 
   const handleUpdateLocalConfig = (patch: Partial<PomodoroConfig>): void => {
-    setLocalConfig((prev) => {
-      const base = prev || config
-      return { ...base, ...patch }
-    })
+    setConfig(patch)
   }
 
   const handleSaveConfig = (): void => {
-    if (localConfig) {
-      setConfig(localConfig)
-      setLocalConfig(null)
-      showSuccessToast("Pomodoro configuration saved!")
-    }
+    // No-op since changes are auto-saved in real-time
   }
 
   const handleSetMode = (mode: IntegrationMode): void => {
@@ -137,11 +114,6 @@ export function usePomodoroPage() {
   }
 
   const handleQuickStart = (): void => {
-    if (isDirty && localConfig) {
-      // Auto-save before starting
-      setConfig(localConfig)
-      setLocalConfig(null)
-    }
     if (phase !== "idle") {
       openModal()
     } else {
