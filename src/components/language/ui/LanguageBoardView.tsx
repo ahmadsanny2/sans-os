@@ -328,7 +328,7 @@ export function LanguageBoardView({
 
                   {/* Word */}
                   <div className="space-y-2 mt-3 flex-1">
-                    <h4 className={`text-xl font-bold tracking-tight text-foreground leading-none ${vocab.memorized ? "line-through text-muted-foreground" : ""}`}>
+                    <h4 className={`text-xl font-bold tracking-tight text-foreground leading-none ${vocab.memorized ? "text-muted-foreground" : ""}`}>
                       {vocab.word}
                     </h4>
                   </div>
