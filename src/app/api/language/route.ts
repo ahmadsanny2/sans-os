@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import { db } from "@/lib/db"
 import { vocabularyLogs } from "@/types/schema"
-import { eq, and, desc, sql } from "drizzle-orm"
+import { eq, and, asc, sql } from "drizzle-orm"
 import { createServerSupabaseClient } from "@/lib/supabase/server"
 
 export async function GET(): Promise<NextResponse> {
@@ -19,7 +19,7 @@ export async function GET(): Promise<NextResponse> {
       .select()
       .from(vocabularyLogs)
       .where(eq(vocabularyLogs.userId, user.id))
-      .orderBy(desc(vocabularyLogs.createdAt))
+      .orderBy(asc(vocabularyLogs.word))
 
     return NextResponse.json(logs)
   } catch (error) {
