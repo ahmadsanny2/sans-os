@@ -72,17 +72,31 @@ export function useLanguagePage() {
     e.preventDefault()
     setFormError(null)
 
-    if (!word.trim() || !translation.trim()) {
+    const trimmedWord = word.trim()
+    const trimmedTranslation = translation.trim()
+
+    if (!trimmedWord || !trimmedTranslation) {
       setFormError("Please fill out all required fields.")
+      return
+    }
+
+    // Client-side uniqueness check (case-insensitive & trimmed)
+    const normalizedWord = trimmedWord.toLowerCase()
+    const isDuplicate = vocabList.some(
+      (v) => v.word.trim().toLowerCase() === normalizedWord
+    )
+
+    if (isDuplicate) {
+      setFormError("Kosa kata ini sudah terdaftar.")
       return
     }
 
     try {
       await createVocabMutation.mutateAsync({
-        word: word.trim(),
+        word: trimmedWord,
         partOfSpeech: "n/a",
         definition: "n/a",
-        translation: translation.trim(),
+        translation: trimmedTranslation,
         exampleSentence: exampleSentence.trim() || undefined,
         masteryLevel: 3,
       })
@@ -91,8 +105,9 @@ export function useLanguagePage() {
       setExampleSentence("")
       setShowAddForm(false)
       showSuccessToast("Vocabulary added successfully")
-    } catch {
-      setFormError("Failed to add vocabulary log.")
+    } catch (err) {
+      const errMsg = err instanceof Error ? err.message : "Failed to add vocabulary log."
+      setFormError(errMsg)
     }
   }
 

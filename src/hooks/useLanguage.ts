@@ -55,7 +55,8 @@ async function createVocabulary(body: {
     body: JSON.stringify(body),
   })
   if (!res.ok) {
-    throw new Error("Failed to create vocabulary log")
+    const errorData = await res.json().catch(() => ({}))
+    throw new Error(errorData.error || "Failed to create vocabulary log")
   }
   return res.json()
 }

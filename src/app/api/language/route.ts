@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import { db } from "@/lib/db"
 import { vocabularyLogs } from "@/types/schema"
-import { eq, and, desc } from "drizzle-orm"
+import { eq, and, desc, sql } from "drizzle-orm"
 import { createServerSupabaseClient } from "@/lib/supabase/server"
 
 export async function GET(): Promise<NextResponse> {
@@ -46,15 +46,31 @@ export async function POST(request: Request): Promise<NextResponse> {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
     }
 
+    // Check if the word already exists for the user (case-insensitive & trimmed)
+    const existingWords = await db
+      .select()
+      .from(vocabularyLogs)
+      .where(
+        and(
+          eq(vocabularyLogs.userId, user.id),
+          sql`lower(trim(${vocabularyLogs.word})) = ${word.trim().toLowerCase()}`
+        )
+      )
+      .limit(1)
+
+    if (existingWords.length > 0) {
+      return NextResponse.json({ error: "Kosa kata ini sudah terdaftar" }, { status: 400 })
+    }
+
     const [newLog] = await db
       .insert(vocabularyLogs)
       .values({
         userId: user.id,
-        word,
+        word: word.trim(),
         partOfSpeech: partOfSpeech || "n/a",
         definition: definition || "n/a",
-        translation,
-        exampleSentence: exampleSentence || null,
+        translation: translation.trim(),
+        exampleSentence: exampleSentence ? exampleSentence.trim() : null,
         masteryLevel: masteryLevel !== undefined ? Number(masteryLevel) : 3,
         memorized: false,
       })
