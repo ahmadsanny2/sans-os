@@ -1,6 +1,7 @@
 "use client"
 
-import React, { useState, useEffect } from "react"
+import React, { useState, useEffect, useRef } from "react"
+import { motion } from "framer-motion"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { useWorkspaceStore } from "@/store/workspaceStore"
@@ -48,6 +49,7 @@ const SIDEBAR_ITEMS: SidebarItem[] = [
 ]
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
+  const rootRef = useRef<HTMLDivElement>(null)
   const pathname = usePathname()
   const router = useRouter()
   const supabase = createBrowserSupabaseClient()
@@ -93,7 +95,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="flex h-screen w-screen overflow-hidden bg-background font-sans text-foreground transition-colors duration-300">
+    <div ref={rootRef} className="flex h-screen w-screen overflow-hidden bg-background font-sans text-foreground transition-colors duration-300">
       {/* Desktop Sidebar */}
       <aside
         className={`hidden md:flex flex-col border-r border-border bg-sidebar text-sidebar-foreground transition-all duration-300 ${
@@ -284,9 +286,15 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       </div>
       {/* Floating Pomodoro Trigger Badge (Bottom Right) */}
       {!isModalOpen && (
-        <button
+        <motion.button
+          drag
+          dragConstraints={rootRef}
+          dragElastic={0.1}
+          dragMomentum={false}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
           onClick={toggleModal}
-          className={`fixed bottom-6 right-6 z-40 h-10 w-10 rounded-full flex items-center justify-center border bg-zinc-900/90 text-white backdrop-blur-md transition-all duration-300 shadow-lg hover:scale-105 active:scale-95 cursor-pointer ${
+          className={`fixed bottom-6 right-6 z-40 h-10 w-10 rounded-full flex items-center justify-center border bg-zinc-900/90 text-white backdrop-blur-md transition-colors duration-300 shadow-lg cursor-pointer ${
             pomodoroIsRunning
               ? pomodoroPhase === "focus"
                 ? "border-violet-500 shadow-violet-500/20"
@@ -296,7 +304,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           aria-label="Toggle Pomodoro Panel"
           title="Open Pomodoro Timer"
         >
-          <div className="relative">
+          <div className="relative pointer-events-none">
             <Timer className={`h-5 w-5 ${
               pomodoroIsRunning
                 ? pomodoroPhase === "focus"
@@ -310,7 +318,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               }`} />
             )}
           </div>
-        </button>
+        </motion.button>
       )}
       {/* Pomodoro Floating Modal (global - persists across pages) */}
       <PomodoroModal />
