@@ -70,6 +70,10 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   // Mobile menu state
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
+  // Floating Pomodoro button measurements to position modal
+  const [buttonRect, setButtonRect] = useState<{ top: number; left: number; right: number; bottom: number } | null>(null)
+  const buttonRef = useRef<HTMLButtonElement>(null)
+
   // Handle logging out
   const handleLogout = async (): Promise<void> => {
     try {
@@ -94,6 +98,28 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   const toggleTheme = (): void => {
     updateUserConfig({ theme: userConfig.theme === "dark" ? "light" : "dark" })
   }
+
+  // Measure floating Pomodoro button coordinates when opening the modal or on resize
+  useEffect(() => {
+    const handleMeasure = () => {
+      if (isModalOpen && buttonRef.current) {
+        const rect = buttonRef.current.getBoundingClientRect()
+        setButtonRect({
+          top: rect.top,
+          left: rect.left,
+          right: rect.right,
+          bottom: rect.bottom,
+        })
+      }
+    }
+
+    handleMeasure()
+
+    if (isModalOpen) {
+      window.addEventListener("resize", handleMeasure)
+      return () => window.removeEventListener("resize", handleMeasure)
+    }
+  }, [isModalOpen])
 
   return (
     <div ref={rootRef} className="flex h-screen w-screen overflow-hidden bg-background font-sans text-foreground transition-colors duration-300">
@@ -287,6 +313,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       </div>
       {/* Floating Pomodoro Trigger Badge (Bottom Right) */}
       <motion.button
+        ref={buttonRef}
         drag
         dragConstraints={rootRef}
         dragElastic={0.1}
@@ -342,7 +369,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         </div>
       </motion.button>
       {/* Pomodoro Floating Modal (global - persists across pages) */}
-      <PomodoroModal />
+      <PomodoroModal buttonRect={buttonRect} />
       {/* Pomodoro Picture-in-Picture Controller */}
       <PomodoroPipController />
     </div>

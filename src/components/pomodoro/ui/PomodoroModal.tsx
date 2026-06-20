@@ -114,7 +114,11 @@ function ProgressRing({ progress, phase, children }: RingProps) {
 
 // ---------- Main Modal ----------
 
-export function PomodoroModal() {
+interface PomodoroModalProps {
+  buttonRect: { top: number; left: number; right: number; bottom: number } | null
+}
+
+export function PomodoroModal({ buttonRect }: PomodoroModalProps) {
   const isModalOpen = usePomodoroStore((s) => s.isModalOpen)
   const isRunning = usePomodoroStore((s) => s.isRunning)
   const phase = usePomodoroStore((s) => s.phase)
@@ -245,11 +249,68 @@ export function PomodoroModal() {
     return completedInCycle === 0 ? totalSessions : completedInCycle
   }, [phase, sessionCount, totalSessions])
 
+  // --- Dynamic modal positioning based on floating button coordinate offsets ---
+  const modalStyle = useMemo((): React.CSSProperties => {
+    if (!buttonRect) {
+      return {
+        bottom: "24px",
+        right: "24px",
+      }
+    }
+
+    const viewportWidth = typeof window !== "undefined" ? window.innerWidth : 1200
+    const viewportHeight = typeof window !== "undefined" ? window.innerHeight : 800
+
+    const buttonCenterX = buttonRect.left + (buttonRect.right - buttonRect.left) / 2
+
+    const modalHeight = 440
+    const modalWidth = 288
+    const gap = 12
+
+    let top: number | undefined = undefined
+    let bottom: number | undefined = undefined
+    let left: number | undefined = undefined
+    let right: number | undefined = undefined
+
+    // Vertically: place modal above button if space allows, otherwise place it below
+    if (buttonRect.top > modalHeight + gap) {
+      bottom = viewportHeight - buttonRect.top + gap
+    } else if (viewportHeight - buttonRect.bottom > modalHeight + gap) {
+      top = buttonRect.bottom + gap
+    } else {
+      // Tight space: put it where there's more room
+      if (buttonRect.top > viewportHeight / 2) {
+        bottom = viewportHeight - buttonRect.top + gap
+      } else {
+        top = buttonRect.bottom + gap
+      }
+    }
+
+    // Horizontally: center relative to the button, clamping to screen boundaries with 16px padding
+    const computedLeft = buttonCenterX - modalWidth / 2
+    if (computedLeft < 16) {
+      left = 16
+    } else if (computedLeft + modalWidth > viewportWidth - 16) {
+      right = 16
+    } else {
+      left = computedLeft
+    }
+
+    const style: React.CSSProperties = {}
+    if (top !== undefined) style.top = `${top}px`
+    if (bottom !== undefined) style.bottom = `${bottom}px`
+    if (left !== undefined) style.left = `${left}px`
+    if (right !== undefined) style.right = `${right}px`
+
+    return style
+  }, [buttonRect])
+
   if (!isModalOpen) return null
 
   return (
     <div
-      className="fixed bottom-6 right-6 z-50 w-72 rounded-2xl border border-white/10 bg-zinc-900/95 shadow-2xl backdrop-blur-md animate-in slide-in-from-bottom-4 duration-300"
+      style={modalStyle}
+      className="fixed z-50 w-72 rounded-2xl border border-white/10 bg-zinc-900/95 shadow-2xl backdrop-blur-md animate-in slide-in-from-bottom-4 duration-300"
       role="dialog"
       aria-label="Pomodoro Timer"
     >
