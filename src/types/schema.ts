@@ -124,6 +124,21 @@ export const writingLogs = pgTable("writing_logs", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 })
 
+// 8.3 Dialogue Logs (Q&A Dialogue practice logs)
+export const dialogueLogs = pgTable("dialogue_logs", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: text("user_id").notNull(),
+  vocabId: uuid("vocab_id")
+    .references(() => vocabularyLogs.id, { onDelete: "cascade" })
+    .notNull(),
+  vocabWord: text("vocab_word").notNull(),
+  englishQuestion: text("english_question").notNull(),
+  indonesianQuestion: text("indonesian_question").notNull(),
+  englishAnswer: text("english_answer").notNull(),
+  indonesianAnswer: text("indonesian_answer").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+})
+
 // 9. Projects (Hierarchical project tracking)
 export const projects = pgTable("projects", {
   id: uuid("id").primaryKey().defaultRandom(),

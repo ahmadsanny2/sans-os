@@ -30,8 +30,6 @@ interface LanguageBoardViewProps {
   setWord: (w: string) => void
   translation: string
   setTranslation: (t: string) => void
-  exampleSentence: string
-  setExampleSentence: (s: string) => void
   formError: string | null
   handleAddVocabulary: (e: React.FormEvent) => Promise<void>
   handleDeleteVocabulary: (id: string, wordStr: string) => Promise<void>
@@ -59,8 +57,6 @@ export function LanguageBoardView({
   setWord,
   translation,
   setTranslation,
-  exampleSentence,
-  setExampleSentence,
   formError,
   handleAddVocabulary,
   handleDeleteVocabulary,
@@ -220,20 +216,7 @@ export function LanguageBoardView({
             </div>
           </div>
 
-          {/* Example Sentence */}
-          <div className="space-y-1.5">
-            <label htmlFor="vocabExample" className="text-xs font-bold text-muted-foreground">
-              Example Sentence
-            </label>
-            <input
-              id="vocabExample"
-              type="text"
-              value={exampleSentence}
-              onChange={(e) => setExampleSentence(e.target.value)}
-              placeholder="e.g. Fashions are ephemeral, but style is eternal."
-              className="w-full rounded-lg border border-border bg-background px-3 py-1.5 text-sm outline-none transition-all focus:border-sidebar-primary"
-            />
-          </div>
+
 
           {formError && (
             <p className="text-xs text-destructive flex items-center gap-1 font-semibold animate-in slide-in-from-top-1">
@@ -357,14 +340,7 @@ export function LanguageBoardView({
                     </div>
                   </div>
 
-                  {/* Example Sentence */}
-                  {vocab.exampleSentence && (
-                    <div className="border-l-2 border-border/80 pl-3 py-1 my-3 bg-secondary/10 rounded-r-md">
-                      <p className="text-[10px] text-muted-foreground leading-relaxed italic">
-                        &ldquo;{vocab.exampleSentence}&rdquo;
-                      </p>
-                    </div>
-                  )}
+
                 </div>
               </div>
             )

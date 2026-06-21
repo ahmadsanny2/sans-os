@@ -9,12 +9,16 @@ import {
   useWritingQuery,
   useCreateWritingMutation,
   useDeleteWritingMutation,
+  useDialogueQuery,
+  useCreateDialogueMutation,
+  useDeleteDialogueMutation,
 } from "@/hooks/useLanguage"
 import { confirmDestructive, showError, showSuccessToast } from "@/lib/sweetalert"
 
 export function useLanguagePage() {
   const { data: vocabList = [], isLoading: vocabIsLoading, isError: vocabIsError } = useVocabularyQuery()
   const { data: writingList = [], isLoading: writingIsLoading, isError: writingIsError } = useWritingQuery()
+  const { data: dialogueList = [], isLoading: dialogueIsLoading, isError: dialogueIsError } = useDialogueQuery()
 
   const createVocabMutation = useCreateVocabularyMutation()
   const updateVocabularyMutation = useUpdateVocabularyMutation()
@@ -23,8 +27,11 @@ export function useLanguagePage() {
   const createWritingMutation = useCreateWritingMutation()
   const deleteWritingMutation = useDeleteWritingMutation()
 
+  const createDialogueMutation = useCreateDialogueMutation()
+  const deleteDialogueMutation = useDeleteDialogueMutation()
+
   // Tab switching state
-  const [activeTab, setActiveTab] = useState<"vocab" | "writing">("vocab")
+  const [activeTab, setActiveTab] = useState<"vocab" | "writing" | "dialogue">("vocab")
 
   // ==========================================
   // Vocabulary States
@@ -36,7 +43,6 @@ export function useLanguagePage() {
   // Vocab form fields
   const [word, setWord] = useState("")
   const [translation, setTranslation] = useState("")
-  const [exampleSentence, setExampleSentence] = useState("")
   const [formError, setFormError] = useState<string | null>(null)
 
   // ==========================================
@@ -64,6 +70,25 @@ export function useLanguagePage() {
   const [vocabTransInt, setVocabTransInt] = useState("")
 
   const [writingFormError, setWritingFormError] = useState<string | null>(null)
+
+  // ==========================================
+  // Dialogue Practice States
+  // ==========================================
+  const [showDialogueForm, setShowDialogueForm] = useState(false)
+  const [searchQueryDialogue, setSearchQueryDialogue] = useState("")
+  const [selectedDialogueVocabId, setSelectedDialogueVocabId] = useState("")
+  const [searchDialogueVocabQuery, setSearchDialogueVocabQuery] = useState("")
+  const [showDialogueVocabDropdown, setShowDialogueVocabDropdown] = useState(false)
+
+  // Dialogue Q&A fields
+  const [dialogueEngQ, setDialogueEngQ] = useState("")
+  const [dialogueTransQ, setDialogueTransQ] = useState("")
+  const [dialogueEngA, setDialogueEngA] = useState("")
+  const [dialogueTransA, setDialogueTransA] = useState("")
+  const [dialogueFormError, setDialogueFormError] = useState<string | null>(null)
+
+  // Study reveal aids
+  const [revealedDialogueTranslationIds, setRevealedDialogueTranslationIds] = useState<Record<string, boolean>>({})
 
   // ==========================================
   // Vocabulary Handlers
@@ -97,12 +122,10 @@ export function useLanguagePage() {
         partOfSpeech: "n/a",
         definition: "n/a",
         translation: trimmedTranslation,
-        exampleSentence: exampleSentence.trim() || undefined,
         masteryLevel: 3,
       })
       setWord("")
       setTranslation("")
-      setExampleSentence("")
       setShowAddForm(false)
       showSuccessToast("Vocabulary added successfully")
     } catch (err) {
@@ -291,6 +314,115 @@ export function useLanguagePage() {
     return matchesSearch
   })
 
+  // ==========================================
+  // Dialogue Handlers
+  // ==========================================
+  const handleSelectDialogueVocab = (id: string, word: string) => {
+    setSelectedDialogueVocabId(id)
+    setSearchDialogueVocabQuery(word)
+    setShowDialogueVocabDropdown(false)
+    setDialogueFormError(null)
+  }
+
+  const handleAddDialogue = async (e: React.FormEvent): Promise<void> => {
+    e.preventDefault()
+    setDialogueFormError(null)
+
+    if (!selectedDialogueVocabId) {
+      setDialogueFormError("Please select a vocabulary word.")
+      return
+    }
+
+    if (
+      !dialogueEngQ.trim() || !dialogueTransQ.trim() ||
+      !dialogueEngA.trim() || !dialogueTransA.trim()
+    ) {
+      setDialogueFormError("Please fill out all Question and Answer fields.")
+      return
+    }
+
+    const selectedVocab = vocabList.find((v) => v.id === selectedDialogueVocabId)
+    if (!selectedVocab) {
+      setDialogueFormError("Selected vocabulary word not found.")
+      return
+    }
+
+    try {
+      await createDialogueMutation.mutateAsync({
+        vocabId: selectedVocab.id,
+        vocabWord: selectedVocab.word,
+        englishQuestion: dialogueEngQ.trim(),
+        indonesianQuestion: dialogueTransQ.trim(),
+        englishAnswer: dialogueEngA.trim(),
+        indonesianAnswer: dialogueTransA.trim(),
+      })
+
+      // Reset form
+      setSelectedDialogueVocabId("")
+      setSearchDialogueVocabQuery("")
+      setDialogueEngQ("")
+      setDialogueTransQ("")
+      setDialogueEngA("")
+      setDialogueTransA("")
+      setShowDialogueForm(false)
+      showSuccessToast("Dialogue added successfully")
+    } catch (err) {
+      const errMsg = err instanceof Error ? err.message : "Failed to add dialogue."
+      setDialogueFormError(errMsg)
+    }
+  }
+
+  const handleDeleteDialogue = async (id: string, wordStr: string): Promise<void> => {
+    const isConfirmed = await confirmDestructive(
+      "Delete Dialogue",
+      `Are you sure you want to delete the dialogue practicing "${wordStr}"?`
+    )
+    if (!isConfirmed) return
+
+    try {
+      await deleteDialogueMutation.mutateAsync(id)
+      showSuccessToast("Dialogue deleted successfully")
+    } catch {
+      showError("Delete Error", "Failed to delete dialogue.")
+    }
+  }
+
+  const toggleDialogueTranslation = (id: string) => {
+    setRevealedDialogueTranslationIds((prev) => ({
+      ...prev,
+      [id]: !prev[id],
+    }))
+  }
+
+  const revealAllDialogueTranslations = () => {
+    const allIds: Record<string, boolean> = {}
+    dialogueList.forEach((d) => {
+      allIds[d.id] = true
+    })
+    setRevealedDialogueTranslationIds(allIds)
+  }
+
+  const hideAllDialogueTranslations = () => {
+    setRevealedDialogueTranslationIds({})
+  }
+
+  // Dialogue filter and autocomplete lists
+  const filteredDialogueVocabList = vocabList.filter(
+    (v) =>
+      v.word.toLowerCase().includes(searchDialogueVocabQuery.toLowerCase()) ||
+      v.translation.toLowerCase().includes(searchDialogueVocabQuery.toLowerCase())
+  )
+
+  const filteredDialogues = dialogueList.filter((log) => {
+    const matchesSearch =
+      log.vocabWord.toLowerCase().includes(searchQueryDialogue.toLowerCase()) ||
+      log.englishQuestion.toLowerCase().includes(searchQueryDialogue.toLowerCase()) ||
+      log.indonesianQuestion.toLowerCase().includes(searchQueryDialogue.toLowerCase()) ||
+      log.englishAnswer.toLowerCase().includes(searchQueryDialogue.toLowerCase()) ||
+      log.indonesianAnswer.toLowerCase().includes(searchQueryDialogue.toLowerCase())
+    return matchesSearch
+  })
+
   return {
     activeTab,
     setActiveTab,
@@ -308,8 +440,6 @@ export function useLanguagePage() {
     setWord,
     translation,
     setTranslation,
-    exampleSentence,
-    setExampleSentence,
     formError,
     handleAddVocabulary,
     handleDeleteVocabulary,
@@ -366,6 +496,41 @@ export function useLanguagePage() {
     filteredHistory,
     writingCreatePending: createWritingMutation.isPending,
     writingDeletePending: deleteWritingMutation.isPending,
+
+    // Dialogue States & Handlers
+    dialogueList,
+    dialogueIsLoading,
+    dialogueIsError,
+    showDialogueForm,
+    setShowDialogueForm,
+    searchQueryDialogue,
+    setSearchQueryDialogue,
+    selectedDialogueVocabId,
+    setSelectedDialogueVocabId,
+    searchDialogueVocabQuery,
+    setSearchDialogueVocabQuery,
+    showDialogueVocabDropdown,
+    setShowDialogueVocabDropdown,
+    dialogueEngQ,
+    setDialogueEngQ,
+    dialogueTransQ,
+    setDialogueTransQ,
+    dialogueEngA,
+    setDialogueEngA,
+    dialogueTransA,
+    setDialogueTransA,
+    dialogueFormError,
+    revealedDialogueTranslationIds,
+    handleSelectDialogueVocab,
+    handleAddDialogue,
+    handleDeleteDialogue,
+    toggleDialogueTranslation,
+    revealAllDialogueTranslations,
+    hideAllDialogueTranslations,
+    filteredDialogueVocabList,
+    filteredDialogues,
+    dialogueCreatePending: createDialogueMutation.isPending,
+    dialogueDeletePending: deleteDialogueMutation.isPending,
   }
 }
 

@@ -24,6 +24,18 @@ export interface WritingLog {
   createdAt: string
 }
 
+export interface DialogueLog {
+  id: string
+  userId: string
+  vocabId: string
+  vocabWord: string
+  englishQuestion: string
+  indonesianQuestion: string
+  englishAnswer: string
+  indonesianAnswer: string
+  createdAt: string
+}
+
 // 1. Fetch vocabulary list
 async function fetchVocabulary(): Promise<VocabularyLog[]> {
   const res = await fetch("/api/language")
@@ -265,6 +277,105 @@ export function useDeleteWritingMutation() {
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["writingLogs"] })
+    },
+  })
+}
+
+// 8. Fetch dialogues list
+async function fetchDialogues(): Promise<DialogueLog[]> {
+  const res = await fetch("/api/language/dialogue")
+  if (!res.ok) {
+    throw new Error("Failed to fetch dialogues")
+  }
+  return res.json()
+}
+
+export function useDialogueQuery() {
+  return useQuery<DialogueLog[]>({
+    queryKey: ["dialogues"],
+    queryFn: fetchDialogues,
+  })
+}
+
+// 9. Create dialogue
+async function createDialogue(body: {
+  vocabId: string
+  vocabWord: string
+  englishQuestion: string
+  indonesianQuestion: string
+  englishAnswer: string
+  indonesianAnswer: string
+}): Promise<DialogueLog> {
+  const res = await fetch("/api/language/dialogue", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  })
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({}))
+    throw new Error(errorData.error || "Failed to create dialogue log")
+  }
+  return res.json()
+}
+
+export function useCreateDialogueMutation() {
+  const queryClient = useQueryClient()
+  return useMutation<
+    DialogueLog,
+    Error,
+    {
+      vocabId: string
+      vocabWord: string
+      englishQuestion: string
+      indonesianQuestion: string
+      englishAnswer: string
+      indonesianAnswer: string
+    }
+  >({
+    mutationFn: createDialogue,
+    onSuccess: (newLog) => {
+      queryClient.setQueryData<DialogueLog[]>(["dialogues"], (old) => {
+        if (!old) return [newLog]
+        return [...old.filter((l) => l.id !== newLog.id), newLog]
+      })
+      queryClient.invalidateQueries({ queryKey: ["dialogues"] })
+    },
+  })
+}
+
+// 10. Delete dialogue
+async function deleteDialogue(id: string): Promise<{ success: boolean }> {
+  const res = await fetch(`/api/language/dialogue?id=${id}`, {
+    method: "DELETE",
+  })
+  if (!res.ok) {
+    throw new Error("Failed to delete dialogue")
+  }
+  return res.json()
+}
+
+export function useDeleteDialogueMutation() {
+  const queryClient = useQueryClient()
+  return useMutation<{ success: boolean }, Error, string, { previous: DialogueLog[] | undefined }>({
+    mutationFn: deleteDialogue,
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: ["dialogues"] })
+      const previous = queryClient.getQueryData<DialogueLog[]>(["dialogues"])
+      if (previous) {
+        queryClient.setQueryData<DialogueLog[]>(
+          ["dialogues"],
+          previous.filter((d) => d.id !== id)
+        )
+      }
+      return { previous }
+    },
+    onError: (err, id, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(["dialogues"], context.previous)
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["dialogues"] })
     },
   })
 }

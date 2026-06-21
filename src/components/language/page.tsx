@@ -4,7 +4,8 @@ import React, { useEffect } from "react"
 import { useLanguagePage } from "@/hooks/useLanguagePage"
 import { LanguageBoardView } from "./ui/LanguageBoardView"
 import { WritingPracticeView } from "./ui/WritingPracticeView"
-import { BookOpen, PencilLine, Languages } from "lucide-react"
+import { DialoguePracticeView } from "./ui/DialoguePracticeView"
+import { BookOpen, PencilLine, Languages, MessageSquare } from "lucide-react"
 import { HeaderPage } from "@/components/ui/HeaderPage"
 
 export default function LanguageComponent() {
@@ -46,6 +47,16 @@ export default function LanguageComponent() {
         >
           <PencilLine className="h-4 w-4" /> Writing Practice
         </button>
+        <button
+          onClick={() => setActiveTab("dialogue")}
+          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
+            activeTab === "dialogue"
+              ? "bg-sidebar-primary text-sidebar-primary-foreground shadow-sm"
+              : "text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          <MessageSquare className="h-4 w-4" /> Dialogue Practice
+        </button>
       </div>
 
       {activeTab === "vocab" ? (
@@ -61,8 +72,6 @@ export default function LanguageComponent() {
           setWord={languageData.setWord}
           translation={languageData.translation}
           setTranslation={languageData.setTranslation}
-          exampleSentence={languageData.exampleSentence}
-          setExampleSentence={languageData.setExampleSentence}
           formError={languageData.formError}
           handleAddVocabulary={languageData.handleAddVocabulary}
           handleDeleteVocabulary={languageData.handleDeleteVocabulary}
@@ -77,7 +86,7 @@ export default function LanguageComponent() {
           vocabCreatePending={languageData.vocabCreatePending}
           writingCount={writingList.length}
         />
-      ) : (
+      ) : activeTab === "writing" ? (
         <WritingPracticeView
           vocabList={vocabList}
           writingList={writingList}
@@ -121,6 +130,43 @@ export default function LanguageComponent() {
           filteredHistory={languageData.filteredHistory}
           writingCreatePending={languageData.writingCreatePending}
           writingDeletePending={languageData.writingDeletePending}
+        />
+      ) : (
+        <DialoguePracticeView
+          vocabList={vocabList}
+          dialogueList={languageData.dialogueList}
+          isLoading={languageData.dialogueIsLoading}
+          isError={languageData.dialogueIsError}
+          showDialogueForm={languageData.showDialogueForm}
+          setShowDialogueForm={languageData.setShowDialogueForm}
+          searchQueryDialogue={languageData.searchQueryDialogue}
+          setSearchQueryDialogue={languageData.setSearchQueryDialogue}
+          selectedDialogueVocabId={languageData.selectedDialogueVocabId}
+          setSelectedDialogueVocabId={languageData.setSelectedDialogueVocabId}
+          searchDialogueVocabQuery={languageData.searchDialogueVocabQuery}
+          setSearchDialogueVocabQuery={languageData.setSearchDialogueVocabQuery}
+          showDialogueVocabDropdown={languageData.showDialogueVocabDropdown}
+          setShowDialogueVocabDropdown={languageData.setShowDialogueVocabDropdown}
+          dialogueEngQ={languageData.dialogueEngQ}
+          setDialogueEngQ={languageData.setDialogueEngQ}
+          dialogueTransQ={languageData.dialogueTransQ}
+          setDialogueTransQ={languageData.setDialogueTransQ}
+          dialogueEngA={languageData.dialogueEngA}
+          setDialogueEngA={languageData.setDialogueEngA}
+          dialogueTransA={languageData.dialogueTransA}
+          setDialogueTransA={languageData.setDialogueTransA}
+          dialogueFormError={languageData.dialogueFormError}
+          revealedDialogueTranslationIds={languageData.revealedDialogueTranslationIds}
+          handleSelectDialogueVocab={languageData.handleSelectDialogueVocab}
+          handleAddDialogue={languageData.handleAddDialogue}
+          handleDeleteDialogue={languageData.handleDeleteDialogue}
+          toggleDialogueTranslation={languageData.toggleDialogueTranslation}
+          revealAllDialogueTranslations={languageData.revealAllDialogueTranslations}
+          hideAllDialogueTranslations={languageData.hideAllDialogueTranslations}
+          filteredDialogueVocabList={languageData.filteredDialogueVocabList}
+          filteredDialogues={languageData.filteredDialogues}
+          dialogueCreatePending={languageData.dialogueCreatePending}
+          dialogueDeletePending={languageData.dialogueDeletePending}
         />
       )}
     </div>
