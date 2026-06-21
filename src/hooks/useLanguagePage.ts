@@ -38,6 +38,7 @@ export function useLanguagePage() {
   // ==========================================
   const [showAddForm, setShowAddForm] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
+  const [memorizedFilter, setMemorizedFilter] = useState<"all" | "memorized" | "unmemorized">("all")
   const [revealedTranslationIds, setRevealedTranslationIds] = useState<Record<string, boolean>>({})
 
   // Vocab form fields
@@ -182,7 +183,13 @@ export function useLanguagePage() {
     const matchesQuery =
       v.word.toLowerCase().includes(searchQuery.toLowerCase()) ||
       v.translation.toLowerCase().includes(searchQuery.toLowerCase())
-    return matchesQuery
+    
+    const matchesMemorized =
+      memorizedFilter === "all" ||
+      (memorizedFilter === "memorized" && v.memorized) ||
+      (memorizedFilter === "unmemorized" && !v.memorized)
+
+    return matchesQuery && matchesMemorized
   })
 
   // ==========================================
@@ -438,6 +445,8 @@ export function useLanguagePage() {
     setShowAddForm,
     searchQuery,
     setSearchQuery,
+    memorizedFilter,
+    setMemorizedFilter,
     revealedTranslationIds,
     word,
     setWord,

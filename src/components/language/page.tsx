@@ -67,6 +67,8 @@ export default function LanguageComponent() {
           setShowAddForm={languageData.setShowAddForm}
           searchQuery={languageData.searchQuery}
           setSearchQuery={languageData.setSearchQuery}
+          memorizedFilter={languageData.memorizedFilter}
+          setMemorizedFilter={languageData.setMemorizedFilter}
           revealedTranslationIds={languageData.revealedTranslationIds}
           word={languageData.word}
           setWord={languageData.setWord}

@@ -25,6 +25,8 @@ interface LanguageBoardViewProps {
   setShowAddForm: (show: boolean) => void
   searchQuery: string
   setSearchQuery: (query: string) => void
+  memorizedFilter: "all" | "memorized" | "unmemorized"
+  setMemorizedFilter: (filter: "all" | "memorized" | "unmemorized") => void
   revealedTranslationIds: Record<string, boolean>
   word: string
   setWord: (w: string) => void
@@ -52,6 +54,8 @@ export function LanguageBoardView({
   setShowAddForm,
   searchQuery,
   setSearchQuery,
+  memorizedFilter,
+  setMemorizedFilter,
   revealedTranslationIds,
   word,
   setWord,
@@ -133,11 +137,10 @@ export function LanguageBoardView({
         </div>
       </div>
 
-      {/* 2. Search, Reveal helper, & Toggle Add */}
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between border-b border-border/50 pb-5 animate-in fade-in duration-200">
-        <div className="flex flex-col sm:flex-row gap-3 flex-1 max-w-2xl">
+        <div className="flex flex-wrap items-center gap-3 flex-1 max-w-4xl">
           {/* Search text input */}
-          <div className="relative flex-1">
+          <div className="relative flex-1 min-w-[240px]">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-muted-foreground" />
             <input
               type="text"
@@ -148,8 +151,42 @@ export function LanguageBoardView({
             />
           </div>
 
+          {/* Memorized status filter selector */}
+          <div className="flex gap-1.5 p-0.5 bg-secondary/20 border border-border/30 rounded-xl select-none shrink-0">
+            <button
+              onClick={() => setMemorizedFilter("all")}
+              className={`px-3 py-1 text-[10px] font-bold uppercase tracking-wider rounded-lg transition-all ${
+                memorizedFilter === "all"
+                  ? "bg-background text-foreground shadow-sm border border-border/20 font-extrabold"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              All ({totalWords})
+            </button>
+            <button
+              onClick={() => setMemorizedFilter("memorized")}
+              className={`px-3 py-1 text-[10px] font-bold uppercase tracking-wider rounded-lg transition-all ${
+                memorizedFilter === "memorized"
+                  ? "bg-background text-foreground shadow-sm border border-border/20 font-extrabold"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Memorized ({memorizedCount})
+            </button>
+            <button
+              onClick={() => setMemorizedFilter("unmemorized")}
+              className={`px-3 py-1 text-[10px] font-bold uppercase tracking-wider rounded-lg transition-all ${
+                memorizedFilter === "unmemorized"
+                  ? "bg-background text-foreground shadow-sm border border-border/20 font-extrabold"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Learning ({totalWords - memorizedCount})
+            </button>
+          </div>
+
           {/* Quick reveal study assistant */}
-          <div className="flex items-center gap-1.5 bg-secondary/40 border border-border/80 p-1 rounded-xl shrink-0 self-start sm:self-auto select-none">
+          <div className="flex items-center gap-1.5 bg-secondary/40 border border-border/80 p-1 rounded-xl shrink-0 select-none">
             <button
               onClick={revealAllTranslations}
               className="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider rounded-lg hover:bg-background text-muted-foreground hover:text-foreground transition-all flex items-center gap-1"
