@@ -88,6 +88,8 @@ export default function LanguageComponent() {
         />
       ) : activeTab === "writing" ? (
         <WritingPracticeView
+          showWritingForm={languageData.showWritingForm}
+          setShowWritingForm={languageData.setShowWritingForm}
           vocabList={vocabList}
           writingList={writingList}
           isLoading={languageData.writingIsLoading}

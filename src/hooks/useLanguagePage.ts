@@ -48,6 +48,7 @@ export function useLanguagePage() {
   // ==========================================
   // Writing Practice States
   // ==========================================
+  const [showWritingForm, setShowWritingForm] = useState(false)
   const [practiceMode, setPracticeMode] = useState<"free" | "vocab">("free")
   const [activeHistoryTab, setActiveHistoryTab] = useState<"vocab" | "free">("vocab")
   const [searchQueryWriting, setSearchQueryWriting] = useState("")
@@ -207,6 +208,7 @@ export function useLanguagePage() {
         })
         setFreeEnglish("")
         setFreeTranslation("")
+        setShowWritingForm(false)
         showSuccessToast("Free writing log added successfully")
       } catch {
         setWritingFormError("Failed to add writing log.")
@@ -264,6 +266,7 @@ export function useLanguagePage() {
         setVocabEngInt("")
         setVocabTransInt("")
         setWritingFormError(null)
+        setShowWritingForm(false)
         showSuccessToast("Vocab practice sentences added successfully")
       } catch {
         setWritingFormError("Failed to save some or all sentences. Please try again.")
@@ -455,6 +458,8 @@ export function useLanguagePage() {
     vocabDeletePending: deleteVocabMutation.isPending,
 
     // Writing Practice States
+    showWritingForm,
+    setShowWritingForm,
     writingList,
     writingIsLoading,
     writingIsError,
