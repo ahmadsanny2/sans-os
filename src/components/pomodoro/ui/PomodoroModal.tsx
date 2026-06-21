@@ -37,13 +37,13 @@ const PHASE_META: Record<
 > = {
   idle: {
     label: "Ready",
-    emoji: "🎯",
+    emoji: "",
     color: "text-violet-400",
     ring: "stroke-violet-500/40",
   },
   focus: {
     label: "Focus",
-    emoji: "🎯",
+    emoji: "",
     color: "text-violet-400",
     ring: "stroke-violet-500",
   },
@@ -55,7 +55,7 @@ const PHASE_META: Record<
   },
   "long-break": {
     label: "Long Break",
-    emoji: "🌟",
+    emoji: "",
     color: "text-cyan-400",
     ring: "stroke-cyan-500",
   },
