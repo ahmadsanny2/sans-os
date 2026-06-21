@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useMemo, useState } from "react"
 import { usePomodoroStore, PomodoroPhase } from "@/store/pomodoroStore"
 import { useTimetableQuery, TimetableBlock } from "@/hooks/useDaily"
 import { playPomodoroSound } from "@/lib/pomodoroSound"
+import { motion, useDragControls } from "framer-motion"
 import {
   Play,
   Pause,
@@ -141,6 +142,7 @@ export function PomodoroModal({ buttonRect }: PomodoroModalProps) {
   const setIsPipExpanded = usePomodoroStore((s) => s.setIsPipExpanded)
 
   const isPipSupported = typeof window !== "undefined" && "documentPictureInPicture" in window
+  const dragControls = useDragControls()
 
   const { data: timetableList = [] } = useTimetableQuery()
 
@@ -308,14 +310,28 @@ export function PomodoroModal({ buttonRect }: PomodoroModalProps) {
   if (!isModalOpen) return null
 
   return (
-    <div
+    <motion.div
+      drag
+      dragControls={dragControls}
+      dragListener={false}
+      dragMomentum={false}
+      dragElastic={0}
       style={modalStyle}
       className="fixed z-50 w-72 rounded-2xl border border-white/10 bg-zinc-900/95 shadow-2xl backdrop-blur-md animate-in slide-in-from-bottom-4 duration-300"
       role="dialog"
       aria-label="Pomodoro Timer"
     >
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-white/5">
+      <div
+        className="flex items-center justify-between px-4 py-3 border-b border-white/5 cursor-grab active:cursor-grabbing select-none"
+        onPointerDown={(e) => {
+          const target = e.target as HTMLElement
+          if (target.closest("button") || target.closest("a")) {
+            return
+          }
+          dragControls.start(e)
+        }}
+      >
         <div className="flex items-center gap-2">
           <Timer className="h-4 w-4 text-violet-400" />
           <span className="text-xs font-bold text-white/80 tracking-wide uppercase">
@@ -479,6 +495,6 @@ export function PomodoroModal({ buttonRect }: PomodoroModalProps) {
           )}
         </div>
       </div>
-    </div>
+    </motion.div>
   )
 }
