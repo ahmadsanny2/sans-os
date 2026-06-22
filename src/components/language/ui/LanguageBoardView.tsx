@@ -1,6 +1,6 @@
 "use client"
 
-import React from "react"
+import React, { useState, useMemo, useRef, useEffect } from "react"
 import { VocabularyLog } from "@/hooks/useLanguage"
 import {
   Plus,
@@ -15,6 +15,8 @@ import {
   Check,
   CheckCircle2,
   PencilLine,
+  Filter,
+  ChevronDown,
 } from "lucide-react"
 import { GridCardSkeleton } from "@/components/ui/Skeletons"
 
@@ -83,8 +85,27 @@ export function LanguageBoardView({
   vocabCreatePending,
   writingCount,
 }: LanguageBoardViewProps) {
+  // Local state for direction filter ("all" | "en-id" | "id-en")
+  const [dirFilter, setDirFilter] = useState<"all" | "en-id" | "id-en">("all")
+  const [isFilterOpen, setIsFilterOpen] = useState(false)
+  const dropdownRef = useRef<HTMLDivElement>(null)
+
+  // Click outside to close dropdown
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsFilterOpen(false)
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside)
+    }
+  }, [])
+
   // Group and sort vocabularies by direction first, then alphabetically
-  const vocabByDirection = React.useMemo(() => {
+  const vocabByDirection = useMemo(() => {
     const directions = {
       "en-id": [] as VocabularyLog[],
       "id-en": [] as VocabularyLog[],
@@ -121,21 +142,32 @@ export function LanguageBoardView({
         }))
     }
 
-    return [
-      {
+    const result = []
+
+    if (dirFilter === "all" || dirFilter === "en-id") {
+      result.push({
         direction: "en-id",
         label: "English ➔ Indonesian (EN ➔ ID)",
         grouped: makeGroupedAlphabetical(directions["en-id"]),
         count: directions["en-id"].length,
-      },
-      {
+      })
+    }
+
+    if (dirFilter === "all" || dirFilter === "id-en") {
+      result.push({
         direction: "id-en",
         label: "Indonesian ➔ English (ID ➔ EN)",
         grouped: makeGroupedAlphabetical(directions["id-en"]),
         count: directions["id-en"].length,
-      },
-    ]
-  }, [filteredVocab])
+      })
+    }
+
+    return result
+  }, [filteredVocab, dirFilter])
+
+  const renderedCount = useMemo(() => {
+    return vocabByDirection.reduce((acc, curr) => acc + curr.count, 0)
+  }, [vocabByDirection])
 
   return (
     <>
@@ -213,56 +245,119 @@ export function LanguageBoardView({
             />
           </div>
 
-          {/* Memorized status filter selector */}
-          <div className="flex gap-1.5 p-0.5 bg-secondary/20 border border-border/30 rounded-xl select-none shrink-0">
+          {/* Filter Popover Dropdown */}
+          <div className="relative" ref={dropdownRef}>
             <button
-              onClick={() => setMemorizedFilter("all")}
-              className={`px-3 py-1 text-[10px] font-bold uppercase tracking-wider rounded-lg transition-all ${
-                memorizedFilter === "all"
-                  ? "bg-background text-foreground shadow-sm border border-border/20 font-extrabold"
-                  : "text-muted-foreground hover:text-foreground"
+              onClick={() => setIsFilterOpen(!isFilterOpen)}
+              type="button"
+              className={`inline-flex items-center gap-2 px-3.5 py-2 text-xs font-semibold rounded-xl border transition-all select-none cursor-pointer ${
+                isFilterOpen || dirFilter !== "all" || memorizedFilter !== "all"
+                  ? "bg-violet-500/10 border-violet-500/30 text-violet-400"
+                  : "border-border bg-card/60 text-muted-foreground hover:text-foreground hover:bg-secondary/40"
               }`}
             >
-              All ({totalWords})
+              <Filter className="h-4 w-4" />
+              <span>Filter & Actions</span>
+              {(dirFilter !== "all" || memorizedFilter !== "all") && (
+                <span className="h-1.5 w-1.5 rounded-full bg-violet-400" />
+              )}
+              <ChevronDown className={`h-3 w-3 transition-transform duration-200 ${isFilterOpen ? "rotate-180" : ""}`} />
             </button>
-            <button
-              onClick={() => setMemorizedFilter("memorized")}
-              className={`px-3 py-1 text-[10px] font-bold uppercase tracking-wider rounded-lg transition-all ${
-                memorizedFilter === "memorized"
-                  ? "bg-background text-foreground shadow-sm border border-border/20 font-extrabold"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Memorized ({memorizedCount})
-            </button>
-            <button
-              onClick={() => setMemorizedFilter("unmemorized")}
-              className={`px-3 py-1 text-[10px] font-bold uppercase tracking-wider rounded-lg transition-all ${
-                memorizedFilter === "unmemorized"
-                  ? "bg-background text-foreground shadow-sm border border-border/20 font-extrabold"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Learning ({totalWords - memorizedCount})
-            </button>
-          </div>
 
-          {/* Quick reveal study assistant */}
-          <div className="flex items-center gap-1.5 bg-secondary/40 border border-border/80 p-1 rounded-xl shrink-0 select-none">
-            <button
-              onClick={revealAllTranslations}
-              className="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider rounded-lg hover:bg-background text-muted-foreground hover:text-foreground transition-all flex items-center gap-1"
-              title="Reveal all translations for study review"
-            >
-              <Eye className="h-3.5 w-3.5" /> Reveal All
-            </button>
-            <button
-              onClick={hideAllTranslations}
-              className="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider rounded-lg hover:bg-background text-muted-foreground hover:text-foreground transition-all flex items-center gap-1"
-              title="Hide all translations for quiz mode"
-            >
-              <EyeOff className="h-3.5 w-3.5" /> Hide All
-            </button>
+            {isFilterOpen && (
+              <div className="absolute left-0 mt-2 z-50 w-72 rounded-2xl border border-border bg-card/95 p-4 shadow-xl backdrop-blur-xl space-y-4 animate-in fade-in slide-in-from-top-2 duration-150">
+                {/* 1. Language Direction Group */}
+                <div className="space-y-1.5">
+                  <span className="text-[9px] font-extrabold uppercase tracking-wider text-muted-foreground block select-none">
+                    Language Direction
+                  </span>
+                  <div className="space-y-0.5">
+                    {(
+                      [
+                        { id: "all", label: "All Directions" },
+                        { id: "en-id", label: "English ➔ Indonesian" },
+                        { id: "id-en", label: "Indonesian ➔ English" },
+                      ] as const
+                    ).map((opt) => (
+                      <button
+                        key={opt.id}
+                        type="button"
+                        onClick={() => setDirFilter(opt.id)}
+                        className={`w-full flex items-center justify-between px-3 py-1.5 rounded-lg text-xs font-semibold transition-all hover:bg-secondary/40 text-left cursor-pointer ${
+                          dirFilter === opt.id ? "text-violet-400 bg-violet-500/5 font-bold" : "text-foreground"
+                        }`}
+                      >
+                        <span>{opt.label}</span>
+                        {dirFilter === opt.id && <Check className="h-3.5 w-3.5 text-violet-400 stroke-[3]" />}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Divider */}
+                <div className="border-t border-border/40" />
+
+                {/* 2. Memorization Status Group */}
+                <div className="space-y-1.5">
+                  <span className="text-[9px] font-extrabold uppercase tracking-wider text-muted-foreground block select-none">
+                    Status
+                  </span>
+                  <div className="space-y-0.5">
+                    {(
+                      [
+                        { id: "all", label: "All Words" },
+                        { id: "memorized", label: "Memorized / Hafal" },
+                        { id: "unmemorized", label: "Learning / Belajar" },
+                      ] as const
+                    ).map((opt) => (
+                      <button
+                        key={opt.id}
+                        type="button"
+                        onClick={() => setMemorizedFilter(opt.id)}
+                        className={`w-full flex items-center justify-between px-3 py-1.5 rounded-lg text-xs font-semibold transition-all hover:bg-secondary/40 text-left cursor-pointer ${
+                          memorizedFilter === opt.id ? "text-violet-400 bg-violet-500/5 font-bold" : "text-foreground"
+                        }`}
+                      >
+                        <span>{opt.label}</span>
+                        {memorizedFilter === opt.id && <Check className="h-3.5 w-3.5 text-violet-400 stroke-[3]" />}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Divider */}
+                <div className="border-t border-border/40" />
+
+                {/* 3. Study Assistant Actions Group */}
+                <div className="space-y-1.5">
+                  <span className="text-[9px] font-extrabold uppercase tracking-wider text-muted-foreground block select-none">
+                    Study Assistant
+                  </span>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        revealAllTranslations()
+                        setIsFilterOpen(false)
+                      }}
+                      className="px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-lg border border-border hover:bg-secondary/40 text-muted-foreground hover:text-foreground transition-all flex items-center justify-center gap-1 cursor-pointer"
+                    >
+                      <Eye className="h-3.5 w-3.5" /> Reveal All
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        hideAllTranslations()
+                        setIsFilterOpen(false)
+                      }}
+                      className="px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-lg border border-border hover:bg-secondary/40 text-muted-foreground hover:text-foreground transition-all flex items-center justify-center gap-1 cursor-pointer"
+                    >
+                      <EyeOff className="h-3.5 w-3.5" /> Hide All
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
@@ -367,8 +462,6 @@ export function LanguageBoardView({
             </div>
           </div>
 
-
-
           {formError && (
             <p className="text-xs text-destructive flex items-center gap-1 font-semibold animate-in slide-in-from-top-1">
               <AlertCircle className="h-3.5 w-3.5" />
@@ -411,7 +504,7 @@ export function LanguageBoardView({
           <AlertCircle className="h-6 w-6" />
           <span>Error loading vocabulary logs. Please check database.</span>
         </div>
-      ) : filteredVocab.length === 0 ? (
+      ) : filteredVocab.length === 0 || renderedCount === 0 ? (
         <div className="rounded-2xl border border-dashed border-border py-16 text-center text-sm text-muted-foreground bg-card/10 select-none animate-in fade-in duration-200">
           No vocabulary matches the search filters. Click &quot;Add Vocabulary&quot; to record new words.
         </div>
