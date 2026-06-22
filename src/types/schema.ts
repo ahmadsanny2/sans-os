@@ -118,6 +118,7 @@ export const vocabularyLogs = pgTable("vocabulary_logs", {
   v2Translation: text("v2_translation"),
   v3Translation: text("v3_translation"),
   vIngTranslation: text("v_ing_translation"),
+  langDirection: text("lang_direction").default("en-id").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 })
 

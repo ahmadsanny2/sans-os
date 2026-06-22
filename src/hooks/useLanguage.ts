@@ -19,6 +19,7 @@ export interface VocabularyLog {
   v2Translation: string | null
   v3Translation: string | null
   vIngTranslation: string | null
+  langDirection: string
   createdAt: string
 }
 
@@ -72,6 +73,7 @@ async function createVocabulary(body: {
   translation: string
   exampleSentence?: string
   masteryLevel?: number
+  langDirection?: string
 }): Promise<VocabularyLog> {
   const res = await fetch("/api/language", {
     method: "POST",
@@ -97,6 +99,7 @@ export function useCreateVocabularyMutation() {
       translation: string
       exampleSentence?: string
       masteryLevel?: number
+      langDirection?: string
     }
   >({
     mutationFn: createVocabulary,

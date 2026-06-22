@@ -45,6 +45,7 @@ export function useLanguagePage() {
   const [word, setWord] = useState("")
   const [translation, setTranslation] = useState("")
   const [partOfSpeech, setPartOfSpeech] = useState("noun")
+  const [langDirection, setLangDirection] = useState("en-id")
   const [formError, setFormError] = useState<string | null>(null)
 
   // ==========================================
@@ -126,10 +127,12 @@ export function useLanguagePage() {
         definition: "n/a",
         translation: trimmedTranslation,
         masteryLevel: 3,
+        langDirection: langDirection,
       })
       setWord("")
       setTranslation("")
       setPartOfSpeech("noun")
+      setLangDirection("en-id")
       setShowAddForm(false)
       showSuccessToast("Vocabulary added successfully")
     } catch (err) {
@@ -469,6 +472,8 @@ export function useLanguagePage() {
     vocabDeletePending: deleteVocabMutation.isPending,
     partOfSpeech,
     setPartOfSpeech,
+    langDirection,
+    setLangDirection,
 
     // Writing Practice States
     showWritingForm,

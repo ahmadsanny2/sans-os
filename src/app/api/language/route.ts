@@ -92,11 +92,13 @@ export async function POST(request: Request): Promise<NextResponse> {
     }
 
     const body = await request.json()
-    const { word, partOfSpeech, definition, translation, exampleSentence, masteryLevel } = body
+    const { word, partOfSpeech, definition, translation, exampleSentence, masteryLevel, langDirection } = body
 
     if (!word || !translation) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
     }
+
+    const direction = langDirection || "en-id"
 
     // Check if the word already exists for the user (case-insensitive & trimmed)
     const existingWords = await db
@@ -114,7 +116,10 @@ export async function POST(request: Request): Promise<NextResponse> {
       return NextResponse.json({ error: "This vocabulary word is already registered" }, { status: 400 })
     }
 
-    const autoTranslation = await translateText(word)
+    // Auto-translation: if id-en, translate Indonesian to English. Else English to Indonesian.
+    const autoTranslation = direction === "id-en" 
+      ? await translateText(word, "id", "en")
+      : await translateText(word, "en", "id")
 
     let v1 = null
     let v2 = null
@@ -126,16 +131,24 @@ export async function POST(request: Request): Promise<NextResponse> {
     let vIngTranslation = null
 
     if (partOfSpeech && partOfSpeech.trim().toLowerCase() === "verb") {
-      const conj = conjugateVerb(word)
+      // For verbs:
+      // If direction is id-en, the English word to conjugate is the translation (e.g. "study").
+      // If en-id, the English word to conjugate is the main word (e.g. "study").
+      const englishVerb = direction === "id-en" ? translation.trim() : word.trim()
+      const conj = conjugateVerb(englishVerb)
+      
       v1 = conj.v1
       v2 = conj.v2
       v3 = conj.v3
       vIng = conj.vIng
       
-      v1Translation = translation.trim()
-      v2Translation = await translateText(conj.v2)
-      v3Translation = await translateText(conj.v3)
-      vIngTranslation = await translateText(conj.vIng)
+      // V1 translation is the Indonesian equivalent (either word or translation)
+      v1Translation = direction === "id-en" ? word.trim() : translation.trim()
+      
+      // The translations for conjugated forms are always translated to Indonesian (from English)
+      v2Translation = await translateText(conj.v2, "en", "id")
+      v3Translation = await translateText(conj.v3, "en", "id")
+      vIngTranslation = await translateText(conj.vIng, "en", "id")
     }
 
     const [newLog] = await db
@@ -158,6 +171,7 @@ export async function POST(request: Request): Promise<NextResponse> {
         v2Translation,
         v3Translation,
         vIngTranslation,
+        langDirection: direction,
       })
       .returning()
 

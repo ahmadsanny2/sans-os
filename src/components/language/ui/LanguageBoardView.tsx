@@ -34,6 +34,8 @@ interface LanguageBoardViewProps {
   setTranslation: (t: string) => void
   partOfSpeech: string
   setPartOfSpeech: (pos: string) => void
+  langDirection: string
+  setLangDirection: (dir: string) => void
   formError: string | null
   handleAddVocabulary: (e: React.FormEvent) => Promise<void>
   handleDeleteVocabulary: (id: string, wordStr: string) => Promise<void>
@@ -65,6 +67,8 @@ export function LanguageBoardView({
   setTranslation,
   partOfSpeech,
   setPartOfSpeech,
+  langDirection,
+  setLangDirection,
   formError,
   handleAddVocabulary,
   handleDeleteVocabulary,
@@ -253,56 +257,89 @@ export function LanguageBoardView({
           onSubmit={handleAddVocabulary}
           className="rounded-2xl border border-border bg-card/60 p-5 shadow-sm backdrop-blur-md space-y-4 animate-in slide-in-from-top-4 duration-200"
         >
-          <div className="grid gap-4 sm:grid-cols-3">
-            {/* Word Input */}
+          <div className="space-y-4">
+            {/* Language Direction Toggle */}
             <div className="space-y-1.5">
-              <label htmlFor="vocabWord" className="text-xs font-bold text-muted-foreground">
-                Word *
+              <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider select-none">
+                Language Direction / Arah Bahasa
               </label>
-              <input
-                id="vocabWord"
-                type="text"
-                required
-                value={word}
-                onChange={(e) => setWord(e.target.value)}
-                placeholder="e.g. Ephemeral"
-                className="w-full rounded-lg border border-border bg-background px-3 py-1.5 text-sm outline-none transition-all focus:border-sidebar-primary focus:ring-2 focus:ring-sidebar-primary/10"
-              />
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setLangDirection("en-id")}
+                  className={`flex-1 py-2 px-3 text-xs font-extrabold rounded-xl border transition-all active:scale-[0.99] cursor-pointer ${
+                    langDirection === "en-id"
+                      ? "bg-violet-500/10 text-violet-400 border-violet-500/30"
+                      : "border-border text-muted-foreground hover:bg-secondary/40"
+                  }`}
+                >
+                  English ➔ Indonesian (EN ➔ ID)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setLangDirection("id-en")}
+                  className={`flex-1 py-2 px-3 text-xs font-extrabold rounded-xl border transition-all active:scale-[0.99] cursor-pointer ${
+                    langDirection === "id-en"
+                      ? "bg-violet-500/10 text-violet-400 border-violet-500/30"
+                      : "border-border text-muted-foreground hover:bg-secondary/40"
+                  }`}
+                >
+                  Indonesian ➔ English (ID ➔ EN)
+                </button>
+              </div>
             </div>
 
-            {/* Part of Speech Selection */}
-            <div className="space-y-1.5">
-              <label htmlFor="vocabPos" className="text-xs font-bold text-muted-foreground">
-                Part of Speech *
-              </label>
-              <select
-                id="vocabPos"
-                value={partOfSpeech}
-                onChange={(e) => setPartOfSpeech(e.target.value)}
-                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none transition-all focus:border-sidebar-primary"
-              >
-                <option value="noun">Noun (Kata Benda)</option>
-                <option value="verb">Verb (Kata Kerja)</option>
-                <option value="adjective">Adjective (Kata Sifat)</option>
-                <option value="adverb">Adverb (Kata Keterangan)</option>
-                <option value="other">Other (Lainnya)</option>
-              </select>
-            </div>
+            <div className="grid gap-4 sm:grid-cols-3">
+              {/* Word Input */}
+              <div className="space-y-1.5">
+                <label htmlFor="vocabWord" className="text-xs font-bold text-muted-foreground">
+                  {langDirection === "id-en" ? "Word (Indonesian) *" : "Word (English) *"}
+                </label>
+                <input
+                  id="vocabWord"
+                  type="text"
+                  required
+                  value={word}
+                  onChange={(e) => setWord(e.target.value)}
+                  placeholder={langDirection === "id-en" ? "e.g. Belajar" : "e.g. Ephemeral"}
+                  className="w-full rounded-lg border border-border bg-background px-3 py-1.5 text-sm outline-none transition-all focus:border-sidebar-primary focus:ring-2 focus:ring-sidebar-primary/10"
+                />
+              </div>
 
-            {/* Translation */}
-            <div className="space-y-1.5">
-              <label htmlFor="vocabTrans" className="text-xs font-bold text-muted-foreground">
-                Translation *
-              </label>
-              <input
-                id="vocabTrans"
-                type="text"
-                required
-                value={translation}
-                onChange={(e) => setTranslation(e.target.value)}
-                placeholder="e.g. Temporary, brief"
-                className="w-full rounded-lg border border-border bg-background px-3 py-1.5 text-sm outline-none transition-all focus:border-sidebar-primary"
-              />
+              {/* Part of Speech Selection */}
+              <div className="space-y-1.5">
+                <label htmlFor="vocabPos" className="text-xs font-bold text-muted-foreground">
+                  Part of Speech *
+                </label>
+                <select
+                  id="vocabPos"
+                  value={partOfSpeech}
+                  onChange={(e) => setPartOfSpeech(e.target.value)}
+                  className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none transition-all focus:border-sidebar-primary"
+                >
+                  <option value="noun">Noun (Kata Benda)</option>
+                  <option value="verb">Verb (Kata Kerja)</option>
+                  <option value="adjective">Adjective (Kata Sifat)</option>
+                  <option value="adverb">Adverb (Kata Keterangan)</option>
+                  <option value="other">Other (Lainnya)</option>
+                </select>
+              </div>
+
+              {/* Translation */}
+              <div className="space-y-1.5">
+                <label htmlFor="vocabTrans" className="text-xs font-bold text-muted-foreground">
+                  {langDirection === "id-en" ? "Translation (English) *" : "Translation (Indonesian) *"}
+                </label>
+                <input
+                  id="vocabTrans"
+                  type="text"
+                  required
+                  value={translation}
+                  onChange={(e) => setTranslation(e.target.value)}
+                  placeholder={langDirection === "id-en" ? "e.g. Study, learn" : "e.g. Temporary, brief"}
+                  className="w-full rounded-lg border border-border bg-background px-3 py-1.5 text-sm outline-none transition-all focus:border-sidebar-primary"
+                />
+              </div>
             </div>
           </div>
 
@@ -400,6 +437,13 @@ export function LanguageBoardView({
                                   {vocab.partOfSpeech}
                                 </span>
                               )}
+                              <span className={`px-1.5 py-0.5 rounded text-[8px] font-extrabold uppercase tracking-wider ${
+                                vocab.langDirection === "id-en"
+                                  ? "bg-amber-500/10 text-amber-400 border border-amber-500/20"
+                                  : "bg-blue-500/10 text-blue-400 border border-blue-500/20"
+                              }`}>
+                                {vocab.langDirection === "id-en" ? "ID ➔ EN" : "EN ➔ ID"}
+                              </span>
                             </div>
                             <div className="flex items-center gap-2">
                               {/* Memorized Checklist Toggle */}
