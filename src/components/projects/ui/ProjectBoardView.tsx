@@ -139,6 +139,15 @@ export function ProjectBoardView({
   isPendingTaskDelete,
   isPendingTaskToggle,
 }: ProjectBoardViewProps) {
+  const sortedProjects = [...projectsList].sort((a, b) => {
+    const aCompleted = a.status === "Completed"
+    const bCompleted = b.status === "Completed"
+    if (aCompleted !== bCompleted) {
+      return aCompleted ? 1 : -1
+    }
+    return 0
+  })
+
   return (
     <div className="grid gap-8 lg:grid-cols-12 animate-in fade-in duration-200">
       {/* Left Column: Projects List */}
@@ -290,7 +299,7 @@ export function ProjectBoardView({
               description="Create a project to start planning."
             />
           ) : (
-            projectsList.map((project: Project) => {
+            sortedProjects.map((project: Project) => {
               const totalTasks = project.tasks.length
               const completedTasks = project.tasks.filter((t) => t.completed).length
               const progressPct = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0

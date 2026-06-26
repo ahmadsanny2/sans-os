@@ -61,7 +61,7 @@ export function useCreateDailyTodoMutation() {
         if (!old) return [newTodo]
         return [...old.filter((t) => t.id !== newTodo.id), newTodo]
       })
-      queryClient.invalidateQueries({ queryKey: ["daily-todos", newTodo.date] })
+      queryClient.invalidateQueries({ queryKey: ["daily-todos"] })
     },
   })
 }
@@ -108,7 +108,7 @@ export function useToggleDailyTodoMutation(date: string) {
       }
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ["daily-todos", date] })
+      queryClient.invalidateQueries({ queryKey: ["daily-todos"] })
     },
   })
 }
@@ -146,7 +146,7 @@ export function useDeleteDailyTodoMutation(date: string) {
       }
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ["daily-todos", date] })
+      queryClient.invalidateQueries({ queryKey: ["daily-todos"] })
     },
   })
 }
@@ -203,8 +203,8 @@ export function useSaveDailyLogMutation() {
     }
   >({
     mutationFn: saveDailyLog,
-    onSuccess: (savedLog) => {
-      queryClient.invalidateQueries({ queryKey: ["daily-log", savedLog.date] })
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["daily-log"] })
     },
   })
 }

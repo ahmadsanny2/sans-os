@@ -36,6 +36,16 @@ export function TodosWidget({
     todos.filter((t) => t.completed).length + habits.filter((h) => h.completed).length
   const totalCount = todos.length + habits.length
 
+  const sortedHabits = [...habits].sort((a, b) => {
+    if (a.completed === b.completed) return 0
+    return a.completed ? 1 : -1
+  })
+
+  const sortedTodos = [...todos].sort((a, b) => {
+    if (a.completed === b.completed) return 0
+    return a.completed ? 1 : -1
+  })
+
   return (
     <div className="rounded-2xl border border-border bg-card/25 dark:bg-card/10 p-6 shadow-sm space-y-4">
       <div className="flex items-center justify-between">
@@ -74,7 +84,7 @@ export function TodosWidget({
                 <p className="text-[10px] font-bold tracking-wider text-muted-foreground/70 uppercase px-0.5">
                   Habits
                 </p>
-                {habits.map((habit) => (
+                {sortedHabits.map((habit) => (
                   <div
                     key={habit.id}
                     onClick={() => !isPendingToggleHabit && handleToggleHabit?.(habit.id)}
@@ -114,7 +124,7 @@ export function TodosWidget({
                     Tasks
                   </p>
                 )}
-                {todos.map((todo) => (
+                {sortedTodos.map((todo) => (
                   <div
                     key={todo.id}
                     onClick={() => !isPendingToggle && handleToggle(todo.id, todo.completed)}

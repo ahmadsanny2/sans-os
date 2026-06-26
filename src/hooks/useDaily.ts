@@ -90,7 +90,8 @@ export function useCreatePriorityMutation() {
         if (!old) return [newPriority]
         return [...old.filter((p) => p.id !== newPriority.id), newPriority].sort((a, b) => a.orderIndex - b.orderIndex)
       })
-      queryClient.invalidateQueries({ queryKey: ["priorities", variables.date] })
+      queryClient.invalidateQueries({ queryKey: ["priorities"] })
+      queryClient.invalidateQueries({ queryKey: ["priorities-range"] })
     },
   })
 }
@@ -135,7 +136,8 @@ export function useTogglePriorityMutation(date: string) {
       }
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ["priorities", date] })
+      queryClient.invalidateQueries({ queryKey: ["priorities"] })
+      queryClient.invalidateQueries({ queryKey: ["priorities-range"] })
     },
   })
 }
@@ -187,6 +189,7 @@ export function useDeletePriorityMutation() {
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["priorities"] })
+      queryClient.invalidateQueries({ queryKey: ["priorities-range"] })
       queryClient.invalidateQueries({ queryKey: ["timetable"] })
     },
   })
@@ -254,7 +257,7 @@ export function useCreateTimetableBlockMutation() {
       })
       queryClient.invalidateQueries({ queryKey: ["timetable"] })
       if (newBlock.date) {
-        queryClient.invalidateQueries({ queryKey: ["priorities", newBlock.date] })
+        queryClient.invalidateQueries({ queryKey: ["priorities"] })
         queryClient.invalidateQueries({ queryKey: ["priorities-range"] })
       }
     },
@@ -294,6 +297,7 @@ export function useDeleteTimetableBlockMutation() {
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["timetable"] })
       queryClient.invalidateQueries({ queryKey: ["priorities"] })
+      queryClient.invalidateQueries({ queryKey: ["priorities-range"] })
     },
   })
 }

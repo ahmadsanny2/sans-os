@@ -19,6 +19,13 @@ export function PrioritiesWidget({
   handleToggle,
   isPendingToggle,
 }: PrioritiesWidgetProps) {
+  const sortedPriorities = [...priorities].sort((a, b) => {
+    if (a.completed === b.completed) {
+      return a.orderIndex - b.orderIndex
+    }
+    return a.completed ? 1 : -1
+  })
+
   return (
     <div className="rounded-2xl border border-border bg-card/25 dark:bg-card/10 p-6 shadow-sm space-y-4">
       <div className="flex items-center justify-between">
@@ -51,7 +58,7 @@ export function PrioritiesWidget({
           </div>
         ) : (
           <div className="space-y-2">
-            {priorities.map((priority) => (
+            {sortedPriorities.map((priority) => (
               <div
                 key={priority.id}
                 onClick={() => !isPendingToggle && handleToggle(priority.id, priority.completed)}

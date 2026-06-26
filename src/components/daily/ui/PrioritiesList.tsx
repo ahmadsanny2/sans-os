@@ -31,6 +31,13 @@ export function PrioritiesList({
   isPendingCreate,
   isPendingToggle = false,
 }: PrioritiesListProps) {
+  const sortedPriorities = [...listPriorities].sort((a, b) => {
+    if (a.completed === b.completed) {
+      return a.orderIndex - b.orderIndex
+    }
+    return a.completed ? 1 : -1
+  })
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -108,7 +115,7 @@ export function PrioritiesList({
           </div>
         ) : (
           <div className="space-y-2.5">
-            {listPriorities.map((priority) => (
+            {sortedPriorities.map((priority) => (
               <div
                 key={priority.id}
                 className={`flex items-center justify-between rounded-xl border p-4 transition-all duration-200 bg-card ${

@@ -51,6 +51,16 @@ export function DailyTodos({
   const completedCount = completedTodos + completedHabits
   const totalCount = totalTodos + totalHabits
 
+  const sortedHabits = [...habits].sort((a, b) => {
+    if (a.completed === b.completed) return 0
+    return a.completed ? 1 : -1
+  })
+
+  const sortedTodos = [...todos].sort((a, b) => {
+    if (a.completed === b.completed) return 0
+    return a.completed ? 1 : -1
+  })
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -128,7 +138,7 @@ export function DailyTodos({
                   Habits
                 </div>
                 <div className="space-y-2">
-                  {habits.map((habit) => (
+                  {sortedHabits.map((habit) => (
                     <div
                       key={habit.id}
                       className={`flex items-center justify-between rounded-xl border p-3.5 transition-all duration-200 bg-card ${
@@ -172,7 +182,7 @@ export function DailyTodos({
                   Tasks
                 </div>
                 <div className="space-y-2">
-                  {todos.map((todo) => (
+                  {sortedTodos.map((todo) => (
                     <div
                       key={todo.id}
                       className={`flex items-center justify-between rounded-xl border p-3.5 transition-all duration-200 bg-card ${
