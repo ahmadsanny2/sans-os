@@ -70,7 +70,8 @@ module.exports = {
         sm: "calc(var(--radius) - 4px)",
       },
       fontFamily: {
-        sans: ["var(--font-poppins)", ...fontFamily.sans],
+        sans: ["var(--font-plus-jakarta)", ...fontFamily.sans],
+        display: ["var(--font-space-grotesk)", ...fontFamily.sans],
       },
     },
   },
