@@ -74,25 +74,25 @@ export function PrioritiesList({
                 ? "Top 5 limit reached for today"
                 : "Add new priority task..."
             }
-            className="flex-1 rounded-xl border border-border bg-background px-3.5 py-2 text-sm outline-none transition-all focus:border-primary focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950 focus-visible:outline-none disabled:bg-secondary/40 disabled:placeholder-muted-foreground"
+            className="flex-1 rounded-xl border border-border bg-background px-3.5 py-2 text-sm outline-none transition-all focus:border-sidebar-primary focus:ring-2 focus:ring-sidebar-primary/10 disabled:bg-secondary/40 disabled:placeholder-muted-foreground"
           />
           <button
             type="submit"
             disabled={isLoading || listPriorities.length >= 5 || isPendingCreate || !newText.trim()}
-            className="inline-flex items-center justify-center rounded-xl bg-sidebar-primary px-4 py-2 text-sm font-semibold text-sidebar-primary-foreground shadow-sm transition-all hover:bg-sidebar-primary/95 disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950 focus-visible:outline-none"
-            aria-label="Add priority task"
+            className="inline-flex items-center justify-center rounded-xl bg-sidebar-primary px-4 py-2 text-sm font-semibold text-sidebar-primary-foreground shadow-sm transition-all hover:bg-sidebar-primary/95 disabled:opacity-50"
+            aria-label="Add task button"
           >
             {isPendingCreate ? (
-              <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+              <Loader2 className="h-4 w-4 animate-spin" />
             ) : (
-              <Plus className="h-4 w-4" aria-hidden="true" />
+              <Plus className="h-4 w-4" />
             )}
           </button>
         </div>
 
         {errorMsg && (
           <p className="text-xs text-destructive flex items-center gap-1 font-semibold">
-            <AlertCircle className="h-3.5 w-3.5" aria-hidden="true" />
+            <AlertCircle className="h-3.5 w-3.5" />
             {errorMsg}
           </p>
         )}
@@ -128,14 +128,14 @@ export function PrioritiesList({
                   <button
                     disabled={isPendingToggle}
                     onClick={() => handleToggleCompleted(priority.id, priority.completed)}
-                    className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-lg border transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950 focus-visible:outline-none ${
+                    className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-lg border transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed ${
                       priority.completed
                         ? "bg-sidebar-primary border-sidebar-primary text-sidebar-primary-foreground"
                         : "border-border hover:border-sidebar-primary/50 hover:bg-sidebar-primary/10"
                     } ${isPendingToggle ? "cursor-not-allowed" : "cursor-pointer"}`}
-                    aria-label={`Toggle completion of priority: ${priority.text}`}
+                    aria-label="Toggle task completed"
                   >
-                    {priority.completed && <Check className="h-3.5 w-3.5 stroke-[3]" aria-hidden="true" />}
+                    {priority.completed && <Check className="h-3.5 w-3.5 stroke-[3]" />}
                   </button>
 
                   <div className="flex flex-col min-w-0 pr-2">
@@ -147,8 +147,8 @@ export function PrioritiesList({
                       {priority.text}
                     </span>
                     {priority.rolloverCount > 0 && !priority.completed && (
-                      <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-500 mt-0.5 select-none">
-                        <RefreshCw className="h-3 w-3 animate-spin-slow" aria-hidden="true" />
+                      <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-500 mt-0.5">
+                        <RefreshCw className="h-3 w-3 animate-spin-slow" />
                         Rolled over {priority.rolloverCount}x
                       </span>
                     )}
@@ -157,10 +157,10 @@ export function PrioritiesList({
 
                 <button
                   onClick={() => handleDeletePriority(priority.id)}
-                  className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950 focus-visible:outline-none cursor-pointer"
-                  aria-label={`Delete priority: ${priority.text}`}
+                  className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+                  aria-label="Delete priority"
                 >
-                  <Trash2 className="h-4 w-4" aria-hidden="true" />
+                  <Trash2 className="h-4 w-4" />
                 </button>
               </div>
             ))}

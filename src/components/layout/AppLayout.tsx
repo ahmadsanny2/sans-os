@@ -122,17 +122,10 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   }, [isModalOpen])
 
   return (
-    <div ref={rootRef} className="relative flex h-screen w-screen overflow-hidden bg-background font-sans text-foreground transition-colors duration-300">
-      {/* Ambient background glows */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
-        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-violet-600/10 dark:bg-violet-600/8 blur-[120px] animate-aurora-slow" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] rounded-full bg-indigo-600/10 dark:bg-indigo-600/8 blur-[130px] animate-aurora-slower" />
-        <div className="absolute top-[30%] right-[20%] w-[35%] h-[35%] rounded-full bg-emerald-500/5 dark:bg-emerald-500/4 blur-[100px] animate-aurora-slow" />
-      </div>
-
+    <div ref={rootRef} className="flex h-screen w-screen overflow-hidden bg-background font-sans text-foreground transition-colors duration-300">
       {/* Desktop Sidebar */}
       <aside
-        className={`hidden md:flex flex-col border-r border-white/5 bg-zinc-900/15 dark:bg-black/30 backdrop-blur-xl text-sidebar-foreground transition-all duration-300 z-10 ${
+        className={`hidden md:flex flex-col border-r border-border bg-sidebar text-sidebar-foreground transition-all duration-300 ${
           sidebarOpen ? "w-64" : "w-16"
         }`}
       >
@@ -145,10 +138,10 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           ) : null}
           <button
             onClick={toggleSidebar}
-            className="rounded p-1 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950 focus-visible:outline-none transition-all cursor-pointer"
+            className="rounded p-1 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
             aria-label="Toggle Sidebar"
           >
-            {sidebarOpen ? <ChevronLeft className="h-5 w-5" aria-hidden="true" /> : <ChevronRight className="h-5 w-5" aria-hidden="true" />}
+            {sidebarOpen ? <ChevronLeft className="h-5 w-5" /> : <ChevronRight className="h-5 w-5" />}
           </button>
         </div>
 
@@ -161,13 +154,13 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-all focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950 focus-visible:outline-none ${
+                className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-all ${
                   isActive
                     ? "bg-sidebar-primary text-sidebar-primary-foreground font-semibold"
                     : "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground text-muted-foreground"
                 }`}
               >
-                <Icon className={`h-5 w-5 ${isActive ? "text-sidebar-primary-foreground" : "text-muted-foreground"}`} aria-hidden="true" />
+                <Icon className={`h-5 w-5 ${isActive ? "text-sidebar-primary-foreground" : "text-muted-foreground"}`} />
                 {sidebarOpen ? <span>{item.name}</span> : null}
               </Link>
             );
@@ -179,13 +172,13 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           <div className="border-t border-sidebar-border p-2 space-y-1">
           <button
             onClick={toggleTheme}
-            className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium hover:bg-sidebar-accent hover:text-sidebar-accent-foreground text-muted-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950 focus-visible:outline-none transition-all cursor-pointer"
+            className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium hover:bg-sidebar-accent hover:text-sidebar-accent-foreground text-muted-foreground"
             aria-label="Toggle Theme"
           >
             {userConfig.theme === "dark" ? (
-              <Sun className="h-5 w-5 text-amber-500" aria-hidden="true" />
+              <Sun className="h-5 w-5 text-amber-500" />
             ) : (
-              <Moon className="h-5 w-5 text-slate-700" aria-hidden="true" />
+              <Moon className="h-5 w-5 text-slate-700" />
             )}
             {sidebarOpen ? (
               <span>{userConfig.theme === "dark" ? "Light Mode" : "Dark Mode"}</span>
@@ -193,10 +186,10 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           </button>
           <button
             onClick={handleLogout}
-            className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium hover:bg-destructive/10 hover:text-destructive text-muted-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950 focus-visible:outline-none transition-all cursor-pointer"
+            className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium hover:bg-destructive/10 hover:text-destructive text-muted-foreground"
             aria-label="Log out"
           >
-            <LogOut className="h-5 w-5" aria-hidden="true" />
+            <LogOut className="h-5 w-5" />
             {sidebarOpen ? <span>Sign Out</span> : null}
           </button>
         </div>
@@ -204,8 +197,8 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
 
       {/* Mobile Sidebar (Slide-out Drawer) */}
       {mobileMenuOpen ? (
-        <div className="fixed inset-0 z-50 flex md:hidden bg-black/40 backdrop-blur-sm">
-          <div className="w-64 border-r border-white/5 bg-zinc-900/40 dark:bg-zinc-950/60 backdrop-blur-2xl text-sidebar-foreground flex flex-col h-full animate-in slide-in-from-left duration-250">
+        <div className="fixed inset-0 z-50 flex md:hidden bg-background/80 backdrop-blur-sm">
+          <div className="w-64 border-r border-border bg-sidebar text-sidebar-foreground flex flex-col h-full animate-in slide-in-from-left duration-250">
             <div className="flex h-14 items-center justify-between border-b border-sidebar-border px-4">
               <span className="bg-gradient-to-r from-violet-500 to-indigo-500 bg-clip-text text-lg font-bold tracking-wider text-transparent">
                 SansOS
@@ -263,7 +256,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       {/* Main Content Area */}
       <div className="flex flex-1 flex-col overflow-hidden">
         {/* Mobile Header */}
-        <header className="flex h-14 items-center justify-between border-b border-white/5 bg-zinc-900/10 dark:bg-black/25 backdrop-blur-xl px-4 md:hidden shrink-0 z-20">
+        <header className="flex h-14 items-center justify-between border-b border-border bg-card/60 backdrop-blur-md px-4 md:hidden shrink-0">
           <div className="flex items-center gap-3">
             <button
               onClick={() => setMobileMenuOpen(true)}
@@ -290,12 +283,12 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         </header>
 
         {/* Dynamic page view content container */}
-        <main className="flex-1 overflow-y-auto p-3 sm:p-4 md:p-6 bg-transparent scroll-smooth z-10">
+        <main className="flex-1 overflow-y-auto p-3 sm:p-4 md:p-6 bg-background/95 scroll-smooth">
           {children}
         </main>
 
         {/* Mobile Bottom Navigation Bar (Quick Navigation) */}
-        <nav className="flex h-16 border-t border-white/5 bg-zinc-900/10 dark:bg-black/25 backdrop-blur-2xl md:hidden items-center justify-around pb-safe shrink-0 z-20">
+        <nav className="flex h-16 border-t border-border bg-card/85 backdrop-blur-md md:hidden items-center justify-around pb-safe shrink-0">
           {SIDEBAR_ITEMS.slice(0, 4).map((item) => {
             const isActive = pathname === item.href
             const Icon = item.icon

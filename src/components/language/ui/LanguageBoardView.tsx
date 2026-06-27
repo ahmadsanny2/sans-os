@@ -218,7 +218,7 @@ export function LanguageBoardView({
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search word, meaning, or translation..."
-              className="w-full rounded-xl border border-border bg-card/60 pl-10 pr-4 py-2 text-sm outline-none transition-all focus:border-primary focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950 focus-visible:outline-none"
+              className="w-full rounded-xl border border-border bg-card/60 pl-10 pr-4 py-2 text-sm outline-none transition-all focus:border-sidebar-primary focus:ring-2 focus:ring-sidebar-primary/10"
             />
           </div>
 
@@ -227,18 +227,18 @@ export function LanguageBoardView({
             <button
               onClick={() => setIsFilterOpen(!isFilterOpen)}
               type="button"
-              className={`inline-flex items-center gap-2 px-3.5 py-2 text-xs font-semibold rounded-xl border transition-all select-none cursor-pointer focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950 focus-visible:outline-none ${
+              className={`inline-flex items-center gap-2 px-3.5 py-2 text-xs font-semibold rounded-xl border transition-all select-none cursor-pointer ${
                 isFilterOpen || dirFilter !== "all" || memorizedFilter !== "all"
                   ? "bg-violet-500/10 border-violet-500/30 text-violet-400"
                   : "border-border bg-card/60 text-muted-foreground hover:text-foreground hover:bg-secondary/40"
               }`}
             >
-              <Filter className="h-4 w-4" aria-hidden="true" />
+              <Filter className="h-4 w-4" />
               <span>Filter & Actions</span>
               {(dirFilter !== "all" || memorizedFilter !== "all") && (
                 <span className="h-1.5 w-1.5 rounded-full bg-violet-400" />
               )}
-              <ChevronDown className={`h-3 w-3 transition-transform duration-200 ${isFilterOpen ? "rotate-180" : ""}`} aria-hidden="true" />
+              <ChevronDown className={`h-3 w-3 transition-transform duration-200 ${isFilterOpen ? "rotate-180" : ""}`} />
             </button>
 
             {isFilterOpen && (
@@ -340,9 +340,9 @@ export function LanguageBoardView({
 
         <button
           onClick={() => setShowAddForm(!showAddForm)}
-          className="inline-flex items-center gap-1.5 rounded-lg bg-sidebar-primary px-3.5 py-2 text-xs font-semibold text-sidebar-primary-foreground shadow-sm transition-all hover:bg-sidebar-primary/90 hover:scale-[1.02] self-start md:self-auto focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950 focus-visible:outline-none cursor-pointer"
+          className="inline-flex items-center gap-1.5 rounded-lg bg-sidebar-primary px-3.5 py-2 text-xs font-semibold text-sidebar-primary-foreground shadow-sm transition-all hover:bg-sidebar-primary/90 hover:scale-[1.02] self-start md:self-auto"
         >
-          <Plus className="h-4 w-4" aria-hidden="true" />
+          <Plus className="h-4 w-4" />
           {showAddForm ? "Cancel Add" : "Add Vocabulary"}
         </button>
       </div>
@@ -363,7 +363,7 @@ export function LanguageBoardView({
                 <button
                   type="button"
                   onClick={() => setLangDirection("en-id")}
-                  className={`flex-1 py-2 px-3 text-xs font-extrabold rounded-xl border transition-all active:scale-[0.99] cursor-pointer focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950 focus-visible:outline-none ${
+                  className={`flex-1 py-2 px-3 text-xs font-extrabold rounded-xl border transition-all active:scale-[0.99] cursor-pointer ${
                     langDirection === "en-id"
                       ? "bg-violet-500/10 text-violet-400 border-violet-500/30"
                       : "border-border text-muted-foreground hover:bg-secondary/40"
@@ -374,7 +374,7 @@ export function LanguageBoardView({
                 <button
                   type="button"
                   onClick={() => setLangDirection("id-en")}
-                  className={`flex-1 py-2 px-3 text-xs font-extrabold rounded-xl border transition-all active:scale-[0.99] cursor-pointer focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950 focus-visible:outline-none ${
+                  className={`flex-1 py-2 px-3 text-xs font-extrabold rounded-xl border transition-all active:scale-[0.99] cursor-pointer ${
                     langDirection === "id-en"
                       ? "bg-violet-500/10 text-violet-400 border-violet-500/30"
                       : "border-border text-muted-foreground hover:bg-secondary/40"
@@ -398,7 +398,7 @@ export function LanguageBoardView({
                   value={word}
                   onChange={(e) => setWord(e.target.value)}
                   placeholder={langDirection === "id-en" ? "e.g. Belajar" : "e.g. Ephemeral"}
-                  className="w-full rounded-lg border border-border bg-background px-3 py-1.5 text-sm outline-none transition-all focus:border-primary focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950 focus-visible:outline-none"
+                  className="w-full rounded-lg border border-border bg-background px-3 py-1.5 text-sm outline-none transition-all focus:border-sidebar-primary focus:ring-2 focus:ring-sidebar-primary/10"
                 />
               </div>
 
@@ -414,7 +414,7 @@ export function LanguageBoardView({
                   value={translation}
                   onChange={(e) => setTranslation(e.target.value)}
                   placeholder={langDirection === "id-en" ? "e.g. Study, learn" : "e.g. Temporary, brief"}
-                  className="w-full rounded-lg border border-border bg-background px-3 py-1.5 text-sm outline-none transition-all focus:border-primary focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950 focus-visible:outline-none"
+                  className="w-full rounded-lg border border-border bg-background px-3 py-1.5 text-sm outline-none transition-all focus:border-sidebar-primary"
                 />
               </div>
             </div>
@@ -431,14 +431,14 @@ export function LanguageBoardView({
             <button
               type="button"
               onClick={() => setShowAddForm(false)}
-              className="rounded-lg border border-border px-3 py-1.5 text-xs font-semibold hover:bg-muted focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950 focus-visible:outline-none"
+              className="rounded-lg border border-border px-3 py-1.5 text-xs font-semibold hover:bg-muted"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={vocabCreatePending}
-              className="rounded-lg bg-sidebar-primary px-3.5 py-1.5 text-xs font-semibold text-sidebar-primary-foreground hover:bg-sidebar-primary/95 flex items-center gap-1 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950 focus-visible:outline-none"
+              className="rounded-lg bg-sidebar-primary px-3.5 py-1.5 text-xs font-semibold text-sidebar-primary-foreground hover:bg-sidebar-primary/95 flex items-center gap-1"
             >
               {vocabCreatePending ? (
                 <Loader2 className="h-3.5 w-3.5 animate-spin" />
