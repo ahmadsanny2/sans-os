@@ -91,18 +91,18 @@ export function DailyTodos({
             value={newText}
             onChange={(e) => setNewText(e.target.value)}
             placeholder={isLoading ? "Loading..." : "Add new task..."}
-            className="flex-1 rounded-xl border border-border bg-background px-3.5 py-2 text-sm outline-none transition-all focus:border-sidebar-primary focus:ring-2 focus:ring-sidebar-primary/10 disabled:bg-secondary/40 disabled:placeholder-muted-foreground"
+            className="flex-1 rounded-xl border border-border bg-background px-3.5 py-2 text-sm outline-none transition-all focus:border-primary focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950 focus-visible:outline-none disabled:bg-secondary/40 disabled:placeholder-muted-foreground"
           />
           <button
             type="submit"
             disabled={isLoading || isPendingCreate || !newText.trim()}
-            className="inline-flex items-center justify-center rounded-xl bg-sidebar-primary px-4 py-2 text-sm font-semibold text-sidebar-primary-foreground shadow-sm transition-all hover:bg-sidebar-primary/95 disabled:opacity-50"
+            className="inline-flex items-center justify-center rounded-xl bg-sidebar-primary px-4 py-2 text-sm font-semibold text-sidebar-primary-foreground shadow-sm transition-all hover:bg-sidebar-primary/95 disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950 focus-visible:outline-none cursor-pointer"
             aria-label="Add new todo item"
           >
             {isPendingCreate ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
+              <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
             ) : (
-              <Plus className="h-4 w-4" />
+              <Plus className="h-4 w-4" aria-hidden="true" />
             )}
           </button>
         </div>
@@ -151,16 +151,16 @@ export function DailyTodos({
                         <button
                           onClick={() => handleToggleHabit?.(habit.id)}
                           disabled={isPendingToggleHabit}
-                          className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-lg border transition-all active:scale-95 ${
+                          className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-lg border transition-all active:scale-95 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950 focus-visible:outline-none ${
                             habit.completed
                               ? "bg-indigo-600 border-indigo-600 text-white"
                               : "border-border hover:border-indigo-600/50"
-                          } disabled:opacity-50`}
-                          aria-label="Toggle habit check-in"
+                          } disabled:opacity-50 cursor-pointer`}
+                          aria-label={`Toggle check-in status of habit: ${habit.name}`}
                         >
-                          {habit.completed && <Check className="h-3.5 w-3.5 stroke-[3]" />}
+                          {habit.completed && <Check className="h-3.5 w-3.5 stroke-[3]" aria-hidden="true" />}
                         </button>
-
+ 
                         <span
                           className={`text-sm font-medium break-words whitespace-normal pr-2 ${
                             habit.completed ? "line-through text-muted-foreground font-normal" : "text-foreground"
@@ -174,7 +174,7 @@ export function DailyTodos({
                 </div>
               </div>
             )}
-
+ 
             {/* Todos Section */}
             {todos.length > 0 && (
               <div className="space-y-2">
@@ -195,16 +195,16 @@ export function DailyTodos({
                         <button
                           disabled={isPendingToggleTodo}
                           onClick={() => handleToggleCompleted(todo.id, todo.completed)}
-                          className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-lg border transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed ${
+                          className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-lg border transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950 focus-visible:outline-none ${
                             todo.completed
                               ? "bg-sidebar-primary border-sidebar-primary text-sidebar-primary-foreground"
                               : "border-border hover:border-sidebar-primary/50"
                           } ${isPendingToggleTodo ? "cursor-not-allowed" : "cursor-pointer"}`}
-                          aria-label="Toggle task completion"
+                          aria-label={`Toggle completion status of task: ${todo.text}`}
                         >
-                          {todo.completed && <Check className="h-3.5 w-3.5 stroke-[3]" />}
+                          {todo.completed && <Check className="h-3.5 w-3.5 stroke-[3]" aria-hidden="true" />}
                         </button>
-
+ 
                         <span
                           className={`text-sm font-medium break-words whitespace-normal pr-2 ${
                             todo.completed ? "line-through text-muted-foreground font-normal" : "text-foreground"
@@ -213,13 +213,13 @@ export function DailyTodos({
                           {todo.text}
                         </span>
                       </div>
-
+ 
                       <button
                         onClick={() => handleDeleteTodo(todo.id)}
-                        className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
-                        aria-label="Delete todo item"
+                        className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950 focus-visible:outline-none cursor-pointer"
+                        aria-label={`Delete task: ${todo.text}`}
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <Trash2 className="h-4 w-4" aria-hidden="true" />
                       </button>
                     </div>
                   ))}

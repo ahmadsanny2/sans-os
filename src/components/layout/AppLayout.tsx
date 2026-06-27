@@ -145,10 +145,10 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           ) : null}
           <button
             onClick={toggleSidebar}
-            className="rounded p-1 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+            className="rounded p-1 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950 focus-visible:outline-none transition-all cursor-pointer"
             aria-label="Toggle Sidebar"
           >
-            {sidebarOpen ? <ChevronLeft className="h-5 w-5" /> : <ChevronRight className="h-5 w-5" />}
+            {sidebarOpen ? <ChevronLeft className="h-5 w-5" aria-hidden="true" /> : <ChevronRight className="h-5 w-5" aria-hidden="true" />}
           </button>
         </div>
 
@@ -161,13 +161,13 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-all ${
+                className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-all focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950 focus-visible:outline-none ${
                   isActive
                     ? "bg-sidebar-primary text-sidebar-primary-foreground font-semibold"
                     : "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground text-muted-foreground"
                 }`}
               >
-                <Icon className={`h-5 w-5 ${isActive ? "text-sidebar-primary-foreground" : "text-muted-foreground"}`} />
+                <Icon className={`h-5 w-5 ${isActive ? "text-sidebar-primary-foreground" : "text-muted-foreground"}`} aria-hidden="true" />
                 {sidebarOpen ? <span>{item.name}</span> : null}
               </Link>
             );
@@ -179,13 +179,13 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           <div className="border-t border-sidebar-border p-2 space-y-1">
           <button
             onClick={toggleTheme}
-            className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium hover:bg-sidebar-accent hover:text-sidebar-accent-foreground text-muted-foreground"
+            className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium hover:bg-sidebar-accent hover:text-sidebar-accent-foreground text-muted-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950 focus-visible:outline-none transition-all cursor-pointer"
             aria-label="Toggle Theme"
           >
             {userConfig.theme === "dark" ? (
-              <Sun className="h-5 w-5 text-amber-500" />
+              <Sun className="h-5 w-5 text-amber-500" aria-hidden="true" />
             ) : (
-              <Moon className="h-5 w-5 text-slate-700" />
+              <Moon className="h-5 w-5 text-slate-700" aria-hidden="true" />
             )}
             {sidebarOpen ? (
               <span>{userConfig.theme === "dark" ? "Light Mode" : "Dark Mode"}</span>
@@ -193,10 +193,10 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           </button>
           <button
             onClick={handleLogout}
-            className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium hover:bg-destructive/10 hover:text-destructive text-muted-foreground"
+            className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium hover:bg-destructive/10 hover:text-destructive text-muted-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950 focus-visible:outline-none transition-all cursor-pointer"
             aria-label="Log out"
           >
-            <LogOut className="h-5 w-5" />
+            <LogOut className="h-5 w-5" aria-hidden="true" />
             {sidebarOpen ? <span>Sign Out</span> : null}
           </button>
         </div>

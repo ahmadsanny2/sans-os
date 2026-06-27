@@ -58,7 +58,7 @@ export function HabitGrid({
         </h3>
         <button
           onClick={() => setShowAddForm(!showAddForm)}
-          className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3.5 py-2 text-xs font-semibold text-primary-foreground shadow-sm transition-all hover:bg-primary/90 hover:scale-[1.02] cursor-pointer"
+          className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3.5 py-2 text-xs font-semibold text-primary-foreground shadow-sm transition-all hover:bg-primary/90 hover:scale-[1.02] cursor-pointer focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950 focus-visible:outline-none"
         >
           <Plus className="h-4 w-4" />
           {showAddForm ? "Cancel" : "Add Habit"}
@@ -82,7 +82,7 @@ export function HabitGrid({
               value={newHabitName}
               onChange={(e) => setNewHabitName(e.target.value)}
               placeholder="e.g. Workout, Read books 15 mins..."
-              className="w-full rounded-lg border border-white/5 bg-background px-3.5 py-2 text-sm outline-none transition-all focus:border-primary"
+              className="w-full rounded-lg border border-white/5 bg-background px-3.5 py-2 text-sm outline-none transition-all focus:border-primary focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950 focus-visible:outline-none"
             />
           </div>
 
@@ -90,14 +90,14 @@ export function HabitGrid({
             <button
               type="button"
               onClick={() => setShowAddForm(false)}
-              className="rounded-lg border border-white/5 px-3 py-1.5 text-xs font-semibold hover:bg-muted"
+              className="rounded-lg border border-white/5 px-3 py-1.5 text-xs font-semibold hover:bg-muted focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950 focus-visible:outline-none"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isPendingCreate}
-              className="rounded-lg bg-primary px-3.5 py-1.5 text-xs font-semibold text-primary-foreground hover:bg-primary/95 flex items-center gap-1"
+              className="rounded-lg bg-primary px-3.5 py-1.5 text-xs font-semibold text-primary-foreground hover:bg-primary/95 flex items-center gap-1 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950 focus-visible:outline-none"
             >
               {isPendingCreate ? (
                 <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -184,10 +184,10 @@ export function HabitGrid({
                   </div>
                   <button
                     onClick={() => handleDeleteHabit(habit.id)}
-                    className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all shrink-0 cursor-pointer"
+                    className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all shrink-0 cursor-pointer focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950 focus-visible:outline-none"
                     aria-label={`Delete ${habit.name}`}
                   >
-                    <Trash2 className="h-4 w-4" />
+                    <Trash2 className="h-4 w-4" aria-hidden="true" />
                   </button>
                 </div>
 
@@ -197,19 +197,19 @@ export function HabitGrid({
                     <button
                       onClick={() => handleToggleLog(habit.id, activeDate)}
                       disabled={activeIsPending}
-                      className={`flex h-9 w-9 items-center justify-center rounded-xl border text-transparent transition-all active:scale-95 disabled:opacity-50 cursor-pointer ${
+                      className={`flex h-9 w-9 items-center justify-center rounded-xl border text-transparent transition-all active:scale-95 disabled:opacity-50 cursor-pointer focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950 focus-visible:outline-none ${
                         activeChecked
                           ? "bg-primary border-primary text-white shadow-md shadow-primary/20"
                           : "border-white/10 hover:border-primary/50 bg-white/5"
                       }`}
-                      aria-label="Toggle active date completion"
+                      aria-label={`Toggle check-in status of ${habit.name} for ${format(parseISO(activeDate), "d MMMM yyyy")}`}
                     >
                       {activeIsPending ? (
                         <Loader2 className="h-4 w-4 animate-spin text-primary" />
                       ) : activeChecked ? (
-                        <Check className="h-4.5 w-4.5 stroke-[3] text-white" />
+                        <Check className="h-4.5 w-4.5 stroke-[3] text-white" aria-hidden="true" />
                       ) : (
-                        <CheckCircle className="h-4.5 w-4.5 text-muted-foreground/30" />
+                        <CheckCircle className="h-4.5 w-4.5 text-muted-foreground/30" aria-hidden="true" />
                       )}
                     </button>
                     <div className="text-left select-none">
@@ -241,13 +241,14 @@ export function HabitGrid({
                             key={dayStr}
                             disabled={isDayPending}
                             onClick={() => handleToggleLog(habit.id, dayStr)}
-                            className={`relative h-6 w-6 rounded-full flex items-center justify-center text-[9px] font-extrabold transition-all border font-display active:scale-95 select-none cursor-pointer ${
+                            className={`relative h-6 w-6 rounded-full flex items-center justify-center text-[9px] font-extrabold transition-all border font-display active:scale-95 select-none cursor-pointer focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950 focus-visible:outline-none ${
                               isDayChecked
                                 ? "bg-primary/20 border-primary/40 text-primary"
                                 : isToday
                                 ? "border-primary/40 text-muted-foreground bg-white/5"
                                 : "border-white/5 bg-white/5 text-muted-foreground/60"
                             }`}
+                            aria-label={`Toggle check-in status of ${habit.name} for ${format(day, "EEEE d MMMM")}`}
                             title={`Toggle check-in for ${format(day, "d MMM")}`}
                           >
                             {isDayPending ? (
