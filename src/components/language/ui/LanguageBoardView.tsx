@@ -3,6 +3,7 @@
 import React, { useState, useMemo, useRef, useEffect } from "react"
 import { VocabularyLog } from "@/hooks/useLanguage"
 import { DictionaryView } from "./DictionaryView"
+import { motion, AnimatePresence } from "framer-motion"
 import {
   Plus,
   Trash2,
@@ -93,11 +94,18 @@ export function LanguageBoardView({
   vocabCreatePending,
   writingCount,
 }: LanguageBoardViewProps) {
-  // Local state for direction filter ("all" | "en-id" | "id-en")
   const [dirFilter, setDirFilter] = useState<"all" | "en-id" | "id-en">("all")
   const [addMode, setAddMode] = useState<"dictionary" | "manual">("dictionary")
+  const [collapsedLetters, setCollapsedLetters] = useState<Record<string, boolean>>({})
   const [isFilterOpen, setIsFilterOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
+
+  const toggleLetterCollapse = (key: string) => {
+    setCollapsedLetters((prev) => ({
+      ...prev,
+      [key]: !prev[key],
+    }))
+  }
 
   // Click outside to close dropdown
   useEffect(() => {
@@ -530,185 +538,218 @@ export function LanguageBoardView({
 
                 {/* Alphabet Groups */}
                 <div className="space-y-8">
-                  {grouped.map(({ letter, words }) => (
-                    <div key={letter} className="space-y-3">
-                      {/* Group Letter Badge */}
-                      <div className="inline-flex items-center justify-center px-3 py-1 text-xs font-bold tracking-wider text-muted-foreground uppercase bg-secondary/30 dark:bg-zinc-800/50 border border-border/80 rounded-lg select-none shadow-sm">
-                        {letter}
-                      </div>
+                  {grouped.map(({ letter, words }) => {
+                    const groupKey = `${direction}-${letter}`
+                    const isCollapsed = collapsedLetters[groupKey] === true
 
-                      {/* Group Border Container */}
-                      <div className="rounded-2xl border border-border bg-card/10 dark:bg-card/5 p-5 shadow-sm">
-                        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                          {words.map((vocab) => {
-                            const isRevealed = revealedTranslationIds[vocab.id] !== false
+                    return (
+                      <div key={letter} className="space-y-3">
+                        {/* Collapsible Group Header / Separator */}
+                        <button
+                          type="button"
+                          onClick={() => toggleLetterCollapse(groupKey)}
+                          className="w-full flex items-center justify-between p-3 bg-secondary/20 hover:bg-secondary/45 dark:bg-zinc-900/40 dark:hover:bg-zinc-900/60 border border-border/80 rounded-xl transition-all duration-200 select-none cursor-pointer text-left shadow-sm active:scale-[0.995]"
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className="inline-flex h-8 w-8 items-center justify-center text-xs font-extrabold bg-sidebar-primary text-sidebar-primary-foreground rounded-lg shadow-sm border border-white/5 uppercase select-none">
+                              {letter}
+                            </div>
+                            <span className="text-xs font-bold text-muted-foreground">
+                              {words.length} {words.length === 1 ? "Word" : "Words"} logged
+                            </span>
+                          </div>
+                          <ChevronDown
+                            className={`h-4 w-4 text-muted-foreground transition-transform duration-300 ${
+                              isCollapsed ? "" : "rotate-180 text-violet-500"
+                            }`}
+                          />
+                        </button>
 
-                            return (
-                              <div
-                                key={vocab.id}
-                                className={`group relative rounded-xl border p-5 shadow-sm transition-all duration-300 flex flex-col justify-between ${
-                                  vocab.memorized
-                                    ? "border-border/50 bg-secondary/15 opacity-75"
-                                    : "border-border bg-card/45 dark:bg-card/15 hover:border-sidebar-primary/30"
-                                }`}
-                              >
-                                {/* Header row */}
-                                <div>
-                                  <div className="flex items-center justify-between gap-2 border-b border-border/40 pb-2.5">
-                                    <div className="flex items-center gap-1.5">
-                                      <span className="text-[10px] font-extrabold text-muted-foreground/50 tracking-wider">
-                                        VOCAB
-                                      </span>
-                                      {vocab.partOfSpeech && vocab.partOfSpeech !== "n/a" && (
-                                        <div className="flex flex-wrap gap-1">
-                                          {vocab.partOfSpeech.split(",").map((pos) => {
-                                            const cleanPos = pos.trim().toLowerCase()
-                                            return (
-                                              <span
-                                                key={cleanPos}
-                                                className={`px-1.5 py-0.5 rounded text-[8px] font-extrabold uppercase tracking-wider ${
-                                                  cleanPos === "verb"
-                                                    ? "bg-violet-500/10 text-violet-400 border border-violet-500/20"
-                                                    : cleanPos === "noun"
-                                                    ? "bg-blue-500/10 text-blue-400 border border-blue-500/20"
-                                                    : cleanPos === "adjective"
-                                                    ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                                                    : cleanPos === "adverb"
-                                                    ? "bg-amber-500/10 text-amber-400 border border-amber-500/20"
-                                                    : cleanPos === "preposition"
-                                                    ? "bg-indigo-500/10 text-indigo-400 border border-indigo-500/20"
-                                                    : cleanPos === "conjunction"
-                                                    ? "bg-orange-500/10 text-orange-400 border border-orange-500/20"
-                                                    : cleanPos === "pronoun"
-                                                    ? "bg-rose-500/10 text-rose-400 border border-rose-500/20"
-                                                    : "bg-zinc-500/10 text-zinc-400 border border-zinc-500/20"
-                                                }`}
-                                              >
-                                                {cleanPos}
-                                              </span>
-                                            )
-                                          })}
-                                        </div>
-                                      )}
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                      {/* Memorized Checklist Toggle */}
-                                      <button
-                                        onClick={() => handleToggleMemorized(vocab.id, vocab.memorized)}
-                                        className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-lg border transition-all active:scale-95 cursor-pointer ${
+                        {/* Collapsible Group Border Container */}
+                        <AnimatePresence initial={false}>
+                          {!isCollapsed && (
+                            <motion.div
+                              initial={{ height: 0, opacity: 0 }}
+                              animate={{ height: "auto", opacity: 1 }}
+                              exit={{ height: 0, opacity: 0 }}
+                              transition={{ duration: 0.2, ease: "easeInOut" }}
+                              className="overflow-hidden"
+                            >
+                              <div className="rounded-2xl border border-border bg-card/10 dark:bg-card/5 p-5 shadow-sm mt-1">
+                                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                                  {words.map((vocab) => {
+                                    const isRevealed = revealedTranslationIds[vocab.id] !== false
+
+                                    return (
+                                      <div
+                                        key={vocab.id}
+                                        className={`group relative rounded-xl border p-5 shadow-sm transition-all duration-300 flex flex-col justify-between ${
                                           vocab.memorized
-                                            ? "bg-sidebar-primary border-sidebar-primary text-sidebar-primary-foreground"
-                                            : "border-border hover:border-sidebar-primary/50 hover:bg-sidebar-primary/10"
+                                            ? "border-border/50 bg-secondary/15 opacity-75"
+                                            : "border-border bg-card/45 dark:bg-card/15 hover:border-sidebar-primary/30"
                                         }`}
-                                        aria-label="Toggle word memorized"
-                                        title={vocab.memorized ? "Mark as unmemorized" : "Mark as memorized"}
                                       >
-                                        {vocab.memorized && <Check className="h-3.5 w-3.5 stroke-[3]" />}
-                                      </button>
+                                        {/* Header row */}
+                                        <div>
+                                          <div className="flex items-center justify-between gap-2 border-b border-border/40 pb-2.5">
+                                            <div className="flex items-center gap-1.5">
+                                              <span className="text-[10px] font-extrabold text-muted-foreground/50 tracking-wider">
+                                                VOCAB
+                                              </span>
+                                              {vocab.partOfSpeech && vocab.partOfSpeech !== "n/a" && (
+                                                <div className="flex flex-wrap gap-1">
+                                                  {vocab.partOfSpeech.split(",").map((pos) => {
+                                                    const cleanPos = pos.trim().toLowerCase()
+                                                    return (
+                                                      <span
+                                                        key={cleanPos}
+                                                        className={`px-1.5 py-0.5 rounded text-[8px] font-extrabold uppercase tracking-wider ${
+                                                          cleanPos === "verb"
+                                                            ? "bg-violet-500/10 text-violet-400 border border-violet-500/20"
+                                                            : cleanPos === "noun"
+                                                            ? "bg-blue-500/10 text-blue-400 border border-blue-500/20"
+                                                            : cleanPos === "adjective"
+                                                            ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                                                            : cleanPos === "adverb"
+                                                            ? "bg-amber-500/10 text-amber-400 border border-amber-500/20"
+                                                            : cleanPos === "preposition"
+                                                            ? "bg-indigo-500/10 text-indigo-400 border border-indigo-500/20"
+                                                            : cleanPos === "conjunction"
+                                                            ? "bg-orange-500/10 text-orange-400 border border-orange-500/20"
+                                                            : cleanPos === "pronoun"
+                                                            ? "bg-rose-500/10 text-rose-400 border border-rose-500/20"
+                                                            : "bg-zinc-500/10 text-zinc-400 border border-zinc-500/20"
+                                                        }`}
+                                                      >
+                                                        {cleanPos}
+                                                      </span>
+                                                    )
+                                                  })}
+                                                </div>
+                                              )}
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                              {/* Memorized Checklist Toggle */}
+                                              <button
+                                                onClick={() => handleToggleMemorized(vocab.id, vocab.memorized)}
+                                                className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-lg border transition-all active:scale-95 cursor-pointer ${
+                                                  vocab.memorized
+                                                    ? "bg-sidebar-primary border-sidebar-primary text-sidebar-primary-foreground"
+                                                    : "border-border hover:border-sidebar-primary/50 hover:bg-sidebar-primary/10"
+                                                }`}
+                                                aria-label="Toggle word memorized"
+                                                title={vocab.memorized ? "Mark as unmemorized" : "Mark as memorized"}
+                                              >
+                                                {vocab.memorized && <Check className="h-3.5 w-3.5 stroke-[3]" />}
+                                              </button>
 
-                                      <button
-                                        onClick={() => handleDeleteVocabulary(vocab.id, vocab.word)}
-                                        className="opacity-0 group-hover:opacity-100 focus:opacity-100 p-1 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all shrink-0"
-                                        aria-label={`Delete word ${vocab.word}`}
-                                      >
-                                        <Trash2 className="h-3.5 w-3.5" />
-                                      </button>
-                                    </div>
-                                  </div>
-
-                                  {/* Word */}
-                                  <div className="space-y-2 mt-3 flex-1">
-                                    <h4 className={`text-xl font-bold tracking-tight text-foreground leading-none ${vocab.memorized ? "text-muted-foreground" : ""}`}>
-                                      {capitalizeFirstLetter(vocab.word)}
-                                    </h4>
-                                  </div>
-
-                                  {/* Translation clicking review block */}
-                                  <div className="my-4.5">
-                                    <div className="text-[10px] font-extrabold uppercase tracking-widest text-muted-foreground mb-1.5 select-none flex items-center gap-1">
-                                      <Lightbulb className="h-3 w-3 text-violet-500" /> Translation
-                                    </div>
-
-                                    <div
-                                      onClick={() => toggleRevealTranslation(vocab.id)}
-                                      className={`relative min-h-[48px] flex rounded-lg border transition-all p-3 select-none cursor-pointer ${
-                                        isRevealed
-                                          ? "bg-secondary/40 border-border/60 text-foreground items-start justify-start"
-                                          : "bg-secondary/10 border-dashed border-border/40 text-muted-foreground backdrop-blur-[2px] items-center justify-center"
-                                      }`}
-                                    >
-                                      {isRevealed ? (
-                                        <div className="flex flex-col gap-2 w-full text-left">
-                                          <div>
-                                            <span className="text-[9px] font-extrabold uppercase tracking-wider text-muted-foreground block select-none">
-                                              Manual
-                                            </span>
-                                            <span className="text-xs font-bold text-foreground leading-normal">{capitalizeFirstLetter(vocab.translation)}</span>
+                                              <button
+                                                onClick={() => handleDeleteVocabulary(vocab.id, vocab.word)}
+                                                className="opacity-0 group-hover:opacity-100 focus:opacity-100 p-1 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all shrink-0"
+                                                aria-label={`Delete word ${vocab.word}`}
+                                              >
+                                                <Trash2 className="h-3.5 w-3.5" />
+                                              </button>
+                                            </div>
                                           </div>
-                                          {vocab.autoTranslation && (
-                                            <div className="border-t border-border/40 pt-1.5 mt-1">
-                                              <span className="text-[9px] font-extrabold uppercase tracking-wider text-muted-foreground block select-none">
-                                                Google Translate
-                                              </span>
-                                              <span className="text-xs font-medium text-muted-foreground leading-normal italic">{capitalizeFirstLetter(vocab.autoTranslation)}</span>
-                                            </div>
-                                          )}
-                                          {vocab.partOfSpeech.split(",").map(p => p.trim().toLowerCase()).includes("verb") && vocab.v1 && (
-                                            <div className="border-t border-border/40 pt-1.5 mt-2 space-y-1.5">
-                                              <span className="text-[9px] font-extrabold uppercase tracking-wider text-violet-400 block select-none">
-                                                Verb Conjugations
-                                              </span>
-                                              <div className="grid grid-cols-2 gap-x-3 gap-y-1.5 text-[10px] rounded-lg bg-zinc-950/40 p-2 border border-white/5 font-mono">
-                                                <div className="break-words whitespace-normal">
-                                                  <span className="text-muted-foreground mr-1">V1:</span>
-                                                  <span className="font-bold text-white">{vocab.v1}</span>
-                                                </div>
-                                                <div className="text-muted-foreground break-words whitespace-normal">
-                                                  {capitalizeFirstLetter(vocab.v1Translation)}
-                                                </div>
-                                                
-                                                <div className="break-words whitespace-normal">
-                                                  <span className="text-muted-foreground mr-1">V2:</span>
-                                                  <span className="font-bold text-white">{vocab.v2}</span>
-                                                </div>
-                                                <div className="text-muted-foreground break-words whitespace-normal">
-                                                  {capitalizeFirstLetter(vocab.v2Translation)}
-                                                </div>
 
-                                                <div className="break-words whitespace-normal">
-                                                  <span className="text-muted-foreground mr-1">V3:</span>
-                                                  <span className="font-bold text-white">{vocab.v3}</span>
-                                                </div>
-                                                <div className="text-muted-foreground break-words whitespace-normal">
-                                                  {capitalizeFirstLetter(vocab.v3Translation)}
-                                                </div>
+                                          {/* Word */}
+                                          <div className="space-y-2 mt-3 flex-1">
+                                            <h4 className={`text-xl font-bold tracking-tight text-foreground leading-none ${vocab.memorized ? "text-muted-foreground" : ""}`}>
+                                              {capitalizeFirstLetter(vocab.word)}
+                                            </h4>
+                                          </div>
 
-                                                <div className="break-words whitespace-normal">
-                                                  <span className="text-muted-foreground mr-1">V-ing:</span>
-                                                  <span className="font-bold text-white">{vocab.vIng}</span>
-                                                </div>
-                                                <div className="text-muted-foreground break-words whitespace-normal">
-                                                  {capitalizeFirstLetter(vocab.vIngTranslation)}
-                                                </div>
-                                              </div>
+                                          {/* Translation clicking review block */}
+                                          <div className="my-4.5">
+                                            <div className="text-[10px] font-extrabold uppercase tracking-widest text-muted-foreground mb-1.5 select-none flex items-center gap-1">
+                                              <Lightbulb className="h-3 w-3 text-violet-500" /> Translation
                                             </div>
-                                          )}
+
+                                            <div
+                                              onClick={() => toggleRevealTranslation(vocab.id)}
+                                              className={`relative min-h-[48px] flex rounded-lg border transition-all p-3 select-none cursor-pointer ${
+                                                isRevealed
+                                                  ? "bg-secondary/40 border-border/60 text-foreground items-start justify-start"
+                                                  : "bg-secondary/10 border-dashed border-border/40 text-muted-foreground backdrop-blur-[2px] items-center justify-center"
+                                              }`}
+                                            >
+                                              {isRevealed ? (
+                                                <div className="flex flex-col gap-2 w-full text-left">
+                                                  <div>
+                                                    <span className="text-[9px] font-extrabold uppercase tracking-wider text-muted-foreground block select-none">
+                                                      Manual
+                                                    </span>
+                                                    <span className="text-xs font-bold text-foreground leading-normal">{capitalizeFirstLetter(vocab.translation)}</span>
+                                                  </div>
+                                                  {vocab.autoTranslation && (
+                                                    <div className="border-t border-border/40 pt-1.5 mt-1">
+                                                      <span className="text-[9px] font-extrabold uppercase tracking-wider text-muted-foreground block select-none">
+                                                        Google Translate
+                                                      </span>
+                                                      <span className="text-xs font-medium text-muted-foreground leading-normal italic">{capitalizeFirstLetter(vocab.autoTranslation)}</span>
+                                                    </div>
+                                                  )}
+                                                  {vocab.partOfSpeech.split(",").map(p => p.trim().toLowerCase()).includes("verb") && vocab.v1 && (
+                                                    <div className="border-t border-border/40 pt-1.5 mt-2 space-y-1.5">
+                                                      <span className="text-[9px] font-extrabold uppercase tracking-wider text-violet-400 block select-none">
+                                                        Verb Conjugations
+                                                      </span>
+                                                      <div className="grid grid-cols-2 gap-x-3 gap-y-1.5 text-[10px] rounded-lg bg-zinc-950/40 p-2 border border-white/5 font-mono">
+                                                        <div className="break-words whitespace-normal">
+                                                          <span className="text-muted-foreground mr-1">V1:</span>
+                                                          <span className="font-bold text-white">{vocab.v1}</span>
+                                                        </div>
+                                                        <div className="text-muted-foreground break-words whitespace-normal">
+                                                          {capitalizeFirstLetter(vocab.v1Translation)}
+                                                        </div>
+                                                        
+                                                        <div className="break-words whitespace-normal">
+                                                          <span className="text-muted-foreground mr-1">V2:</span>
+                                                          <span className="font-bold text-white">{vocab.v2}</span>
+                                                        </div>
+                                                        <div className="text-muted-foreground break-words whitespace-normal">
+                                                          {capitalizeFirstLetter(vocab.v2Translation)}
+                                                        </div>
+
+                                                        <div className="break-words whitespace-normal">
+                                                          <span className="text-muted-foreground mr-1">V3:</span>
+                                                          <span className="font-bold text-white">{vocab.v3}</span>
+                                                        </div>
+                                                        <div className="text-muted-foreground break-words whitespace-normal">
+                                                          {capitalizeFirstLetter(vocab.v3Translation)}
+                                                        </div>
+
+                                                        <div className="break-words whitespace-normal">
+                                                          <span className="text-muted-foreground mr-1">V-ing:</span>
+                                                          <span className="font-bold text-white">{vocab.vIng}</span>
+                                                        </div>
+                                                        <div className="text-muted-foreground break-words whitespace-normal">
+                                                          {capitalizeFirstLetter(vocab.vIngTranslation)}
+                                                        </div>
+                                                      </div>
+                                                    </div>
+                                                  )}
+                                                </div>
+                                              ) : (
+                                                <div className="flex items-center gap-1 text-[10px] font-extrabold uppercase tracking-wider select-none text-muted-foreground/60 group-hover:text-muted-foreground/95 transition-colors">
+                                                  <Eye className="h-3.5 w-3.5" /> Click to reveal
+                                                </div>
+                                              )}
+                                            </div>
+                                          </div>
                                         </div>
-                                      ) : (
-                                        <div className="flex items-center gap-1 text-[10px] font-extrabold uppercase tracking-wider select-none text-muted-foreground/60 group-hover:text-muted-foreground/95 transition-colors">
-                                          <Eye className="h-3.5 w-3.5" /> Click to reveal
-                                        </div>
-                                      )}
-                                    </div>
-                                  </div>
+                                      </div>
+                                    )
+                                  })}
                                 </div>
                               </div>
-                            )
-                          })}
-                        </div>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
                       </div>
-                    </div>
-                  ))}
+                    )
+                  })}
                 </div>
               </div>
             )
