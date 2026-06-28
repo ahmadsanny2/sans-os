@@ -38,7 +38,7 @@ export function DictionaryView({ vocabList }: DictionaryViewProps) {
   const toggleLetterCollapse = (letter: string) => {
     setCollapsedLetters((prev) => ({
       ...prev,
-      [letter]: !prev[letter],
+      [letter]: prev[letter] === undefined ? false : !prev[letter],
     }))
   }
 
@@ -195,7 +195,7 @@ export function DictionaryView({ vocabList }: DictionaryViewProps) {
       ) : (
         <div className="space-y-6">
           {makeGroupedAlphabetical(words).map(({ letter, words: groupWords }) => {
-            const isCollapsed = collapsedLetters[letter] === true
+            const isCollapsed = collapsedLetters[letter] !== false
 
             return (
               <div key={letter} className="space-y-3">
