@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo, useRef, useEffect } from "react"
 import { VocabularyLog } from "@/hooks/useLanguage"
+import { DictionaryView } from "./DictionaryView"
 import {
   Plus,
   Trash2,
@@ -22,8 +23,15 @@ import { GridCardSkeleton } from "@/components/ui/Skeletons"
 import { StatCard } from "@/components/ui/StatCard"
 import { EmptyState } from "@/components/ui/EmptyState"
 import { ErrorState } from "@/components/ui/ErrorState"
+const capitalizeFirstLetter = (str: string | null | undefined): string => {
+  if (!str) return ""
+  const trimmed = str.trim()
+  if (trimmed.length === 0) return ""
+  return trimmed.charAt(0).toUpperCase() + trimmed.slice(1)
+}
 
 interface LanguageBoardViewProps {
+  vocabList: VocabularyLog[]
   isLoading: boolean
   isError: boolean
   showAddForm: boolean
@@ -55,6 +63,7 @@ interface LanguageBoardViewProps {
 }
 
 export function LanguageBoardView({
+  vocabList,
   isLoading,
   isError,
   showAddForm,
@@ -86,6 +95,7 @@ export function LanguageBoardView({
 }: LanguageBoardViewProps) {
   // Local state for direction filter ("all" | "en-id" | "id-en")
   const [dirFilter, setDirFilter] = useState<"all" | "en-id" | "id-en">("all")
+  const [addMode, setAddMode] = useState<"dictionary" | "manual">("dictionary")
   const [isFilterOpen, setIsFilterOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
@@ -117,9 +127,11 @@ export function LanguageBoardView({
 
     const makeGroupedAlphabetical = (list: VocabularyLog[]) => {
       const groups: Record<string, VocabularyLog[]> = {}
-      const sorted = [...list].sort((a, b) => 
-        a.word.localeCompare(b.word, undefined, { sensitivity: "base" })
-      )
+      const sorted = [...list].sort((a, b) => {
+        const comp = a.word.toLowerCase().localeCompare(b.word.toLowerCase())
+        if (comp !== 0) return comp
+        return a.word.localeCompare(b.word)
+      })
       sorted.forEach((vocab) => {
         const firstLetter = vocab.word.trim().charAt(0).toUpperCase()
         const letter = /^[A-Z]$/i.test(firstLetter) ? firstLetter : "#"
@@ -347,107 +359,141 @@ export function LanguageBoardView({
         </button>
       </div>
 
-      {/* 3. Add Vocabulary Form Card */}
+      {/* 3. Add Vocabulary Form Card / Dictionary Panel */}
       {showAddForm && (
-        <form
-          onSubmit={handleAddVocabulary}
-          className="rounded-2xl border border-border bg-card/60 p-5 shadow-sm backdrop-blur-md space-y-4 animate-in slide-in-from-top-4 duration-200"
-        >
-          <div className="space-y-4">
-            {/* Language Direction Toggle */}
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider select-none">
-                Language Direction / Arah Bahasa
-              </label>
-              <div className="flex flex-col sm:flex-row gap-2">
-                <button
-                  type="button"
-                  onClick={() => setLangDirection("en-id")}
-                  className={`flex-1 py-2 px-3 text-xs font-extrabold rounded-xl border transition-all active:scale-[0.99] cursor-pointer ${
-                    langDirection === "en-id"
-                      ? "bg-violet-500/10 text-violet-400 border-violet-500/30"
-                      : "border-border text-muted-foreground hover:bg-secondary/40"
-                  }`}
-                >
-                  English ➔ Indonesian (EN ➔ ID)
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setLangDirection("id-en")}
-                  className={`flex-1 py-2 px-3 text-xs font-extrabold rounded-xl border transition-all active:scale-[0.99] cursor-pointer ${
-                    langDirection === "id-en"
-                      ? "bg-violet-500/10 text-violet-400 border-violet-500/30"
-                      : "border-border text-muted-foreground hover:bg-secondary/40"
-                  }`}
-                >
-                  Indonesian ➔ English (ID ➔ EN)
-                </button>
-              </div>
-            </div>
-
-            <div className="grid gap-4 sm:grid-cols-2">
-              {/* Word Input */}
-              <div className="space-y-1.5">
-                <label htmlFor="vocabWord" className="text-xs font-bold text-muted-foreground">
-                  {langDirection === "id-en" ? "Word (Indonesian) *" : "Word (English) *"}
-                </label>
-                <input
-                  id="vocabWord"
-                  type="text"
-                  required
-                  value={word}
-                  onChange={(e) => setWord(e.target.value)}
-                  placeholder={langDirection === "id-en" ? "e.g. Belajar" : "e.g. Ephemeral"}
-                  className="w-full rounded-lg border border-border bg-background px-3 py-1.5 text-sm outline-none transition-all focus:border-sidebar-primary focus:ring-2 focus:ring-sidebar-primary/10"
-                />
-              </div>
-
-              {/* Translation */}
-              <div className="space-y-1.5">
-                <label htmlFor="vocabTrans" className="text-xs font-bold text-muted-foreground">
-                  {langDirection === "id-en" ? "Translation (English) *" : "Translation (Indonesian) *"}
-                </label>
-                <input
-                  id="vocabTrans"
-                  type="text"
-                  required
-                  value={translation}
-                  onChange={(e) => setTranslation(e.target.value)}
-                  placeholder={langDirection === "id-en" ? "e.g. Study, learn" : "e.g. Temporary, brief"}
-                  className="w-full rounded-lg border border-border bg-background px-3 py-1.5 text-sm outline-none transition-all focus:border-sidebar-primary"
-                />
-              </div>
+        <div className="rounded-2xl border border-border bg-card/60 p-5 shadow-sm backdrop-blur-md space-y-4 animate-in slide-in-from-top-4 duration-200">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border/40 pb-3">
+            <h3 className="text-sm font-bold text-foreground flex items-center gap-1.5 select-none">
+              <Plus className="h-4.5 w-4.5 text-violet-500" /> Add New Vocabulary
+            </h3>
+            {/* Sub-tabs for Add Mode */}
+            <div className="flex gap-1 p-0.5 bg-secondary/60 border border-border/30 rounded-xl select-none text-[10px] w-fit self-end sm:self-auto">
+              <button
+                type="button"
+                onClick={() => setAddMode("dictionary")}
+                className={`px-3 py-1.5 rounded-lg font-bold transition-all cursor-pointer ${
+                  addMode === "dictionary"
+                    ? "bg-sidebar-primary text-sidebar-primary-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                Search Dictionary
+              </button>
+              <button
+                type="button"
+                onClick={() => setAddMode("manual")}
+                className={`px-3 py-1.5 rounded-lg font-bold transition-all cursor-pointer ${
+                  addMode === "manual"
+                    ? "bg-sidebar-primary text-sidebar-primary-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                Add Manually
+              </button>
             </div>
           </div>
 
-          {formError && (
-            <p className="text-xs text-destructive flex items-center gap-1 font-semibold animate-in slide-in-from-top-1">
-              <AlertCircle className="h-3.5 w-3.5" />
-              {formError}
-            </p>
-          )}
+          {addMode === "dictionary" ? (
+            <DictionaryView vocabList={vocabList} />
+          ) : (
+            <form onSubmit={handleAddVocabulary} className="space-y-4 pt-2">
+              <div className="space-y-4">
+                {/* Language Direction Toggle */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider select-none">
+                    Language Direction / Arah Bahasa
+                  </label>
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setLangDirection("en-id")}
+                      className={`flex-1 py-2 px-3 text-xs font-extrabold rounded-xl border transition-all active:scale-[0.99] cursor-pointer ${
+                        langDirection === "en-id"
+                          ? "bg-violet-500/10 text-violet-400 border-violet-500/30"
+                          : "border-border text-muted-foreground hover:bg-secondary/40"
+                      }`}
+                    >
+                      English ➔ Indonesian (EN ➔ ID)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setLangDirection("id-en")}
+                      className={`flex-1 py-2 px-3 text-xs font-extrabold rounded-xl border transition-all active:scale-[0.99] cursor-pointer ${
+                        langDirection === "id-en"
+                          ? "bg-violet-500/10 text-violet-400 border-violet-500/30"
+                          : "border-border text-muted-foreground hover:bg-secondary/40"
+                      }`}
+                    >
+                      Indonesian ➔ English (ID ➔ EN)
+                    </button>
+                  </div>
+                </div>
 
-          <div className="flex justify-end gap-2 border-t border-border/40 pt-3">
-            <button
-              type="button"
-              onClick={() => setShowAddForm(false)}
-              className="rounded-lg border border-border px-3 py-1.5 text-xs font-semibold hover:bg-muted"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={vocabCreatePending}
-              className="rounded-lg bg-sidebar-primary px-3.5 py-1.5 text-xs font-semibold text-sidebar-primary-foreground hover:bg-sidebar-primary/95 flex items-center gap-1"
-            >
-              {vocabCreatePending ? (
-                <Loader2 className="h-3.5 w-3.5 animate-spin" />
-              ) : (
-                "Save Word"
+                <div className="grid gap-4 sm:grid-cols-2">
+                  {/* Word Input */}
+                  <div className="space-y-1.5">
+                    <label htmlFor="vocabWord" className="text-xs font-bold text-muted-foreground">
+                      {langDirection === "id-en" ? "Word (Indonesian) *" : "Word (English) *"}
+                    </label>
+                    <input
+                      id="vocabWord"
+                      type="text"
+                      required
+                      value={word}
+                      onChange={(e) => setWord(e.target.value)}
+                      placeholder={langDirection === "id-en" ? "e.g. Belajar" : "e.g. Ephemeral"}
+                      className="w-full rounded-lg border border-border bg-background px-3 py-1.5 text-sm outline-none transition-all focus:border-sidebar-primary focus:ring-2 focus:ring-sidebar-primary/10"
+                    />
+                  </div>
+
+                  {/* Translation */}
+                  <div className="space-y-1.5">
+                    <label htmlFor="vocabTrans" className="text-xs font-bold text-muted-foreground">
+                      {langDirection === "id-en" ? "Translation (English) *" : "Translation (Indonesian) *"}
+                    </label>
+                    <input
+                      id="vocabTrans"
+                      type="text"
+                      required
+                      value={translation}
+                      onChange={(e) => setTranslation(e.target.value)}
+                      placeholder={langDirection === "id-en" ? "e.g. Study, learn" : "e.g. Temporary, brief"}
+                      className="w-full rounded-lg border border-border bg-background px-3 py-1.5 text-sm outline-none transition-all focus:border-sidebar-primary"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {formError && (
+                <p className="text-xs text-destructive flex items-center gap-1 font-semibold animate-in slide-in-from-top-1">
+                  <AlertCircle className="h-3.5 w-3.5" />
+                  {formError}
+                </p>
               )}
-            </button>
-          </div>
-        </form>
+
+              <div className="flex justify-end gap-2 border-t border-border/40 pt-3">
+                <button
+                  type="button"
+                  onClick={() => setShowAddForm(false)}
+                  className="rounded-lg border border-border px-3 py-1.5 text-xs font-semibold hover:bg-muted"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={vocabCreatePending}
+                  className="rounded-lg bg-sidebar-primary px-3.5 py-1.5 text-xs font-semibold text-sidebar-primary-foreground hover:bg-sidebar-primary/95 flex items-center gap-1"
+                >
+                  {vocabCreatePending ? (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  ) : (
+                    "Save Word"
+                  )}
+                </button>
+              </div>
+            </form>
+          )}
+        </div>
       )}
 
       {/* 4. Vocabulary Cards Grid */}
@@ -495,7 +541,7 @@ export function LanguageBoardView({
                       <div className="rounded-2xl border border-border bg-card/10 dark:bg-card/5 p-5 shadow-sm">
                         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                           {words.map((vocab) => {
-                            const isRevealed = !!revealedTranslationIds[vocab.id]
+                            const isRevealed = revealedTranslationIds[vocab.id] !== false
 
                             return (
                               <div
@@ -514,19 +560,35 @@ export function LanguageBoardView({
                                         VOCAB
                                       </span>
                                       {vocab.partOfSpeech && vocab.partOfSpeech !== "n/a" && (
-                                        <span className={`px-1.5 py-0.5 rounded text-[8px] font-extrabold uppercase tracking-wider ${
-                                          vocab.partOfSpeech === "verb"
-                                            ? "bg-violet-500/10 text-violet-400 border border-violet-500/20"
-                                            : vocab.partOfSpeech === "noun"
-                                            ? "bg-blue-500/10 text-blue-400 border border-blue-500/20"
-                                            : vocab.partOfSpeech === "adjective"
-                                            ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                                            : vocab.partOfSpeech === "adverb"
-                                            ? "bg-amber-500/10 text-amber-400 border border-amber-500/20"
-                                            : "bg-zinc-500/10 text-zinc-400 border border-zinc-500/20"
-                                        }`}>
-                                          {vocab.partOfSpeech}
-                                        </span>
+                                        <div className="flex flex-wrap gap-1">
+                                          {vocab.partOfSpeech.split(",").map((pos) => {
+                                            const cleanPos = pos.trim().toLowerCase()
+                                            return (
+                                              <span
+                                                key={cleanPos}
+                                                className={`px-1.5 py-0.5 rounded text-[8px] font-extrabold uppercase tracking-wider ${
+                                                  cleanPos === "verb"
+                                                    ? "bg-violet-500/10 text-violet-400 border border-violet-500/20"
+                                                    : cleanPos === "noun"
+                                                    ? "bg-blue-500/10 text-blue-400 border border-blue-500/20"
+                                                    : cleanPos === "adjective"
+                                                    ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                                                    : cleanPos === "adverb"
+                                                    ? "bg-amber-500/10 text-amber-400 border border-amber-500/20"
+                                                    : cleanPos === "preposition"
+                                                    ? "bg-indigo-500/10 text-indigo-400 border border-indigo-500/20"
+                                                    : cleanPos === "conjunction"
+                                                    ? "bg-orange-500/10 text-orange-400 border border-orange-500/20"
+                                                    : cleanPos === "pronoun"
+                                                    ? "bg-rose-500/10 text-rose-400 border border-rose-500/20"
+                                                    : "bg-zinc-500/10 text-zinc-400 border border-zinc-500/20"
+                                                }`}
+                                              >
+                                                {cleanPos}
+                                              </span>
+                                            )
+                                          })}
+                                        </div>
                                       )}
                                     </div>
                                     <div className="flex items-center gap-2">
@@ -557,7 +619,7 @@ export function LanguageBoardView({
                                   {/* Word */}
                                   <div className="space-y-2 mt-3 flex-1">
                                     <h4 className={`text-xl font-bold tracking-tight text-foreground leading-none ${vocab.memorized ? "text-muted-foreground" : ""}`}>
-                                      {vocab.word}
+                                      {capitalizeFirstLetter(vocab.word)}
                                     </h4>
                                   </div>
 
@@ -581,17 +643,17 @@ export function LanguageBoardView({
                                             <span className="text-[9px] font-extrabold uppercase tracking-wider text-muted-foreground block select-none">
                                               Manual
                                             </span>
-                                            <span className="text-xs font-bold text-foreground leading-normal">{vocab.translation}</span>
+                                            <span className="text-xs font-bold text-foreground leading-normal">{capitalizeFirstLetter(vocab.translation)}</span>
                                           </div>
                                           {vocab.autoTranslation && (
                                             <div className="border-t border-border/40 pt-1.5 mt-1">
                                               <span className="text-[9px] font-extrabold uppercase tracking-wider text-muted-foreground block select-none">
                                                 Google Translate
                                               </span>
-                                              <span className="text-xs font-medium text-muted-foreground leading-normal italic">{vocab.autoTranslation}</span>
+                                              <span className="text-xs font-medium text-muted-foreground leading-normal italic">{capitalizeFirstLetter(vocab.autoTranslation)}</span>
                                             </div>
                                           )}
-                                          {vocab.partOfSpeech.trim().toLowerCase() === "verb" && vocab.v1 && (
+                                          {vocab.partOfSpeech.split(",").map(p => p.trim().toLowerCase()).includes("verb") && vocab.v1 && (
                                             <div className="border-t border-border/40 pt-1.5 mt-2 space-y-1.5">
                                               <span className="text-[9px] font-extrabold uppercase tracking-wider text-violet-400 block select-none">
                                                 Verb Conjugations
@@ -602,7 +664,7 @@ export function LanguageBoardView({
                                                   <span className="font-bold text-white">{vocab.v1}</span>
                                                 </div>
                                                 <div className="text-muted-foreground break-words whitespace-normal">
-                                                  {vocab.v1Translation}
+                                                  {capitalizeFirstLetter(vocab.v1Translation)}
                                                 </div>
                                                 
                                                 <div className="break-words whitespace-normal">
@@ -610,7 +672,7 @@ export function LanguageBoardView({
                                                   <span className="font-bold text-white">{vocab.v2}</span>
                                                 </div>
                                                 <div className="text-muted-foreground break-words whitespace-normal">
-                                                  {vocab.v2Translation}
+                                                  {capitalizeFirstLetter(vocab.v2Translation)}
                                                 </div>
 
                                                 <div className="break-words whitespace-normal">
@@ -618,7 +680,7 @@ export function LanguageBoardView({
                                                   <span className="font-bold text-white">{vocab.v3}</span>
                                                 </div>
                                                 <div className="text-muted-foreground break-words whitespace-normal">
-                                                  {vocab.v3Translation}
+                                                  {capitalizeFirstLetter(vocab.v3Translation)}
                                                 </div>
 
                                                 <div className="break-words whitespace-normal">
@@ -626,7 +688,7 @@ export function LanguageBoardView({
                                                   <span className="font-bold text-white">{vocab.vIng}</span>
                                                 </div>
                                                 <div className="text-muted-foreground break-words whitespace-normal">
-                                                  {vocab.vIngTranslation}
+                                                  {capitalizeFirstLetter(vocab.vIngTranslation)}
                                                 </div>
                                               </div>
                                             </div>

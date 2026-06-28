@@ -31,7 +31,7 @@ export function useLanguagePage() {
   const deleteDialogueMutation = useDeleteDialogueMutation()
 
   // Tab switching state
-  const [activeTab, setActiveTab] = useState<"vocab" | "writing" | "dialogue">("vocab")
+  const [activeTab, setActiveTab] = useState<"vocab" | "writing" | "dialogue" | "dictionary">("vocab")
 
   // ==========================================
   // Vocabulary States
@@ -159,20 +159,20 @@ export function useLanguagePage() {
   const toggleRevealTranslation = (id: string): void => {
     setRevealedTranslationIds((prev) => ({
       ...prev,
-      [id]: !prev[id],
+      [id]: prev[id] === false ? true : false,
     }))
   }
 
   const revealAllTranslations = (): void => {
-    const allIds: Record<string, boolean> = {}
-    vocabList.forEach((v) => {
-      allIds[v.id] = true
-    })
-    setRevealedTranslationIds(allIds)
+    setRevealedTranslationIds({})
   }
 
   const hideAllTranslations = (): void => {
-    setRevealedTranslationIds({})
+    const allIds: Record<string, boolean> = {}
+    vocabList.forEach((v) => {
+      allIds[v.id] = false
+    })
+    setRevealedTranslationIds(allIds)
   }
 
   // Vocab metrics

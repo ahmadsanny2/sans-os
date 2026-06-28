@@ -61,6 +61,7 @@ export default function LanguageComponent() {
 
       {activeTab === "vocab" ? (
         <LanguageBoardView
+          vocabList={vocabList}
           isLoading={languageData.vocabIsLoading}
           isError={languageData.vocabIsError}
           showAddForm={languageData.showAddForm}

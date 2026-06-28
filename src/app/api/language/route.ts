@@ -38,7 +38,8 @@ export async function GET(): Promise<NextResponse> {
           }
         }
 
-        if (log.partOfSpeech.trim().toLowerCase() === "verb" && !log.v1) {
+        const posList = log.partOfSpeech.split(",").map((p: string) => p.trim().toLowerCase())
+        if (posList.includes("verb") && !log.v1) {
           const conj = conjugateVerb(log.word)
           
           updateFields.v1 = conj.v1
@@ -47,9 +48,9 @@ export async function GET(): Promise<NextResponse> {
           updateFields.vIng = conj.vIng
           
           updateFields.v1Translation = log.translation.trim()
-          updateFields.v2Translation = await translateText(conj.v2)
-          updateFields.v3Translation = await translateText(conj.v3)
-          updateFields.vIngTranslation = await translateText(conj.vIng)
+          updateFields.v2Translation = await translateText(conj.v2, "en", "id", false)
+          updateFields.v3Translation = await translateText(conj.v3, "en", "id", false)
+          updateFields.vIngTranslation = await translateText(conj.vIng, "en", "id", false)
           
           needsUpdate = true
 
@@ -100,31 +101,93 @@ function isIndonesianVerb(indoWord: string): boolean {
   return false
 }
 
+const SPECIAL_WORDS: Record<string, string> = {
+  "at": "preposition",
+  "in": "preposition",
+  "on": "preposition",
+  "of": "preposition",
+  "to": "preposition",
+  "by": "preposition",
+  "for": "preposition",
+  "with": "preposition",
+  "about": "preposition",
+  "against": "preposition",
+  "between": "preposition",
+  "into": "preposition",
+  "through": "preposition",
+  "during": "preposition",
+  "before": "preposition",
+  "after": "preposition",
+  "above": "preposition",
+  "below": "preposition",
+  "from": "preposition",
+  "up": "preposition",
+  "down": "preposition",
+  "out": "preposition",
+  "over": "preposition",
+  "under": "preposition",
+  "off": "preposition",
+  "and": "conjunction",
+  "but": "conjunction",
+  "or": "conjunction",
+  "so": "conjunction",
+  "because": "conjunction",
+  "although": "conjunction",
+  "while": "conjunction",
+  "as": "conjunction",
+  "if": "conjunction",
+  "unless": "conjunction",
+  "until": "conjunction",
+  "since": "conjunction",
+  "than": "conjunction",
+  "i": "pronoun",
+  "me": "pronoun",
+  "my": "pronoun",
+  "you": "pronoun",
+  "he": "pronoun",
+  "him": "pronoun",
+  "she": "pronoun",
+  "her": "pronoun",
+  "it": "pronoun",
+  "we": "pronoun",
+  "us": "pronoun",
+  "they": "pronoun",
+  "them": "pronoun",
+  "who": "pronoun",
+  "which": "pronoun",
+  "that": "pronoun",
+  "this": "pronoun",
+  "the": "determiner",
+  "a": "determiner",
+  "an": "determiner"
+}
+
 async function detectPartOfSpeech(englishWord: string, indonesianWord: string): Promise<string> {
   const cleanWord = englishWord.split(/[,;]/)[0].trim().toLowerCase()
   if (!cleanWord) return "noun"
+
+  if (SPECIAL_WORDS[cleanWord]) {
+    return SPECIAL_WORDS[cleanWord]
+  }
+
   try {
     const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(cleanWord)}`)
     if (res.ok) {
       const data = await res.json()
-      if (Array.isArray(data) && data[0] && data[0].meanings) {
-        const primaryEntry = data[0]
-        const primaryParts = primaryEntry.meanings.map((m: { partOfSpeech: string }) => m.partOfSpeech.toLowerCase())
-        const primaryPOS = primaryEntry.meanings[0].partOfSpeech.toLowerCase()
-
-        if (primaryParts.includes("verb")) {
-          // If it can be a verb, check if it is the primary POS or if the Indonesian word is a verb
-          if (primaryPOS === "verb" || isIndonesianVerb(indonesianWord)) {
-            return "verb"
+      if (Array.isArray(data)) {
+        const partsSet = new Set<string>()
+        for (const entry of data) {
+          if (entry.meanings) {
+            for (const m of entry.meanings) {
+              if (m.partOfSpeech) {
+                partsSet.add(m.partOfSpeech.toLowerCase())
+              }
+            }
           }
-          return primaryPOS
         }
-
-        // Fallback to other parts of speech in the primary entry
-        if (primaryParts.includes("adjective")) return "adjective"
-        if (primaryParts.includes("adverb")) return "adverb"
-        if (primaryParts.includes("noun")) return "noun"
-        if (primaryParts.length > 0) return primaryParts[0]
+        if (partsSet.size > 0) {
+          return Array.from(partsSet).join(", ")
+        }
       }
     }
   } catch (error) {
@@ -145,7 +208,7 @@ export async function POST(request: Request): Promise<NextResponse> {
     }
 
     const body = await request.json()
-    const { word, definition, translation, exampleSentence, masteryLevel, langDirection } = body
+    const { word, partOfSpeech, definition, translation, exampleSentence, masteryLevel, langDirection } = body
 
     if (!word || !translation) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
@@ -169,15 +232,22 @@ export async function POST(request: Request): Promise<NextResponse> {
       return NextResponse.json({ error: "This vocabulary word is already registered" }, { status: 400 })
     }
 
-    // Auto-translation: if id-en, translate Indonesian to English. Else English to Indonesian.
-    const autoTranslation = direction === "id-en" 
-      ? await translateText(word, "id", "en")
-      : await translateText(word, "en", "id")
+    const capitalizedWord = word.trim().charAt(0).toUpperCase() + word.trim().slice(1)
+    const capitalizedTranslation = translation.trim().charAt(0).toUpperCase() + translation.trim().slice(1)
 
-    // Automatically detect part of speech based on the English word
-    const englishWordRaw = direction === "id-en" ? translation.trim() : word.trim()
-    const indonesianWordRaw = direction === "id-en" ? word.trim() : translation.trim()
-    const detectedPartOfSpeech = await detectPartOfSpeech(englishWordRaw, indonesianWordRaw)
+    // Auto-translation: if id-en, translate Indonesian to English. Else English to Indonesian.
+    let autoTranslation = direction === "id-en" 
+      ? await translateText(capitalizedWord, "id", "en")
+      : await translateText(capitalizedWord, "en", "id")
+
+    if (autoTranslation) {
+      autoTranslation = autoTranslation.trim().charAt(0).toUpperCase() + autoTranslation.trim().slice(1)
+    }
+
+    // Automatically detect part of speech based on the English word if not provided
+    const englishWordRaw = direction === "id-en" ? capitalizedTranslation : capitalizedWord
+    const indonesianWordRaw = direction === "id-en" ? capitalizedWord : capitalizedTranslation
+    const detectedPartOfSpeech = partOfSpeech || await detectPartOfSpeech(englishWordRaw, indonesianWordRaw)
 
     let v1 = null
     let v2 = null
@@ -188,36 +258,42 @@ export async function POST(request: Request): Promise<NextResponse> {
     let v3Translation = null
     let vIngTranslation = null
 
-    if (detectedPartOfSpeech === "verb") {
+    const posList = detectedPartOfSpeech.split(",").map((p: string) => p.trim().toLowerCase())
+    if (posList.includes("verb")) {
       // For verbs:
       // If direction is id-en, the English word to conjugate is the translation (e.g. "study").
       // If en-id, the English word to conjugate is the main word (e.g. "study").
-      const englishVerb = direction === "id-en" ? translation.trim() : word.trim()
+      const englishVerb = direction === "id-en" ? capitalizedTranslation : capitalizedWord
       const cleanVerb = englishVerb.split(/[,;]/)[0].trim()
       const conj = conjugateVerb(cleanVerb)
       
-      v1 = conj.v1
-      v2 = conj.v2
-      v3 = conj.v3
-      vIng = conj.vIng
+      v1 = conj.v1 ? conj.v1.trim().charAt(0).toUpperCase() + conj.v1.trim().slice(1) : null
+      v2 = conj.v2 ? conj.v2.trim().charAt(0).toUpperCase() + conj.v2.trim().slice(1) : null
+      v3 = conj.v3 ? conj.v3.trim().charAt(0).toUpperCase() + conj.v3.trim().slice(1) : null
+      vIng = conj.vIng ? conj.vIng.trim().charAt(0).toUpperCase() + conj.vIng.trim().slice(1) : null
       
       // V1 translation is the Indonesian equivalent (either word or translation)
-      v1Translation = direction === "id-en" ? word.trim() : translation.trim()
+      v1Translation = direction === "id-en" ? capitalizedWord : capitalizedTranslation
       
       // The translations for conjugated forms are always translated to Indonesian (from English)
-      v2Translation = await translateText(conj.v2, "en", "id")
-      v3Translation = await translateText(conj.v3, "en", "id")
-      vIngTranslation = await translateText(conj.vIng, "en", "id")
+      const rawV2Trans = await translateText(conj.v2, "en", "id", false)
+      v2Translation = rawV2Trans ? rawV2Trans.trim().charAt(0).toUpperCase() + rawV2Trans.trim().slice(1) : null
+
+      const rawV3Trans = await translateText(conj.v3, "en", "id", false)
+      v3Translation = rawV3Trans ? rawV3Trans.trim().charAt(0).toUpperCase() + rawV3Trans.trim().slice(1) : null
+
+      const rawVIngTrans = await translateText(conj.vIng, "en", "id", false)
+      vIngTranslation = rawVIngTrans ? rawVIngTrans.trim().charAt(0).toUpperCase() + rawVIngTrans.trim().slice(1) : null
     }
 
     const [newLog] = await db
       .insert(vocabularyLogs)
       .values({
         userId: user.id,
-        word: word.trim(),
+        word: capitalizedWord,
         partOfSpeech: detectedPartOfSpeech,
         definition: definition || "n/a",
-        translation: translation.trim(),
+        translation: capitalizedTranslation,
         exampleSentence: exampleSentence ? exampleSentence.trim() : null,
         masteryLevel: masteryLevel !== undefined ? Number(masteryLevel) : 3,
         memorized: false,
