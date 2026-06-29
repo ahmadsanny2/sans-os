@@ -2,19 +2,14 @@
 
 import React from "react"
 import { Priority } from "@/hooks/useDaily"
-import { Plus, Trash2, Check, Loader2, RefreshCw, AlertCircle } from "lucide-react"
+import { Plus, Trash2, Check, Loader2, RefreshCw, AlertCircle, Link2 } from "lucide-react"
 
 interface PrioritiesListProps {
   listPriorities: Priority[]
   isLoading: boolean
   isError: boolean
-  newText: string
-  setNewText: (t: string) => void
-  errorMsg: string | null
-  handleAddPriority: (e: React.FormEvent) => Promise<void>
   handleToggleCompleted: (id: string, completed: boolean) => void
   handleDeletePriority: (id: string) => Promise<void>
-  isPendingCreate: boolean
   isPendingToggle?: boolean
 }
 
@@ -22,13 +17,8 @@ export function PrioritiesList({
   listPriorities,
   isLoading,
   isError,
-  newText,
-  setNewText,
-  errorMsg,
-  handleAddPriority,
   handleToggleCompleted,
   handleDeletePriority,
-  isPendingCreate,
   isPendingToggle = false,
 }: PrioritiesListProps) {
   const sortedPriorities = [...listPriorities].sort((a, b) => {
@@ -57,46 +47,6 @@ export function PrioritiesList({
           )}
         </span>
       </div>
-
-      {/* Add Priority Input Form */}
-      <form onSubmit={handleAddPriority} className="space-y-2.5">
-        <div className="flex gap-2">
-          <input
-            type="text"
-            required
-            disabled={isLoading || listPriorities.length >= 5 || isPendingCreate}
-            value={newText}
-            onChange={(e) => setNewText(e.target.value)}
-            placeholder={
-              isLoading
-                ? "Loading..."
-                : listPriorities.length >= 5
-                ? "Top 5 limit reached for today"
-                : "Add new priority task..."
-            }
-            className="flex-1 rounded-xl border border-border bg-background px-3.5 py-2 text-sm outline-none transition-all focus:border-sidebar-primary focus:ring-2 focus:ring-sidebar-primary/10 disabled:bg-secondary/40 disabled:placeholder-muted-foreground"
-          />
-          <button
-            type="submit"
-            disabled={isLoading || listPriorities.length >= 5 || isPendingCreate || !newText.trim()}
-            className="inline-flex items-center justify-center rounded-xl bg-sidebar-primary px-4 py-2 text-sm font-semibold text-sidebar-primary-foreground shadow-sm transition-all hover:bg-sidebar-primary/95 disabled:opacity-50"
-            aria-label="Add task button"
-          >
-            {isPendingCreate ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <Plus className="h-4 w-4" />
-            )}
-          </button>
-        </div>
-
-        {errorMsg && (
-          <p className="text-xs text-destructive flex items-center gap-1 font-semibold">
-            <AlertCircle className="h-3.5 w-3.5" />
-            {errorMsg}
-          </p>
-        )}
-      </form>
 
       {/* Priorities List */}
       <div className="space-y-3">
@@ -139,13 +89,26 @@ export function PrioritiesList({
                   </button>
 
                   <div className="flex flex-col min-w-0 pr-2">
-                    <span
-                      className={`text-sm font-semibold break-words whitespace-normal leading-snug ${
-                        priority.completed ? "line-through text-muted-foreground" : "text-foreground"
-                      }`}
-                    >
-                      {priority.text}
-                    </span>
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <span
+                        className={`text-sm font-semibold break-words whitespace-normal leading-snug ${
+                          priority.completed ? "line-through text-muted-foreground" : "text-foreground"
+                        }`}
+                      >
+                        {priority.text}
+                      </span>
+                      {priority.link && (
+                        <a
+                          href={priority.link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center text-violet-500 hover:text-violet-600 dark:text-violet-400 dark:hover:text-violet-300 transition-colors"
+                          title="Open Link"
+                        >
+                          <Link2 className="h-3.5 w-3.5" />
+                        </a>
+                      )}
+                    </div>
                     {priority.rolloverCount > 0 && !priority.completed && (
                       <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-500 mt-0.5">
                         <RefreshCw className="h-3 w-3 animate-spin-slow" />

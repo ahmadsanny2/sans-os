@@ -2,7 +2,7 @@
 
 import React from "react"
 import { DailyTodo } from "@/hooks/useDailyLogs"
-import { Plus, Trash2, Check, Loader2, ListTodo, AlertCircle } from "lucide-react"
+import { Plus, Trash2, Check, Loader2, ListTodo, AlertCircle, Link2 } from "lucide-react"
 
 interface HabitItem {
   id: string
@@ -15,13 +15,8 @@ interface DailyTodosProps {
   todos: DailyTodo[]
   isLoading: boolean
   isError: boolean
-  newText: string
-  setNewText: (t: string) => void
-  errorMsg: string | null
-  handleAddTodo: (e: React.FormEvent) => Promise<void>
   handleToggleCompleted: (id: string, completed: boolean) => void
   handleDeleteTodo: (id: string) => Promise<void>
-  isPendingCreate: boolean
   isPendingToggleTodo?: boolean
   habits?: HabitItem[]
   handleToggleHabit?: (id: string) => void
@@ -32,13 +27,8 @@ export function DailyTodos({
   todos,
   isLoading,
   isError,
-  newText,
-  setNewText,
-  errorMsg,
-  handleAddTodo,
   handleToggleCompleted,
   handleDeleteTodo,
-  isPendingCreate,
   isPendingToggleTodo = false,
   habits = [],
   handleToggleHabit,
@@ -81,39 +71,6 @@ export function DailyTodos({
           )}
         </span>
       </div>
-
-      <form onSubmit={handleAddTodo} className="space-y-2.5">
-        <div className="flex gap-2">
-          <input
-            type="text"
-            required
-            disabled={isLoading || isPendingCreate}
-            value={newText}
-            onChange={(e) => setNewText(e.target.value)}
-            placeholder={isLoading ? "Loading..." : "Add new task..."}
-            className="flex-1 rounded-xl border border-border bg-background px-3.5 py-2 text-sm outline-none transition-all focus:border-sidebar-primary focus:ring-2 focus:ring-sidebar-primary/10 disabled:bg-secondary/40 disabled:placeholder-muted-foreground"
-          />
-          <button
-            type="submit"
-            disabled={isLoading || isPendingCreate || !newText.trim()}
-            className="inline-flex items-center justify-center rounded-xl bg-sidebar-primary px-4 py-2 text-sm font-semibold text-sidebar-primary-foreground shadow-sm transition-all hover:bg-sidebar-primary/95 disabled:opacity-50"
-            aria-label="Add new todo item"
-          >
-            {isPendingCreate ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <Plus className="h-4 w-4" />
-            )}
-          </button>
-        </div>
-
-        {errorMsg && (
-          <p className="text-xs text-destructive flex items-center gap-1 font-semibold">
-            <AlertCircle className="h-3.5 w-3.5" />
-            {errorMsg}
-          </p>
-        )}
-      </form>
 
       <div className="space-y-4 max-h-[350px] overflow-y-auto pr-1">
         {isLoading ? (
@@ -205,13 +162,26 @@ export function DailyTodos({
                           {todo.completed && <Check className="h-3.5 w-3.5 stroke-[3]" />}
                         </button>
 
-                        <span
-                          className={`text-sm font-medium break-words whitespace-normal pr-2 ${
-                            todo.completed ? "line-through text-muted-foreground font-normal" : "text-foreground"
-                          }`}
-                        >
-                          {todo.text}
-                        </span>
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span
+                            className={`text-sm font-medium break-words whitespace-normal ${
+                              todo.completed ? "line-through text-muted-foreground font-normal" : "text-foreground"
+                            }`}
+                          >
+                            {todo.text}
+                          </span>
+                          {todo.link && (
+                            <a
+                              href={todo.link}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center text-violet-500 hover:text-violet-600 dark:text-violet-400 dark:hover:text-violet-300 transition-colors"
+                              title="Open Link"
+                            >
+                              <Link2 className="h-3.5 w-3.5" />
+                            </a>
+                          )}
+                        </div>
                       </div>
 
                       <button

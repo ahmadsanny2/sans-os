@@ -8,6 +8,7 @@ export interface Priority {
   orderIndex: number
   completed: boolean
   rolloverCount: number
+  link: string | null
   createdAt: string
 }
 
@@ -20,6 +21,7 @@ export interface TimetableBlock {
   title: string
   category: string
   color: string
+  link: string | null
   createdAt: string
   date: string | null
   isTodo: boolean
@@ -68,7 +70,7 @@ export function usePrioritiesRangeQuery(startDate: string, endDate: string) {
   })
 }
 
-async function createPriority(body: { date: string; text: string; orderIndex: number }): Promise<Priority> {
+async function createPriority(body: { date: string; text: string; orderIndex: number; link?: string }): Promise<Priority> {
   const res = await fetch("/api/priorities", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -83,7 +85,7 @@ async function createPriority(body: { date: string; text: string; orderIndex: nu
 
 export function useCreatePriorityMutation() {
   const queryClient = useQueryClient()
-  return useMutation<Priority, Error, { date: string; text: string; orderIndex: number }>({
+  return useMutation<Priority, Error, { date: string; text: string; orderIndex: number; link?: string }>({
     mutationFn: createPriority,
     onSuccess: (newPriority, variables) => {
       queryClient.setQueryData<Priority[]>(["priorities", variables.date], (old) => {
@@ -221,6 +223,7 @@ async function createTimetableBlock(body: {
   color?: string
   date?: string
   isTodo?: boolean
+  link?: string
 }): Promise<TimetableBlock> {
   const res = await fetch("/api/timetable", {
     method: "POST",
@@ -247,6 +250,7 @@ export function useCreateTimetableBlockMutation() {
       color?: string
       date?: string
       isTodo?: boolean
+      link?: string
     }
   >({
     mutationFn: createTimetableBlock,

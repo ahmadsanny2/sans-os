@@ -83,6 +83,7 @@ export const timetableBlocks = pgTable("timetable_blocks", {
   color: text("color").default("blue"), // css class or hex color
   date: text("date"), // YYYY-MM-DD for one-off custom blocks (null for everyday fixed)
   isTodo: boolean("is_todo").default(false).notNull(),
+  link: text("link"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 })
 
@@ -95,6 +96,7 @@ export const priorities = pgTable("priorities", {
   orderIndex: integer("order_index").notNull(), // 0 to 4 (Top 5)
   completed: boolean("completed").default(false).notNull(),
   rolloverCount: integer("rollover_count").default(0).notNull(), // keeps track of rollovers
+  link: text("link"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 })
 
@@ -208,6 +210,7 @@ export const dailyTodos = pgTable("daily_todos", {
   date: text("date").notNull(), // timezone-independent ISO string "YYYY-MM-DD"
   text: text("text").notNull(),
   completed: boolean("completed").default(false).notNull(),
+  link: text("link"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 })
 

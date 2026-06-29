@@ -40,7 +40,7 @@ export async function POST(request: Request): Promise<NextResponse> {
     }
 
     const body = await request.json()
-    const { dayOfWeek, startTime, endTime, title, category, color, date, isTodo } = body
+    const { dayOfWeek, startTime, endTime, title, category, color, date, isTodo, link } = body
 
     if (dayOfWeek === undefined || !startTime || !endTime || !title) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
@@ -58,6 +58,7 @@ export async function POST(request: Request): Promise<NextResponse> {
         color: color || "blue",
         date: date || null,
         isTodo: isTodo ?? false,
+        link: link || null,
       })
       .returning()
 
@@ -70,13 +71,17 @@ export async function POST(request: Request): Promise<NextResponse> {
           .where(and(eq(priorities.userId, user.id), eq(priorities.date, date)))
 
         if (existing.length < 5) {
-          await db.insert(priorities).values({
-            userId: user.id,
-            date,
-            text: title,
-            orderIndex: existing.length,
-            completed: false,
-          })
+          const alreadyExists = existing.some((p) => p.text === title)
+          if (!alreadyExists) {
+            await db.insert(priorities).values({
+              userId: user.id,
+              date,
+              text: title,
+              orderIndex: existing.length,
+              completed: false,
+              link: link || null,
+            })
+          }
         }
       } catch (err) {
         console.error("Failed to auto-insert priority:", err)

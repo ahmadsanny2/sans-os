@@ -41,11 +41,32 @@ function minutesToTime(mins: number): string {
   return `${hStr}:${mStr}`
 }
 
+const CATEGORY_COLORS: Record<string, string> = {
+  Personal: "teal",
+  Work: "blue",
+  Business: "indigo",
+  Playing: "pink",
+  Social: "purple",
+  Education: "orange",
+  Project: "red",
+  Family: "green",
+  General: "slate",
+}
+
 export function useDailyPage() {
   const activeDate = useWorkspaceStore((state) => state.activeDate)
   const setActiveDate = useWorkspaceStore((state) => state.setActiveDate)
 
   const baseDate = parseISO(activeDate)
+
+  // Unified form states
+  const [entryTitle, setEntryTitle] = useState("")
+  const [entryLink, setEntryLink] = useState("")
+  const [targetTimetable, setTargetTimetable] = useState(false)
+  const [targetTodo, setTargetTodo] = useState(true)
+  const [targetPriority, setTargetPriority] = useState(false)
+  const [combinedErrorMsg, setCombinedErrorMsg] = useState<string | null>(null)
+  const [isPendingCombined, setIsPendingCombined] = useState(false)
 
   // Navigation handlers
   const handlePrevDay = (): void => {
@@ -62,6 +83,91 @@ export function useDailyPage() {
     setActiveDate(format(new Date(), "yyyy-MM-dd"))
   }
 
+  const handleAddDailyEntry = async (e: React.FormEvent): Promise<void> => {
+    e.preventDefault()
+    setCombinedErrorMsg(null)
+    if (!entryTitle.trim()) return
+
+    setIsPendingCombined(true)
+    try {
+      const promises: Promise<any>[] = []
+
+      if (targetTimetable) {
+        if (timetableStartTime >= timetableEndTime) {
+          throw new Error("End time must be after start time.")
+        }
+
+        let targetDayOfWeek = -1
+        let targetDate: string | undefined = undefined
+
+        if (timetableScheduleType === "fixed") {
+          targetDayOfWeek = -1
+          targetDate = undefined
+        } else if (timetableScheduleType === "weekly") {
+          targetDayOfWeek = timetableDayOfWeek
+          targetDate = undefined
+        } else {
+          targetDayOfWeek = parseISO(timetableDate).getDay()
+          targetDate = timetableDate
+        }
+
+        promises.push(
+          createBlockMutation.mutateAsync({
+            dayOfWeek: targetDayOfWeek,
+            startTime: timetableStartTime,
+            endTime: timetableEndTime,
+            title: entryTitle.trim(),
+            category: timetableCategory,
+            color: CATEGORY_COLORS[timetableCategory] || "blue",
+            date: targetDate,
+            isTodo: timetableIsTodo,
+            link: entryLink.trim() || undefined,
+          })
+        )
+      }
+
+      if (targetTodo) {
+        promises.push(
+          createTodoMutation.mutateAsync({
+            date: activeDate,
+            text: entryTitle.trim(),
+            link: entryLink.trim() || undefined,
+          })
+        )
+      }
+
+      if (targetPriority) {
+        if (listPriorities.length >= 5) {
+          throw new Error("You can only have a maximum of 5 priorities per day.")
+        }
+        promises.push(
+          createPriorityMutation.mutateAsync({
+            date: activeDate,
+            text: entryTitle.trim(),
+            orderIndex: listPriorities.length,
+            link: entryLink.trim() || undefined,
+          })
+        )
+      }
+
+      if (promises.length === 0) {
+        throw new Error("Please select at least one destination (Timetable, Task, or Priority).")
+      }
+
+      await Promise.all(promises)
+      setEntryTitle("")
+      setEntryLink("")
+      // Uncheck timetable & priority to reset cleanly, leave todo checked by default
+      setTargetTimetable(false)
+      setTargetPriority(false)
+      showSuccessToast("Daily Flow item added")
+    } catch (err) {
+      setCombinedErrorMsg(err instanceof Error ? err.message : "Failed to add entry")
+    } finally {
+      setIsPendingCombined(false)
+    }
+  }
+
   // ==========================================
   // Priorities State & Handlers
   // ==========================================
@@ -69,32 +175,6 @@ export function useDailyPage() {
   const createPriorityMutation = useCreatePriorityMutation()
   const togglePriorityMutation = useTogglePriorityMutation(activeDate)
   const deletePriorityMutation = useDeletePriorityMutation()
-
-  const [newPriorityText, setNewPriorityText] = useState("")
-  const [priorityErrorMsg, setPriorityErrorMsg] = useState<string | null>(null)
-
-  const handleAddPriority = async (e: React.FormEvent): Promise<void> => {
-    e.preventDefault()
-    setPriorityErrorMsg(null)
-    if (!newPriorityText.trim()) return
-
-    if (listPriorities.length >= 5) {
-      setPriorityErrorMsg("You can only have a maximum of 5 priorities per day.")
-      return
-    }
-
-    try {
-      await createPriorityMutation.mutateAsync({
-        date: activeDate,
-        text: newPriorityText,
-        orderIndex: listPriorities.length,
-      })
-      setNewPriorityText("")
-      showSuccessToast("Priority added")
-    } catch (err) {
-      setPriorityErrorMsg(err instanceof Error ? err.message : "Failed to add priority")
-    }
-  }
 
   const handleTogglePriority = (id: string, completed: boolean): void => {
     togglePriorityMutation.mutate({ id, completed: !completed })
@@ -121,26 +201,6 @@ export function useDailyPage() {
   const createTodoMutation = useCreateDailyTodoMutation()
   const toggleTodoMutation = useToggleDailyTodoMutation(activeDate)
   const deleteTodoMutation = useDeleteDailyTodoMutation(activeDate)
-
-  const [newTodoText, setNewTodoText] = useState("")
-  const [todoErrorMsg, setTodoErrorMsg] = useState<string | null>(null)
-
-  const handleAddTodo = async (e: React.FormEvent): Promise<void> => {
-    e.preventDefault()
-    setTodoErrorMsg(null)
-    if (!newTodoText.trim()) return
-
-    try {
-      await createTodoMutation.mutateAsync({
-        date: activeDate,
-        text: newTodoText,
-      })
-      setNewTodoText("")
-      showSuccessToast("Todo added successfully")
-    } catch (err) {
-      setTodoErrorMsg(err instanceof Error ? err.message : "Failed to add todo")
-    }
-  }
 
   const handleToggleTodo = (id: string, completed: boolean): void => {
     toggleTodoMutation.mutate({ id, completed: !completed })
@@ -246,61 +306,7 @@ export function useDailyPage() {
     .filter((block) => block.dayOfWeek === -1 || block.date === activeDate || (block.dayOfWeek === activeDayOfWeek && !block.date))
     .sort((a, b) => a.startTime.localeCompare(b.startTime))
 
-  const CATEGORY_COLORS: Record<string, string> = {
-    Personal: "teal",
-    Work: "blue",
-    Business: "indigo",
-    Playing: "pink",
-    Social: "purple",
-    Education: "orange",
-    Project: "red",
-    Family: "green",
-    General: "slate",
-  }
 
-  const handleAddTimetableBlock = async (e: React.FormEvent): Promise<void> => {
-    e.preventDefault()
-    setTimetableErrorMsg(null)
-    if (!timetableTitle.trim() || !timetableStartTime || !timetableEndTime) return
-
-    if (timetableStartTime >= timetableEndTime) {
-      setTimetableErrorMsg("End time must be after start time.")
-      return
-    }
-
-    let targetDayOfWeek = -1
-    let targetDate: string | undefined = undefined
-
-    if (timetableScheduleType === "fixed") {
-      targetDayOfWeek = -1
-      targetDate = undefined
-    } else if (timetableScheduleType === "weekly") {
-      targetDayOfWeek = timetableDayOfWeek
-      targetDate = undefined
-    } else {
-      targetDayOfWeek = parseISO(timetableDate).getDay()
-      targetDate = timetableDate
-    }
-
-    try {
-      await createBlockMutation.mutateAsync({
-        dayOfWeek: targetDayOfWeek,
-        startTime: timetableStartTime,
-        endTime: timetableEndTime,
-        title: timetableTitle,
-        category: timetableCategory,
-        color: CATEGORY_COLORS[timetableCategory] || "blue",
-        date: targetDate,
-        isTodo: timetableIsTodo,
-      })
-      setTimetableTitle("")
-      setTimetableIsTodo(false)
-      setShowTimetableAddForm(false)
-      showSuccessToast("Schedule block added")
-    } catch {
-      setTimetableErrorMsg("Failed to save timetable block.")
-    }
-  }
 
   const handleDeleteTimetableBlock = async (id: string): Promise<void> => {
     const isConfirmed = await confirmDestructive(
@@ -420,14 +426,26 @@ export function useDailyPage() {
     handleNextDay,
     handleGoToToday,
 
+    // Unified Entry states
+    entryTitle,
+    setEntryTitle,
+    entryLink,
+    setEntryLink,
+    targetTimetable,
+    setTargetTimetable,
+    targetTodo,
+    setTargetTodo,
+    targetPriority,
+    setTargetPriority,
+    combinedErrorMsg,
+    setCombinedErrorMsg,
+    isPendingCombined,
+    handleAddDailyEntry,
+
     // Priorities
     listPriorities,
     prioritiesLoading,
     prioritiesError,
-    newPriorityText,
-    setNewPriorityText,
-    priorityErrorMsg,
-    handleAddPriority,
     handleTogglePriority,
     handleDeletePriority,
     priorityCreatePending: createPriorityMutation.isPending,
@@ -437,10 +455,6 @@ export function useDailyPage() {
     todos,
     todosLoading,
     todosError,
-    newTodoText,
-    setNewTodoText,
-    todoErrorMsg,
-    handleAddTodo,
     handleToggleTodo,
     handleDeleteTodo,
     todoCreatePending: createTodoMutation.isPending,
@@ -452,8 +466,6 @@ export function useDailyPage() {
     timetableError,
     showTimetableAddForm,
     setShowTimetableAddForm,
-    timetableTitle,
-    setTimetableTitle,
     timetableStartTime,
     setTimetableStartTime,
     timetableEndTime,
@@ -464,14 +476,12 @@ export function useDailyPage() {
     setTimetableIsTodo,
     timetableCategory,
     setTimetableCategory,
-    timetableErrorMsg,
     timetableScheduleType,
     setTimetableScheduleType,
     timetableDate,
     setTimetableDate,
     timetableDayOfWeek,
     setTimetableDayOfWeek,
-    handleAddTimetableBlock,
     handleDeleteTimetableBlock,
     activeDayBlocks,
     timetableCreatePending: createBlockMutation.isPending,

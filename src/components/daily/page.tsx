@@ -2,6 +2,7 @@
 
 import React, { useEffect } from "react"
 import { useDailyPage } from "@/hooks/useDailyPage"
+import { AddDailyEntryCard } from "./ui/AddDailyEntryCard"
 import { PrioritiesList } from "./ui/PrioritiesList"
 import { DailyTodos } from "./ui/DailyTodos"
 import { Timetable } from "./ui/Timetable"
@@ -41,6 +42,39 @@ export default function DailyComponent() {
         nextLabel="Next Day"
       />
 
+      {/* Unified Add Card */}
+      <AddDailyEntryCard
+        entryTitle={dailyData.entryTitle}
+        setEntryTitle={dailyData.setEntryTitle}
+        entryLink={dailyData.entryLink}
+        setEntryLink={dailyData.setEntryLink}
+        targetTimetable={dailyData.targetTimetable}
+        setTargetTimetable={dailyData.setTargetTimetable}
+        targetTodo={dailyData.targetTodo}
+        setTargetTodo={dailyData.setTargetTodo}
+        targetPriority={dailyData.targetPriority}
+        setTargetPriority={dailyData.setTargetPriority}
+        combinedErrorMsg={dailyData.combinedErrorMsg}
+        isPendingCombined={dailyData.isPendingCombined}
+        handleAddDailyEntry={dailyData.handleAddDailyEntry}
+        timetableStartTime={dailyData.timetableStartTime}
+        setTimetableStartTime={dailyData.setTimetableStartTime}
+        timetableEndTime={dailyData.timetableEndTime}
+        setTimetableEndTime={dailyData.setTimetableEndTime}
+        timetableDuration={dailyData.timetableDuration}
+        setTimetableDuration={dailyData.setTimetableDuration}
+        timetableIsTodo={dailyData.timetableIsTodo}
+        setTimetableIsTodo={dailyData.setTimetableIsTodo}
+        timetableCategory={dailyData.timetableCategory}
+        setTimetableCategory={dailyData.setTimetableCategory}
+        timetableScheduleType={dailyData.timetableScheduleType}
+        setTimetableScheduleType={dailyData.setTimetableScheduleType}
+        timetableDate={dailyData.timetableDate}
+        setTimetableDate={dailyData.setTimetableDate}
+        timetableDayOfWeek={dailyData.timetableDayOfWeek}
+        setTimetableDayOfWeek={dailyData.setTimetableDayOfWeek}
+      />
+
       {/* Main Content */}
       <div className="grid gap-8 grid-cols-12">
         {/* Priorities Section */}
@@ -49,13 +83,8 @@ export default function DailyComponent() {
             listPriorities={dailyData.listPriorities}
             isLoading={dailyData.prioritiesLoading}
             isError={dailyData.prioritiesError}
-            newText={dailyData.newPriorityText}
-            setNewText={dailyData.setNewPriorityText}
-            errorMsg={dailyData.priorityErrorMsg}
-            handleAddPriority={dailyData.handleAddPriority}
             handleToggleCompleted={dailyData.handleTogglePriority}
             handleDeletePriority={dailyData.handleDeletePriority}
-            isPendingCreate={dailyData.priorityCreatePending}
             isPendingToggle={dailyData.priorityTogglePending}
           />
         </div>
@@ -66,13 +95,8 @@ export default function DailyComponent() {
             todos={dailyData.todos}
             isLoading={dailyData.todosLoading || dailyData.habitsLoading}
             isError={dailyData.todosError || dailyData.habitsError}
-            newText={dailyData.newTodoText}
-            setNewText={dailyData.setNewTodoText}
-            errorMsg={dailyData.todoErrorMsg}
-            handleAddTodo={dailyData.handleAddTodo}
             handleToggleCompleted={dailyData.handleToggleTodo}
             handleDeleteTodo={dailyData.handleDeleteTodo}
-            isPendingCreate={dailyData.todoCreatePending}
             isPendingToggleTodo={dailyData.todoTogglePending}
             habits={dailyData.habits}
             handleToggleHabit={dailyData.handleToggleHabit}
@@ -86,31 +110,8 @@ export default function DailyComponent() {
         <Timetable
           isLoading={dailyData.timetableLoading}
           isError={dailyData.timetableError}
-          showAddForm={dailyData.showTimetableAddForm}
-          setShowAddForm={dailyData.setShowTimetableAddForm}
-          title={dailyData.timetableTitle}
-          setTitle={dailyData.setTimetableTitle}
-          startTime={dailyData.timetableStartTime}
-          setStartTime={dailyData.setTimetableStartTime}
-          endTime={dailyData.timetableEndTime}
-          setEndTime={dailyData.setTimetableEndTime}
-          duration={dailyData.timetableDuration}
-          setDuration={dailyData.setTimetableDuration}
-          isTodo={dailyData.timetableIsTodo}
-          setIsTodo={dailyData.setTimetableIsTodo}
-          category={dailyData.timetableCategory}
-          setCategory={dailyData.setTimetableCategory}
-          scheduleType={dailyData.timetableScheduleType}
-          setScheduleType={dailyData.setTimetableScheduleType}
-          timetableDate={dailyData.timetableDate}
-          setTimetableDate={dailyData.setTimetableDate}
-          timetableDayOfWeek={dailyData.timetableDayOfWeek}
-          setTimetableDayOfWeek={dailyData.setTimetableDayOfWeek}
-          errorMsg={dailyData.timetableErrorMsg}
-          handleAddBlock={dailyData.handleAddTimetableBlock}
           handleDeleteBlock={dailyData.handleDeleteTimetableBlock}
           activeDayBlocks={dailyData.activeDayBlocks}
-          isPendingCreate={dailyData.timetableCreatePending}
         />
       </div>
 

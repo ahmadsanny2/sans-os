@@ -131,7 +131,7 @@ export async function POST(request: Request): Promise<NextResponse> {
     }
 
     const body = await request.json()
-    const { date, text, orderIndex } = body
+    const { date, text, orderIndex, link } = body
 
     if (!date || !text || orderIndex === undefined) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
@@ -159,6 +159,7 @@ export async function POST(request: Request): Promise<NextResponse> {
         orderIndex,
         completed: false,
         rolloverCount: 0,
+        link: link || null,
       })
       .returning()
 

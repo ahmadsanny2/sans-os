@@ -47,7 +47,7 @@ export async function POST(request: Request): Promise<NextResponse> {
     }
 
     const body = await request.json()
-    const { date, text } = body
+    const { date, text, link } = body
 
     if (!date || !text) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
@@ -60,6 +60,7 @@ export async function POST(request: Request): Promise<NextResponse> {
         date,
         text,
         completed: false,
+        link: link || null,
       })
       .returning()
 
