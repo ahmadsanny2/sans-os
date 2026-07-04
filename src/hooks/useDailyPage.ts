@@ -68,8 +68,7 @@ export function useDailyPage() {
   const [combinedErrorMsg, setCombinedErrorMsg] = useState<string | null>(null)
   const [isPendingCombined, setIsPendingCombined] = useState(false)
 
-  const [todoDate, setTodoDate] = useState(activeDate)
-  const [priorityDate, setPriorityDate] = useState(activeDate)
+  const [chooseDate, setChooseDate] = useState(activeDate)
 
   // Navigation handlers
   const handlePrevDay = (): void => {
@@ -110,8 +109,8 @@ export function useDailyPage() {
           targetDayOfWeek = timetableDayOfWeek
           targetDate = undefined
         } else {
-          targetDayOfWeek = parseISO(timetableDate).getDay()
-          targetDate = timetableDate
+          targetDayOfWeek = parseISO(chooseDate).getDay()
+          targetDate = chooseDate
         }
 
         promises.push(
@@ -132,7 +131,7 @@ export function useDailyPage() {
       if (targetTodo) {
         promises.push(
           createTodoMutation.mutateAsync({
-            date: todoDate,
+            date: chooseDate,
             text: entryTitle.trim(),
             link: entryLink.trim() || undefined,
           })
@@ -140,14 +139,14 @@ export function useDailyPage() {
       }
 
       if (targetPriority) {
-        if (priorityDate === activeDate && listPriorities.length >= 5) {
+        if (chooseDate === activeDate && listPriorities.length >= 5) {
           throw new Error("You can only have a maximum of 5 priorities per day.")
         }
         promises.push(
           createPriorityMutation.mutateAsync({
-            date: priorityDate,
+            date: chooseDate,
             text: entryTitle.trim(),
-            orderIndex: priorityDate === activeDate ? listPriorities.length : undefined,
+            orderIndex: chooseDate === activeDate ? listPriorities.length : undefined,
             link: entryLink.trim() || undefined,
           })
         )
@@ -164,8 +163,7 @@ export function useDailyPage() {
       setTargetTimetable(false)
       setTargetTodo(false)
       setTargetPriority(false)
-      setTodoDate(activeDate)
-      setPriorityDate(activeDate)
+      setChooseDate(activeDate)
       showSuccessToast("Daily Flow item added")
     } catch (err) {
       setCombinedErrorMsg(err instanceof Error ? err.message : "Failed to add entry")
@@ -265,15 +263,12 @@ export function useDailyPage() {
   const [timetableErrorMsg, setTimetableErrorMsg] = useState<string | null>(null)
   const [timetableScheduleType, setTimetableScheduleType] = useState<"custom" | "weekly" | "fixed">("custom")
   const [prevActiveDate, setPrevActiveDate] = useState(activeDate)
-  const [timetableDate, setTimetableDate] = useState(activeDate)
   const [timetableDayOfWeek, setTimetableDayOfWeek] = useState(() => parseISO(activeDate).getDay())
 
   if (activeDate !== prevActiveDate) {
     setPrevActiveDate(activeDate)
-    setTimetableDate(activeDate)
+    setChooseDate(activeDate)
     setTimetableDayOfWeek(parseISO(activeDate).getDay())
-    setTodoDate(activeDate)
-    setPriorityDate(activeDate)
   }
 
   const setTimetableStartTime = (newVal: string) => {
@@ -445,10 +440,8 @@ export function useDailyPage() {
     setTargetTodo,
     targetPriority,
     setTargetPriority,
-    todoDate,
-    setTodoDate,
-    priorityDate,
-    setPriorityDate,
+    chooseDate,
+    setChooseDate,
     combinedErrorMsg,
     setCombinedErrorMsg,
     isPendingCombined,
@@ -490,8 +483,6 @@ export function useDailyPage() {
     setTimetableCategory,
     timetableScheduleType,
     setTimetableScheduleType,
-    timetableDate,
-    setTimetableDate,
     timetableDayOfWeek,
     setTimetableDayOfWeek,
     handleDeleteTimetableBlock,

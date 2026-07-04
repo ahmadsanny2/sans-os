@@ -81,14 +81,10 @@ export default function DailyComponent() {
           setTimetableCategory={dailyData.setTimetableCategory}
           timetableScheduleType={dailyData.timetableScheduleType}
           setTimetableScheduleType={dailyData.setTimetableScheduleType}
-          timetableDate={dailyData.timetableDate}
-          setTimetableDate={dailyData.setTimetableDate}
+          chooseDate={dailyData.chooseDate}
+          setChooseDate={dailyData.setChooseDate}
           timetableDayOfWeek={dailyData.timetableDayOfWeek}
           setTimetableDayOfWeek={dailyData.setTimetableDayOfWeek}
-          todoDate={dailyData.todoDate}
-          setTodoDate={dailyData.setTodoDate}
-          priorityDate={dailyData.priorityDate}
-          setPriorityDate={dailyData.setPriorityDate}
           onClose={() => setShowAddForm(false)}
         />
       )}

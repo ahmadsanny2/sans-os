@@ -32,16 +32,10 @@ interface AddDailyEntryCardProps {
   setTimetableCategory: (c: string) => void
   timetableScheduleType: "custom" | "weekly" | "fixed"
   setTimetableScheduleType: (t: "custom" | "weekly" | "fixed") => void
-  timetableDate: string
-  setTimetableDate: (d: string) => void
+  chooseDate: string
+  setChooseDate: (d: string) => void
   timetableDayOfWeek: number
   setTimetableDayOfWeek: (w: number) => void
-
-  // Daily Checklist & Priorities date fields
-  todoDate: string
-  setTodoDate: (d: string) => void
-  priorityDate: string
-  setPriorityDate: (d: string) => void
   onClose?: () => void
 }
 
@@ -73,16 +67,10 @@ export function AddDailyEntryCard({
   setTimetableCategory,
   timetableScheduleType,
   setTimetableScheduleType,
-  timetableDate,
-  setTimetableDate,
+  chooseDate,
+  setChooseDate,
   timetableDayOfWeek,
   setTimetableDayOfWeek,
-
-  // Daily Checklist & Priorities date fields
-  todoDate,
-  setTodoDate,
-  priorityDate,
-  setPriorityDate,
   onClose,
 }: AddDailyEntryCardProps) {
   return (
@@ -185,6 +173,33 @@ export function AddDailyEntryCard({
           </div>
         </div>
 
+        {/* Unified Date Selection */}
+        <AnimatePresence initial={false}>
+          {(targetTodo || targetPriority || (targetTimetable && timetableScheduleType === "custom")) && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.2, ease: "easeInOut" }}
+              className="overflow-hidden"
+            >
+              <div className="space-y-1.5 animate-in fade-in duration-200 max-w-xs">
+                <label htmlFor="chooseDate" className="text-xs font-bold text-muted-foreground">
+                  Choose Date
+                </label>
+                <input
+                  id="chooseDate"
+                  type="date"
+                  required
+                  value={chooseDate}
+                  onChange={(e) => setChooseDate(e.target.value)}
+                  className="w-full rounded-xl border border-border bg-background px-3.5 py-2.5 text-sm outline-none transition-all focus:border-violet-500 focus:ring-2 focus:ring-violet-500/10"
+                />
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         {/* Conditional Timetable Form Fields */}
         <AnimatePresence initial={false}>
           {targetTimetable && (
@@ -283,22 +298,7 @@ export function AddDailyEntryCard({
                     </select>
                   </div>
 
-                  {/* Custom Date Selection */}
-                  {timetableScheduleType === "custom" && (
-                    <div className="space-y-1.5 animate-in fade-in duration-200">
-                      <label htmlFor="timetableDate" className="text-xs font-bold text-muted-foreground">
-                        Choose Date
-                      </label>
-                      <input
-                        id="timetableDate"
-                        type="date"
-                        required={targetTimetable && timetableScheduleType === "custom"}
-                        value={timetableDate}
-                        onChange={(e) => setTimetableDate(e.target.value)}
-                        className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none transition-all focus:border-violet-500 focus:ring-2 focus:ring-violet-500/10"
-                      />
-                    </div>
-                  )}
+
 
                   {/* Weekly Day Selection */}
                   {timetableScheduleType === "weekly" && (
@@ -361,67 +361,7 @@ export function AddDailyEntryCard({
           )}
         </AnimatePresence>
 
-        {/* Conditional Checklist Form Fields */}
-        <AnimatePresence initial={false}>
-          {targetTodo && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.25, ease: "easeInOut" }}
-              className="overflow-hidden"
-            >
-              <div className="border-t border-dashed border-border pt-4 mt-4 space-y-4">
-                <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
-                  <div className="space-y-1.5 animate-in fade-in duration-200">
-                    <label htmlFor="todoDate" className="text-xs font-bold text-muted-foreground">
-                      Choose Date (Daily Checklist)
-                    </label>
-                    <input
-                      id="todoDate"
-                      type="date"
-                      required={targetTodo}
-                      value={todoDate}
-                      onChange={(e) => setTodoDate(e.target.value)}
-                      className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none transition-all focus:border-violet-500 focus:ring-2 focus:ring-violet-500/10"
-                    />
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
 
-        {/* Conditional Priority Form Fields */}
-        <AnimatePresence initial={false}>
-          {targetPriority && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.25, ease: "easeInOut" }}
-              className="overflow-hidden"
-            >
-              <div className="border-t border-dashed border-border pt-4 mt-4 space-y-4">
-                <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
-                  <div className="space-y-1.5 animate-in fade-in duration-200">
-                    <label htmlFor="priorityDate" className="text-xs font-bold text-muted-foreground">
-                      Choose Date (Top 5 Priorities)
-                    </label>
-                    <input
-                      id="priorityDate"
-                      type="date"
-                      required={targetPriority}
-                      value={priorityDate}
-                      onChange={(e) => setPriorityDate(e.target.value)}
-                      className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none transition-all focus:border-violet-500 focus:ring-2 focus:ring-violet-500/10"
-                    />
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
 
         {/* Error Messages */}
         {combinedErrorMsg && (
