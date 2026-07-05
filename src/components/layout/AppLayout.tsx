@@ -132,7 +132,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         {/* Sidebar Header */}
         <div className="flex h-14 items-center justify-between border-b border-sidebar-border/20 px-4">
           {sidebarOpen ? (
-            <span className="bg-gradient-to-r from-violet-500 to-indigo-500 bg-clip-text text-lg font-bold tracking-wider text-transparent">
+            <span className="bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-lg font-bold tracking-wider text-transparent">
               SansOS
             </span>
           ) : null}
@@ -199,7 +199,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         <div className="fixed inset-0 z-50 flex md:hidden bg-background/80 backdrop-blur-sm">
           <div className="w-64 border-r border-sidebar-border/30 bg-sidebar/95 backdrop-blur-md text-sidebar-foreground flex flex-col h-full animate-in slide-in-from-left duration-250">
             <div className="flex h-14 items-center justify-between border-b border-sidebar-border/20 px-4">
-              <span className="bg-gradient-to-r from-violet-500 to-indigo-500 bg-clip-text text-lg font-bold tracking-wider text-transparent">
+              <span className="bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-lg font-bold tracking-wider text-transparent">
                 SansOS
               </span>
               <button onClick={() => setMobileMenuOpen(false)} aria-label="Close menu">
@@ -264,7 +264,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             >
               <Menu className="h-6 w-6" />
             </button>
-            <span className="bg-gradient-to-r from-violet-500 to-indigo-500 bg-clip-text text-lg font-bold tracking-wider text-transparent">
+            <span className="bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-lg font-bold tracking-wider text-transparent">
               SansOS
             </span>
           </div>
@@ -345,7 +345,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         } ${
           pomodoroIsRunning
             ? pomodoroPhase === "focus"
-              ? "border-violet-500 shadow-glow"
+              ? "border-primary shadow-glow"
               : "border-emerald-500 shadow-glow"
             : "border-border/60 hover:border-primary/40 hover:shadow-glow-active"
         }`}
@@ -356,13 +356,13 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           <Timer className={`h-5 w-5 ${
             pomodoroIsRunning
               ? pomodoroPhase === "focus"
-                ? "text-violet-400 animate-pulse"
+                ? "text-primary animate-pulse"
                 : "text-emerald-400 animate-pulse"
               : "text-muted-foreground"
           }`} />
           {pomodoroIsRunning && (
             <span className={`absolute -top-1 -right-1 h-2.5 w-2.5 rounded-full border border-zinc-900 ${
-              pomodoroPhase === "focus" ? "bg-violet-500" : "bg-emerald-500"
+              pomodoroPhase === "focus" ? "bg-primary" : "bg-emerald-500"
             }`} />
           )}
         </div>
