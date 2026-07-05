@@ -12,8 +12,56 @@ import {
   useDialogueQuery,
   useCreateDialogueMutation,
   useDeleteDialogueMutation,
+  WritingLog,
+  GroupedWritingLog,
 } from "@/hooks/useLanguage"
 import { confirmDestructive, showError, showSuccessToast } from "@/lib/sweetalert"
+
+function groupVocabWritingLogs(logs: WritingLog[]): GroupedWritingLog[] {
+  const sorted = [...logs].sort(
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  )
+
+  const groups: GroupedWritingLog[] = []
+
+  sorted.forEach((log) => {
+    if (!log.vocabId) return
+
+    const logTime = new Date(log.createdAt).getTime()
+    const matchingGroup = groups.find((g) => {
+      if (g.vocabId !== log.vocabId) return false
+      const groupTime = new Date(g.createdAt).getTime()
+      return Math.abs(groupTime - logTime) < 60000
+    })
+
+    if (matchingGroup) {
+      matchingGroup.allIds.push(log.id)
+      if (log.sentenceType === "Positive") {
+        matchingGroup.positive = log
+      } else if (log.sentenceType === "Negative") {
+        matchingGroup.negative = log
+      } else if (log.sentenceType === "Interrogative") {
+        matchingGroup.interrogative = log
+      }
+      if (new Date(log.createdAt).getTime() > new Date(matchingGroup.createdAt).getTime()) {
+        matchingGroup.createdAt = log.createdAt
+      }
+    } else {
+      groups.push({
+        id: log.vocabId + "_" + log.createdAt,
+        vocabId: log.vocabId,
+        vocabWord: log.vocabWord || "",
+        createdAt: log.createdAt,
+        positive: log.sentenceType === "Positive" ? log : undefined,
+        negative: log.sentenceType === "Negative" ? log : undefined,
+        interrogative: log.sentenceType === "Interrogative" ? log : undefined,
+        allIds: [log.id],
+      })
+    }
+  })
+
+  return groups
+}
 
 export function useLanguagePage() {
   const { data: vocabList = [], isLoading: vocabIsLoading, isError: vocabIsError } = useVocabularyQuery()
@@ -286,15 +334,15 @@ export function useLanguagePage() {
   const handleDeleteWriting = async (id: string): Promise<void> => {
     const isConfirmed = await confirmDestructive(
       "Delete Writing Log",
-      "Are you sure you want to delete this writing practice log?"
+      "Are you sure you want to delete this writing practice?"
     )
     if (!isConfirmed) return
 
     try {
       await deleteWritingMutation.mutateAsync(id)
-      showSuccessToast("Writing log deleted successfully")
+      showSuccessToast("Writing practice deleted successfully")
     } catch {
-      showError("Delete Error", "Failed to delete writing log.")
+      showError("Delete Error", "Failed to delete writing practice.")
     }
   }
 
@@ -316,13 +364,33 @@ export function useLanguagePage() {
   const vocabWritingLogs = writingList.filter((log) => log.vocabId !== null)
   const freeWritingLogs = writingList.filter((log) => log.vocabId === null)
 
+  const groupedVocabLogs = groupVocabWritingLogs(vocabWritingLogs)
+
   // Search filter matching on active history list
-  const activeHistoryList = activeHistoryTab === "vocab" ? vocabWritingLogs : freeWritingLogs
-  const filteredHistory = activeHistoryList.filter((log) => {
+  const filteredGroupedHistory = groupedVocabLogs.filter((group) => {
+    const q = searchQueryWriting.toLowerCase()
     const matchesSearch =
-      log.englishSentence.toLowerCase().includes(searchQueryWriting.toLowerCase()) ||
-      log.indonesianTranslation.toLowerCase().includes(searchQueryWriting.toLowerCase()) ||
-      (log.vocabWord && log.vocabWord.toLowerCase().includes(searchQueryWriting.toLowerCase()))
+      group.vocabWord.toLowerCase().includes(q) ||
+      (group.positive && (
+        group.positive.englishSentence.toLowerCase().includes(q) ||
+        group.positive.indonesianTranslation.toLowerCase().includes(q)
+      )) ||
+      (group.negative && (
+        group.negative.englishSentence.toLowerCase().includes(q) ||
+        group.negative.indonesianTranslation.toLowerCase().includes(q)
+      )) ||
+      (group.interrogative && (
+        group.interrogative.englishSentence.toLowerCase().includes(q) ||
+        group.interrogative.indonesianTranslation.toLowerCase().includes(q)
+      ))
+    return matchesSearch
+  })
+
+  const filteredFreeHistory = freeWritingLogs.filter((log) => {
+    const q = searchQueryWriting.toLowerCase()
+    const matchesSearch =
+      log.englishSentence.toLowerCase().includes(q) ||
+      log.indonesianTranslation.toLowerCase().includes(q)
     return matchesSearch
   })
 
@@ -509,9 +577,10 @@ export function useLanguagePage() {
     handleDeleteWriting,
     handleSelectVocab,
     filteredVocabList,
-    vocabWritingLogs,
+    vocabWritingLogs: groupedVocabLogs,
     freeWritingLogs,
-    filteredHistory,
+    filteredGroupedHistory,
+    filteredFreeHistory,
     writingCreatePending: createWritingMutation.isPending,
     writingDeletePending: deleteWritingMutation.isPending,
 

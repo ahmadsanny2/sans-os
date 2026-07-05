@@ -35,6 +35,18 @@ export interface WritingLog {
   createdAt: string
 }
 
+export interface GroupedWritingLog {
+  id: string
+  vocabId: string
+  vocabWord: string
+  createdAt: string
+  positive?: WritingLog
+  negative?: WritingLog
+  interrogative?: WritingLog
+  allIds: string[]
+}
+
+
 export interface DialogueLog {
   id: string
   userId: string
@@ -285,9 +297,10 @@ export function useDeleteWritingMutation() {
       await queryClient.cancelQueries({ queryKey: ["writingLogs"] })
       const previous = queryClient.getQueryData<WritingLog[]>(["writingLogs"])
       if (previous) {
+        const ids = id.split(",")
         queryClient.setQueryData<WritingLog[]>(
           ["writingLogs"],
-          previous.filter((l) => l.id !== id)
+          previous.filter((l) => !ids.includes(l.id))
         )
       }
       return { previous }

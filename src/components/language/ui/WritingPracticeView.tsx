@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useRef, useEffect } from "react"
-import { VocabularyLog, WritingLog } from "@/hooks/useLanguage"
+import { VocabularyLog, WritingLog, GroupedWritingLog } from "@/hooks/useLanguage"
 import {
   Plus,
   Trash2,
@@ -55,9 +55,10 @@ interface WritingPracticeViewProps {
   handleDeleteWriting: (id: string) => Promise<void>
   handleSelectVocab: (id: string, word: string) => void
   filteredVocabList: VocabularyLog[]
-  vocabWritingLogs: WritingLog[]
+  vocabWritingLogs: GroupedWritingLog[]
   freeWritingLogs: WritingLog[]
-  filteredHistory: WritingLog[]
+  filteredGroupedHistory: GroupedWritingLog[]
+  filteredFreeHistory: WritingLog[]
   writingCreatePending: boolean
   writingDeletePending: boolean
 }
@@ -103,7 +104,8 @@ export function WritingPracticeView({
   filteredVocabList,
   vocabWritingLogs,
   freeWritingLogs,
-  filteredHistory,
+  filteredGroupedHistory,
+  filteredFreeHistory,
   writingCreatePending,
   writingDeletePending,
 }: WritingPracticeViewProps) {
@@ -462,107 +464,191 @@ export function WritingPracticeView({
             <AlertCircle className="h-6 w-6" />
             <span>Error loading writing logs. Please check database.</span>
           </div>
-        ) : filteredHistory.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-border/40 py-16 text-center text-sm text-muted-foreground bg-card/10 select-none animate-in fade-in duration-200">
-            {searchQueryWriting
-              ? "No sentences match your search query."
-              : activeHistoryTab === "vocab"
-              ? "No vocab-based sentences recorded yet. Click 'Add Writing' to practice!"
-              : "No free writing logs recorded yet. Click 'Add Writing' to practice!"}
-          </div>
-        ) : (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 animate-in fade-in duration-300">
-            {filteredHistory.map((log) => {
-              return (
-                <div
-                  key={log.id}
-                  className="group relative rounded-xl border border-border/60 bg-card/40 dark:bg-card/15 p-4 shadow-sm hover:border-primary/30 hover:bg-card/75 transition-all duration-300 flex flex-col justify-between"
-                >
-                  <div className="space-y-2">
-                    {/* Top Badges Row */}
-                    <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border/30 pb-2 mb-2">
-                      <div className="flex flex-wrap items-center gap-1.5">
-                        {log.vocabWord ? (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[9px] font-extrabold uppercase tracking-wider bg-primary/10 text-primary border border-primary/20">
-                            Word: {log.vocabWord}
-                          </span>
-                        ) : (
-                          <span className="px-2 py-0.5 rounded-md text-[9px] font-extrabold uppercase tracking-wider bg-secondary/40 text-muted-foreground border border-border/55">
-                            Free Writing
-                          </span>
-                        )}
-
-                        {log.sentenceType && (
-                          <span
-                            className={`px-2 py-0.5 rounded-md text-[9px] font-extrabold uppercase tracking-wider border ${
-                              log.sentenceType === "Positive"
-                                ? "bg-emerald-500/10 text-emerald-500 dark:text-emerald-400 border-emerald-500/20"
-                                : log.sentenceType === "Negative"
-                                ? "bg-rose-500/10 text-rose-500 dark:text-rose-400 border-rose-500/20"
-                                : "bg-blue-500/10 text-blue-500 dark:text-blue-400 border-blue-500/20"
-                            }`}
-                          >
-                            {log.sentenceType === "Positive"
-                              ? "Positive"
-                              : log.sentenceType === "Negative"
-                              ? "Negative"
-                              : "Interrogative"}
-                          </span>
-                        )}
-                      </div>
-
-                      <button
-                        onClick={() => handleDeleteWriting(log.id)}
-                        disabled={writingDeletePending}
-                        className="opacity-0 group-hover:opacity-100 focus:opacity-100 p-1 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all shrink-0 cursor-pointer"
-                        aria-label="Delete sentence log"
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </button>
-                    </div>
-
-                    {/* English Sentence */}
-                    <p className="text-sm font-semibold tracking-tight text-foreground leading-relaxed">
-                      {log.englishSentence}
-                    </p>
-
-                    {/* Indonesian translation */}
-                    <div className="pt-1.5 border-t border-dashed border-border/30 mt-2 space-y-2">
-                      <div>
-                        <span className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground block mb-0.5">
-                          Manual Translation
+        ) : activeHistoryTab === "vocab" ? (
+          // ==================== VOCAB-BASED HISTORY (GROUPED CARDS) ====================
+          filteredGroupedHistory.length === 0 ? (
+            <div className="rounded-2xl border border-dashed border-border/40 py-16 text-center text-sm text-muted-foreground bg-card/10 select-none animate-in fade-in duration-200">
+              {searchQueryWriting
+                ? "No sentences match your search query."
+                : "No vocab-based sentences recorded yet. Click 'Add Writing' to practice!"}
+            </div>
+          ) : (
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 animate-in fade-in duration-300">
+              {filteredGroupedHistory.map((group) => {
+                return (
+                  <div
+                    key={group.id}
+                    className="group relative rounded-xl border border-border/60 bg-card/40 dark:bg-card/15 p-4 shadow-sm hover:border-primary/30 hover:bg-card/75 transition-all duration-300 flex flex-col justify-between"
+                  >
+                    <div className="space-y-4">
+                      {/* Top Row: Vocab Word & Delete */}
+                      <div className="flex items-center justify-between gap-2 border-b border-border/30 pb-2 mb-1">
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[9px] font-extrabold uppercase tracking-wider bg-primary/10 text-primary border border-primary/20 shadow-sm">
+                          Word: {group.vocabWord}
                         </span>
-                        <p className="text-xs text-muted-foreground leading-relaxed italic font-semibold">
-                          {log.indonesianTranslation}
-                        </p>
+
+                        <button
+                          onClick={() => handleDeleteWriting(group.allIds.join(","))}
+                          disabled={writingDeletePending}
+                          className="opacity-0 group-hover:opacity-100 focus:opacity-100 p-1 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all shrink-0 cursor-pointer"
+                          aria-label="Delete sentence group"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
                       </div>
-                      {log.autoTranslation && (
-                        <div className="border-t border-dotted border-border/40 pt-1">
-                          <span className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground block mb-0.5">
-                            Google Translation
-                          </span>
-                          <p className="text-xs text-muted-foreground/80 leading-relaxed italic">
-                            {log.autoTranslation}
+
+                      {/* Positive Section */}
+                      {group.positive && (
+                        <div className="space-y-1">
+                          <div className="flex items-center">
+                            <span className="px-1.5 py-0.5 rounded text-[8px] font-extrabold uppercase tracking-wider bg-emerald-500/10 text-emerald-500 dark:text-emerald-400 border border-emerald-500/20">
+                              Positive
+                            </span>
+                          </div>
+                          <p className="text-sm font-semibold tracking-tight text-foreground leading-relaxed">
+                            {group.positive.englishSentence}
                           </p>
+                          <div className="text-xs text-muted-foreground/80 leading-relaxed italic space-y-0.5 pl-2 border-l border-emerald-500/30">
+                            <p className="font-semibold text-muted-foreground/90">{group.positive.indonesianTranslation}</p>
+                            {group.positive.autoTranslation && (
+                              <p className="text-muted-foreground/50 text-[10px] not-italic">Google: {group.positive.autoTranslation}</p>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Negative Section */}
+                      {group.negative && (
+                        <div className="space-y-1">
+                          <div className="flex items-center">
+                            <span className="px-1.5 py-0.5 rounded text-[8px] font-extrabold uppercase tracking-wider bg-rose-500/10 text-rose-500 dark:text-rose-400 border border-rose-500/20">
+                              Negative
+                            </span>
+                          </div>
+                          <p className="text-sm font-semibold tracking-tight text-foreground leading-relaxed">
+                            {group.negative.englishSentence}
+                          </p>
+                          <div className="text-xs text-muted-foreground/80 leading-relaxed italic space-y-0.5 pl-2 border-l border-rose-500/30">
+                            <p className="font-semibold text-muted-foreground/90">{group.negative.indonesianTranslation}</p>
+                            {group.negative.autoTranslation && (
+                              <p className="text-muted-foreground/50 text-[10px] not-italic">Google: {group.negative.autoTranslation}</p>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Interrogative Section */}
+                      {group.interrogative && (
+                        <div className="space-y-1">
+                          <div className="flex items-center">
+                            <span className="px-1.5 py-0.5 rounded text-[8px] font-extrabold uppercase tracking-wider bg-blue-500/10 text-blue-500 dark:text-blue-400 border border-blue-500/20">
+                              Interrogative
+                            </span>
+                          </div>
+                          <p className="text-sm font-semibold tracking-tight text-foreground leading-relaxed">
+                            {group.interrogative.englishSentence}
+                          </p>
+                          <div className="text-xs text-muted-foreground/80 leading-relaxed italic space-y-0.5 pl-2 border-l border-blue-500/30">
+                            <p className="font-semibold text-muted-foreground/90">{group.interrogative.indonesianTranslation}</p>
+                            {group.interrogative.autoTranslation && (
+                              <p className="text-muted-foreground/50 text-[10px] not-italic">Google: {group.interrogative.autoTranslation}</p>
+                            )}
+                          </div>
                         </div>
                       )}
                     </div>
-                  </div>
 
-                  {/* Metadata Footer */}
-                  <div className="mt-3 text-[9px] font-semibold text-muted-foreground/60 text-right">
-                    {new Date(log.createdAt).toLocaleDateString("en-US", {
-                      day: "numeric",
-                      month: "short",
-                      year: "numeric",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
+                    {/* Metadata Footer */}
+                    <div className="mt-3.5 text-[9px] font-semibold text-muted-foreground/60 text-right border-t border-border/20 pt-2 animate-in fade-in duration-200">
+                      {new Date(group.createdAt).toLocaleDateString("en-US", {
+                        day: "numeric",
+                        month: "short",
+                        year: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </div>
                   </div>
-                </div>
-              )
-            })}
-          </div>
+                )
+              })}
+            </div>
+          )
+        ) : (
+          // ==================== FREE WRITING HISTORY ====================
+          filteredFreeHistory.length === 0 ? (
+            <div className="rounded-2xl border border-dashed border-border/40 py-16 text-center text-sm text-muted-foreground bg-card/10 select-none animate-in fade-in duration-200">
+              {searchQueryWriting
+                ? "No sentences match your search query."
+                : "No free writing logs recorded yet. Click 'Add Writing' to practice!"}
+            </div>
+          ) : (
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 animate-in fade-in duration-300">
+              {filteredFreeHistory.map((log) => {
+                return (
+                  <div
+                    key={log.id}
+                    className="group relative rounded-xl border border-border/60 bg-card/40 dark:bg-card/15 p-4 shadow-sm hover:border-primary/30 hover:bg-card/75 transition-all duration-300 flex flex-col justify-between"
+                  >
+                    <div className="space-y-2">
+                      {/* Top Badges Row */}
+                      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border/30 pb-2 mb-2">
+                        <span className="px-2 py-0.5 rounded-md text-[9px] font-extrabold uppercase tracking-wider bg-secondary/40 text-muted-foreground border border-border/55">
+                          Free Writing
+                        </span>
+
+                        <button
+                          onClick={() => handleDeleteWriting(log.id)}
+                          disabled={writingDeletePending}
+                          className="opacity-0 group-hover:opacity-100 focus:opacity-100 p-1 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all shrink-0 cursor-pointer"
+                          aria-label="Delete sentence log"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+
+                      {/* English Sentence */}
+                      <p className="text-sm font-semibold tracking-tight text-foreground leading-relaxed">
+                        {log.englishSentence}
+                      </p>
+
+                      {/* Indonesian translation */}
+                      <div className="pt-1.5 border-t border-dashed border-border/30 mt-2 space-y-2">
+                        <div>
+                          <span className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground block mb-0.5">
+                            Manual Translation
+                          </span>
+                          <p className="text-xs text-muted-foreground leading-relaxed italic font-semibold">
+                            {log.indonesianTranslation}
+                          </p>
+                        </div>
+                        {log.autoTranslation && (
+                          <div className="border-t border-dotted border-border/40 pt-1">
+                            <span className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground block mb-0.5">
+                              Google Translation
+                            </span>
+                            <p className="text-xs text-muted-foreground/80 leading-relaxed italic">
+                              {log.autoTranslation}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Metadata Footer */}
+                    <div className="mt-3 text-[9px] font-semibold text-muted-foreground/60 text-right">
+                      {new Date(log.createdAt).toLocaleDateString("en-US", {
+                        day: "numeric",
+                        month: "short",
+                        year: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          )
         )}
       </div>
 

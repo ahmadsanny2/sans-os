@@ -134,7 +134,8 @@ export default function LanguageComponent() {
           filteredVocabList={languageData.filteredVocabList}
           vocabWritingLogs={languageData.vocabWritingLogs}
           freeWritingLogs={languageData.freeWritingLogs}
-          filteredHistory={languageData.filteredHistory}
+          filteredGroupedHistory={languageData.filteredGroupedHistory}
+          filteredFreeHistory={languageData.filteredFreeHistory}
           writingCreatePending={languageData.writingCreatePending}
           writingDeletePending={languageData.writingDeletePending}
         />

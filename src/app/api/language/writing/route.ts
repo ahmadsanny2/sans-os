@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import { db } from "@/lib/db"
 import { writingLogs } from "@/types/schema"
-import { eq, and, desc } from "drizzle-orm"
+import { eq, and, desc, inArray } from "drizzle-orm"
 import { createServerSupabaseClient } from "@/lib/supabase/server"
 import { translateText } from "@/lib/translate"
 
@@ -104,13 +104,15 @@ export async function DELETE(request: Request): Promise<NextResponse> {
       return NextResponse.json({ error: "Missing log ID" }, { status: 400 })
     }
 
-    const [deletedLog] = await db
+    const ids = id.split(",")
+
+    const deletedLogs = await db
       .delete(writingLogs)
-      .where(and(eq(writingLogs.id, id), eq(writingLogs.userId, user.id)))
+      .where(and(inArray(writingLogs.id, ids), eq(writingLogs.userId, user.id)))
       .returning()
 
-    if (!deletedLog) {
-      return NextResponse.json({ error: "Log not found" }, { status: 404 })
+    if (deletedLogs.length === 0) {
+      return NextResponse.json({ error: "Logs not found" }, { status: 404 })
     }
 
     return NextResponse.json({ success: true })
