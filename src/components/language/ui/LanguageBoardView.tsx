@@ -578,7 +578,7 @@ export function LanguageBoardView({
                               <div className="rounded-2xl border border-border bg-card/10 dark:bg-card/5 p-5 shadow-sm mt-1">
                                 <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                                   {words.map((vocab) => {
-                                    const isRevealed = revealedTranslationIds[vocab.id] !== false
+                                    const isRevealed = !!revealedTranslationIds[vocab.id]
 
                                     return (
                                       <div

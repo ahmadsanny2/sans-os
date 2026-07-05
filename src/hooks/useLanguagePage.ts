@@ -159,20 +159,20 @@ export function useLanguagePage() {
   const toggleRevealTranslation = (id: string): void => {
     setRevealedTranslationIds((prev) => ({
       ...prev,
-      [id]: prev[id] === false ? true : false,
+      [id]: !prev[id],
     }))
   }
 
   const revealAllTranslations = (): void => {
-    setRevealedTranslationIds({})
+    const allIds: Record<string, boolean> = {}
+    vocabList.forEach((v) => {
+      allIds[v.id] = true
+    })
+    setRevealedTranslationIds(allIds)
   }
 
   const hideAllTranslations = (): void => {
-    const allIds: Record<string, boolean> = {}
-    vocabList.forEach((v) => {
-      allIds[v.id] = false
-    })
-    setRevealedTranslationIds(allIds)
+    setRevealedTranslationIds({})
   }
 
   // Vocab metrics
