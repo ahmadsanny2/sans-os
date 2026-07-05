@@ -83,13 +83,18 @@ export function useDashboardPage() {
   }, [])
 
   // 4. Formatted date string
-  const parsedActiveDate = parseISO(activeDate)
-  const activeDateStr = parsedActiveDate.toLocaleDateString("en-US", {
-    weekday: "long",
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  })
+  const [activeDateStr, setActiveDateStr] = useState("")
+  useEffect(() => {
+    const parsedActiveDate = parseISO(activeDate)
+    setActiveDateStr(
+      parsedActiveDate.toLocaleDateString("en-US", {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      })
+    )
+  }, [activeDate])
 
   // 5. Timetable derived state
   const now = new Date()

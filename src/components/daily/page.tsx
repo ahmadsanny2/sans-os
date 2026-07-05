@@ -31,7 +31,7 @@ export default function DailyComponent() {
           <div className="flex items-center gap-1.5 mt-1">
             <Calendar className="h-4 w-4 text-primary" />
             <span>
-              Active Date: <span className="font-semibold text-foreground">{format(baseDate, "MMMM d, yyyy")}</span>
+              Active Date: <span className="font-semibold text-foreground" suppressHydrationWarning>{format(baseDate, "MMMM d, yyyy")}</span>
             </span>
           </div>
         }

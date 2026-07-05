@@ -85,7 +85,7 @@ export function DashboardView({
           <h1 className="text-3xl font-extrabold tracking-tight md:text-4xl text-foreground">
             {greeting}, Ahmad Sani Jabarulloh
           </h1>
-          <p className="text-sm text-muted-foreground md:text-base">
+          <p className="text-sm text-muted-foreground md:text-base" suppressHydrationWarning>
             {activeDateStr} • Manage your daily priorities and monitor your personal life operating system.
           </p>
         </div>
