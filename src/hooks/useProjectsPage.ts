@@ -8,6 +8,9 @@ import {
   useCreateTaskMutation,
   useDeleteTaskMutation,
   useToggleTaskMutation,
+  useCreateSubTaskMutation,
+  useDeleteSubTaskMutation,
+  useToggleSubTaskMutation,
 } from "@/hooks/useProjects"
 import { format, isPast, isToday } from "date-fns"
 import { confirmDestructive, showError, showSuccessToast } from "@/lib/sweetalert"
@@ -39,6 +42,9 @@ export function useProjectsPage() {
   const createTaskMutation = useCreateTaskMutation()
   const deleteTaskMutation = useDeleteTaskMutation()
   const toggleTaskMutation = useToggleTaskMutation()
+  const createSubTaskMutation = useCreateSubTaskMutation()
+  const deleteSubTaskMutation = useDeleteSubTaskMutation()
+  const toggleSubTaskMutation = useToggleSubTaskMutation()
 
   // Selected project ID
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null)
@@ -57,6 +63,10 @@ export function useProjectsPage() {
   const [taskPriority, setTaskPriority] = useState("Medium")
   const [taskDeadline, setTaskDeadline] = useState("")
   const [taskError, setTaskError] = useState<string | null>(null)
+
+  // Sub-task states (we use a map to keep track of active sub-task input per task)
+  const [subTaskInputs, setSubTaskInputs] = useState<Record<string, string>>({})
+  const [subTaskErrors, setSubTaskErrors] = useState<Record<string, string>>({})
 
   // Filter project query list
   const activeProject = projectsList.find((p) => p.id === selectedProjectId) || null
@@ -144,6 +154,42 @@ export function useProjectsPage() {
     toggleTaskMutation.mutate({ id, completed: !completed })
   }
 
+  // --- Sub Task Handlers ---
+  const handleAddSubTask = async (e: React.FormEvent, taskId: string): Promise<void> => {
+    e.preventDefault()
+    const name = subTaskInputs[taskId]
+    if (!name?.trim()) return
+
+    try {
+      await createSubTaskMutation.mutateAsync({
+        taskId,
+        name: name.trim(),
+      })
+      setSubTaskInputs((prev) => ({ ...prev, [taskId]: "" }))
+      setSubTaskErrors((prev) => ({ ...prev, [taskId]: "" }))
+      showSuccessToast("Sub-task added")
+    } catch {
+      setSubTaskErrors((prev) => ({ ...prev, [taskId]: "Failed to add sub-task." }))
+    }
+  }
+
+  const handleDeleteSubTask = async (id: string): Promise<void> => {
+    const confirmed = await confirmDestructive(
+      "Delete Sub-task?",
+      "Are you sure you want to delete this sub-task?"
+    )
+    if (!confirmed) return
+    try {
+      await deleteSubTaskMutation.mutateAsync(id)
+    } catch {
+      await showError("Deletion Failed", "Failed to delete sub-task.")
+    }
+  }
+
+  const handleToggleSubTask = (id: string, completed: boolean): void => {
+    toggleSubTaskMutation.mutate({ id, completed: !completed })
+  }
+
   return {
     projectsList,
     isLoading,
@@ -176,11 +222,23 @@ export function useProjectsPage() {
     handleAddTask,
     handleDeleteTask,
     handleToggleTask,
+    
+    // Subtask helpers
+    subTaskInputs,
+    setSubTaskInputs,
+    subTaskErrors,
+    handleAddSubTask,
+    handleDeleteSubTask,
+    handleToggleSubTask,
+
     isPendingProjectCreate: createProjectMutation.isPending,
     isPendingProjectDelete: deleteProjectMutation.isPending,
     isPendingTaskCreate: createTaskMutation.isPending,
     isPendingTaskDelete: deleteTaskMutation.isPending,
     isPendingTaskToggle: toggleTaskMutation.isPending,
+    isPendingSubTaskCreate: createSubTaskMutation.isPending,
+    isPendingSubTaskDelete: deleteSubTaskMutation.isPending,
+    isPendingSubTaskToggle: toggleSubTaskMutation.isPending,
   }
 }
 

@@ -94,11 +94,20 @@ interface ProjectBoardViewProps {
   handleAddTask: (e: React.FormEvent) => Promise<void>
   handleDeleteTask: (id: string) => Promise<void>
   handleToggleTask: (id: string, completed: boolean) => void
+  subTaskInputs: Record<string, string>
+  setSubTaskInputs: React.Dispatch<React.SetStateAction<Record<string, string>>>
+  subTaskErrors: Record<string, string>
+  handleAddSubTask: (e: React.FormEvent, taskId: string) => Promise<void>
+  handleDeleteSubTask: (id: string) => Promise<void>
+  handleToggleSubTask: (id: string, completed: boolean) => void
   isPendingProjectCreate: boolean
   isPendingProjectDelete: boolean
   isPendingTaskCreate: boolean
   isPendingTaskDelete: boolean
   isPendingTaskToggle: boolean
+  isPendingSubTaskCreate: boolean
+  isPendingSubTaskDelete: boolean
+  isPendingSubTaskToggle: boolean
 }
 
 export function ProjectBoardView({
@@ -133,11 +142,20 @@ export function ProjectBoardView({
   handleAddTask,
   handleDeleteTask,
   handleToggleTask,
+  subTaskInputs,
+  setSubTaskInputs,
+  subTaskErrors,
+  handleAddSubTask,
+  handleDeleteSubTask,
+  handleToggleSubTask,
   isPendingProjectCreate,
   isPendingProjectDelete,
   isPendingTaskCreate,
   isPendingTaskDelete,
   isPendingTaskToggle,
+  isPendingSubTaskCreate,
+  isPendingSubTaskDelete,
+  isPendingSubTaskToggle,
 }: ProjectBoardViewProps) {
   const sortedProjects = [...projectsList].sort((a, b) => {
     const aCompleted = a.status === "Completed"
@@ -478,63 +496,131 @@ export function ProjectBoardView({
                       const taskPriorityTheme = PRIORITY_THEMES[task.priority] || PRIORITY_THEMES.Medium
 
                       return (
-                        <div
-                          key={task.id}
-                          className={`flex items-center justify-between rounded-xl border p-3.5 transition-all duration-200 ${
-                            task.completed
-                              ? "border-border/40 bg-secondary/20 opacity-70"
-                              : "border-border/60 bg-card/40 shadow-sm hover:border-primary/30 hover:bg-card/70"
-                          }`}
-                        >
-                          <div className="flex items-center gap-3.5 flex-1 min-w-0">
-                            <button
-                              onClick={() => handleToggleTask(task.id, task.completed)}
-                              disabled={isPendingTaskToggle}
-                              className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-lg border transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed ${
-                                task.completed
-                                  ? "bg-primary border-primary text-primary-foreground shadow-glow"
-                                  : "border-border/65 hover:border-primary/50 bg-card"
-                              }`}
-                              aria-label="Toggle task completed"
-                            >
-                              {task.completed && <Check className="h-3.5 w-3.5 stroke-[3]" />}
-                            </button>
-
-                            <div className="flex flex-col min-w-0 pr-3">
-                              <span
-                                className={`text-xs font-semibold break-words whitespace-normal leading-tight ${
-                                  task.completed ? "line-through text-muted-foreground font-normal" : "text-foreground"
+                        <div key={task.id} className="space-y-2">
+                          <div
+                            className={`flex items-center justify-between rounded-xl border p-3.5 transition-all duration-200 ${
+                              task.completed
+                                ? "border-border/40 bg-secondary/20 opacity-70"
+                                : "border-border/60 bg-card/40 shadow-sm hover:border-primary/30 hover:bg-card/70"
+                            }`}
+                          >
+                            <div className="flex items-center gap-3.5 flex-1 min-w-0">
+                              <button
+                                onClick={() => handleToggleTask(task.id, task.completed)}
+                                disabled={isPendingTaskToggle}
+                                className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-lg border transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed ${
+                                  task.completed
+                                    ? "bg-primary border-primary text-primary-foreground shadow-glow"
+                                    : "border-border/65 hover:border-primary/50 bg-card"
                                 }`}
+                                aria-label="Toggle task completed"
                               >
-                                {task.name}
-                              </span>
+                                {task.completed && <Check className="h-3.5 w-3.5 stroke-[3]" />}
+                              </button>
 
-                              <div className="flex flex-wrap items-center gap-1.5 mt-1 text-[8px] font-extrabold uppercase tracking-wide">
-                                <span className={`px-1.5 py-0.5 rounded border ${taskPriorityTheme.bg} ${taskPriorityTheme.text} ${taskPriorityTheme.border}`}>
-                                  {task.priority}
+                              <div className="flex flex-col min-w-0 pr-3">
+                                <span
+                                  className={`text-xs font-semibold break-words whitespace-normal leading-tight ${
+                                    task.completed ? "line-through text-muted-foreground font-normal" : "text-foreground"
+                                  }`}
+                                >
+                                  {task.name}
                                 </span>
-                                {task.deadline && (
-                                  <span className={`px-1.5 py-0.5 rounded border flex items-center gap-1 ${
-                                    isTaskOver
-                                      ? "bg-rose-500/10 text-rose-500 border-rose-500/20"
-                                      : "bg-slate-500/10 text-slate-500 border-slate-500/20"
-                                  }`}>
-                                    <Calendar className="h-2.5 w-2.5 shrink-0" />
-                                    <span>{formatDate(task.deadline)}</span>
+
+                                <div className="flex flex-wrap items-center gap-1.5 mt-1 text-[8px] font-extrabold uppercase tracking-wide">
+                                  <span className={`px-1.5 py-0.5 rounded border ${taskPriorityTheme.bg} ${taskPriorityTheme.text} ${taskPriorityTheme.border}`}>
+                                    {task.priority}
                                   </span>
-                                )}
+                                  {task.deadline && (
+                                    <span className={`px-1.5 py-0.5 rounded border flex items-center gap-1 ${
+                                      isTaskOver
+                                        ? "bg-rose-500/10 text-rose-500 border-rose-500/20"
+                                        : "bg-slate-500/10 text-slate-500 border-slate-500/20"
+                                    }`}>
+                                      <Calendar className="h-2.5 w-2.5 shrink-0" />
+                                      <span>{formatDate(task.deadline)}</span>
+                                    </span>
+                                  )}
+                                </div>
                               </div>
                             </div>
+
+                            <button
+                              onClick={() => handleDeleteTask(task.id)}
+                              disabled={isPendingTaskDelete}
+                              className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors shrink-0"
+                              aria-label="Delete task"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </button>
                           </div>
 
-                          <button
-                            onClick={() => handleDeleteTask(task.id)}
-                            disabled={isPendingTaskDelete}
-                            className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors shrink-0"
-                            aria-label="Delete task"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </button>
+                          {/* Nested Sub-Tasks Area */}
+                          <div className="pl-11 pr-2 space-y-2 pb-3 pt-1">
+                            {task.subTasks && task.subTasks.length > 0 && (
+                              <div className="space-y-1.5">
+                                {task.subTasks
+                                  .sort((a, b) => {
+                                    if (a.completed !== b.completed) return a.completed ? 1 : -1
+                                    return a.createdAt.localeCompare(b.createdAt)
+                                  })
+                                  .map((st) => (
+                                  <div key={st.id} className="group flex items-center justify-between py-1 px-2 -mx-2 rounded-lg hover:bg-secondary/40 transition-colors">
+                                    <div className="flex items-center gap-2.5 flex-1 min-w-0">
+                                      <button
+                                        onClick={() => handleToggleSubTask(st.id, st.completed)}
+                                        disabled={isPendingSubTaskToggle}
+                                        className={`flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-[4px] border transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed ${
+                                          st.completed
+                                            ? "bg-primary border-primary text-primary-foreground"
+                                            : "border-border/65 hover:border-primary/50 bg-card"
+                                        }`}
+                                      >
+                                        {st.completed && <Check className="h-2.5 w-2.5 stroke-[4]" />}
+                                      </button>
+                                      <span
+                                        className={`text-[11px] min-w-0 break-words ${
+                                          st.completed ? "line-through text-muted-foreground" : "text-foreground font-medium"
+                                        }`}
+                                      >
+                                        {st.name}
+                                      </span>
+                                    </div>
+                                    <button
+                                      onClick={() => handleDeleteSubTask(st.id)}
+                                      disabled={isPendingSubTaskDelete}
+                                      className="opacity-0 group-hover:opacity-100 p-1 rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all shrink-0"
+                                    >
+                                      <Trash2 className="h-3 w-3" />
+                                    </button>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+
+                            {/* Inline Add Sub-Task Form */}
+                            <form onSubmit={(e) => handleAddSubTask(e, task.id)} className="flex items-center gap-2 mt-2">
+                              <input
+                                type="text"
+                                value={subTaskInputs[task.id] || ""}
+                                onChange={(e) => setSubTaskInputs((prev) => ({ ...prev, [task.id]: e.target.value }))}
+                                placeholder="Add a sub-task..."
+                                className="flex-1 bg-transparent border-b border-dashed border-border/60 hover:border-primary/40 focus:border-primary px-1 py-1 text-[11px] outline-none transition-all placeholder:text-muted-foreground/60"
+                              />
+                              <button
+                                type="submit"
+                                disabled={isPendingSubTaskCreate || !(subTaskInputs[task.id]?.trim())}
+                                className="shrink-0 rounded p-1 text-muted-foreground hover:text-primary hover:bg-primary/10 disabled:opacity-50 disabled:hover:bg-transparent"
+                              >
+                                <Plus className="h-3.5 w-3.5" />
+                              </button>
+                            </form>
+                            {subTaskErrors[task.id] && (
+                              <p className="text-[10px] text-destructive flex items-center gap-1">
+                                <AlertCircle className="h-3 w-3" /> {subTaskErrors[task.id]}
+                              </p>
+                            )}
+                          </div>
                         </div>
                       )
                     })}
@@ -544,21 +630,21 @@ export function ProjectBoardView({
 
             {/* Add task inline form */}
             <form onSubmit={handleAddTask} className="border-t border-border/40 pt-5 space-y-3">
-              <div className="flex flex-col gap-3 sm:flex-row">
+              <div className="flex flex-col gap-3 md:flex-row">
                 <input
                   type="text"
                   required
                   value={taskName}
                   onChange={(e) => setTaskName(e.target.value)}
                   placeholder="Add new subtask deliverables..."
-                  className="flex-1 rounded-lg border border-border/60 bg-background px-3.5 py-2 text-xs outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/10"
+                  className="flex-1 rounded-lg border border-border/60 bg-background px-3.5 py-2 text-xs outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/10 min-w-0"
                 />
 
-                <div className="flex gap-2 shrink-0">
+                <div className="flex flex-wrap sm:flex-nowrap gap-2 shrink-0">
                   <select
                     value={taskPriority}
                     onChange={(e) => setTaskPriority(e.target.value)}
-                    className="rounded-lg border border-border/60 bg-background px-2.5 py-2 text-xs outline-none transition-all focus:border-primary"
+                    className="flex-1 sm:flex-none w-full sm:w-auto rounded-lg border border-border/60 bg-background px-2.5 py-2 text-xs outline-none transition-all focus:border-primary"
                     aria-label="Task priority selection"
                   >
                     <option value="Low">Low</option>
@@ -570,14 +656,14 @@ export function ProjectBoardView({
                     type="date"
                     value={taskDeadline}
                     onChange={(e) => setTaskDeadline(e.target.value)}
-                    className="rounded-lg border border-border/60 bg-background px-2.5 py-2 text-xs outline-none transition-all focus:border-primary w-[130px]"
+                    className="flex-1 sm:flex-none w-full sm:w-[130px] rounded-lg border border-border/60 bg-background px-2.5 py-2 text-xs outline-none transition-all focus:border-primary"
                     aria-label="Task deadline selection"
                   />
 
                   <button
                     type="submit"
                     disabled={isPendingTaskCreate || !taskName.trim()}
-                    className="inline-flex items-center justify-center rounded-lg bg-primary px-3 py-2 text-xs font-semibold text-primary-foreground shadow-sm transition-all hover:bg-primary/95 disabled:opacity-50"
+                    className="inline-flex w-full sm:w-auto items-center justify-center rounded-lg bg-primary px-3 py-2 text-xs font-semibold text-primary-foreground shadow-sm transition-all hover:bg-primary/95 disabled:opacity-50"
                   >
                     {isPendingTaskCreate ? (
                       <Loader2 className="h-4.5 w-4.5 animate-spin" />

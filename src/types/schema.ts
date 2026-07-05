@@ -180,15 +180,35 @@ export const projectTasks = pgTable("project_tasks", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 })
 
+// 10.5 Project Sub-Tasks
+export const projectSubTasks = pgTable("project_sub_tasks", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: text("user_id").notNull(),
+  taskId: uuid("task_id")
+    .references(() => projectTasks.id, { onDelete: "cascade" })
+    .notNull(),
+  name: text("name").notNull(),
+  completed: boolean("completed").default(false).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+})
+
 // Relations for Projects & Tasks
 export const projectsRelations = relations(projects, ({ many }) => ({
   tasks: many(projectTasks),
 }))
 
-export const projectTasksRelations = relations(projectTasks, ({ one }) => ({
+export const projectTasksRelations = relations(projectTasks, ({ one, many }) => ({
   project: one(projects, {
     fields: [projectTasks.projectId],
     references: [projects.id],
+  }),
+  subTasks: many(projectSubTasks),
+}))
+
+export const projectSubTasksRelations = relations(projectSubTasks, ({ one }) => ({
+  task: one(projectTasks, {
+    fields: [projectSubTasks.taskId],
+    references: [projectTasks.id],
   }),
 }))
 

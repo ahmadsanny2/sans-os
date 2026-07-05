@@ -19,7 +19,11 @@ export async function GET(): Promise<NextResponse> {
     const userProjects = await db.query.projects.findMany({
       where: eq(projects.userId, user.id),
       with: {
-        tasks: true,
+        tasks: {
+          with: {
+            subTasks: true
+          }
+        }
       },
       orderBy: [desc(projects.createdAt)],
     })

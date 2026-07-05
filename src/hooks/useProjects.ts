@@ -1,5 +1,14 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 
+export interface ProjectSubTask {
+  id: string
+  userId: string
+  taskId: string
+  name: string
+  completed: boolean
+  createdAt: string
+}
+
 export interface ProjectTask {
   id: string
   userId: string
@@ -9,6 +18,7 @@ export interface ProjectTask {
   priority: string
   deadline: string | null
   createdAt: string
+  subTasks: ProjectSubTask[]
 }
 
 export interface Project {
@@ -241,5 +251,136 @@ export function useToggleTaskMutation() {
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["projects"] })
     },
+  })
+}
+
+// 7. Create new subtask
+async function createSubTask(body: {
+  taskId: string
+  name: string
+}): Promise<ProjectSubTask> {
+  const res = await fetch("/api/projects/tasks/subtasks", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  })
+  if (!res.ok) {
+    throw new Error("Failed to create subtask")
+  }
+  return res.json()
+}
+
+export function useCreateSubTaskMutation() {
+  const queryClient = useQueryClient()
+  return useMutation<ProjectSubTask, Error, { taskId: string; name: string }>({
+    mutationFn: createSubTask,
+    onSuccess: (newSubTask) => {
+      queryClient.setQueryData<Project[]>(["projects"], (old) => {
+        if (!old) return []
+        return old.map((p) => ({
+          ...p,
+          tasks: p.tasks.map((t) => {
+            if (t.id === newSubTask.taskId) {
+              return {
+                ...t,
+                subTasks: [...(t.subTasks || []), newSubTask]
+              }
+            }
+            return t
+          })
+        }))
+      })
+      queryClient.invalidateQueries({ queryKey: ["projects"] })
+    }
+  })
+}
+
+// 8. Delete subtask
+async function deleteSubTask(id: string): Promise<{ success: boolean }> {
+  const res = await fetch(`/api/projects/tasks/subtasks?id=${id}`, {
+    method: "DELETE",
+  })
+  if (!res.ok) {
+    throw new Error("Failed to delete subtask")
+  }
+  return res.json()
+}
+
+export function useDeleteSubTaskMutation() {
+  const queryClient = useQueryClient()
+  return useMutation<{ success: boolean }, Error, string, { previous: Project[] | undefined }>({
+    mutationFn: deleteSubTask,
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: ["projects"] })
+      const previous = queryClient.getQueryData<Project[]>(["projects"])
+      if (previous) {
+        queryClient.setQueryData<Project[]>(
+          ["projects"],
+          previous.map((p) => ({
+            ...p,
+            tasks: p.tasks.map((t) => ({
+              ...t,
+              subTasks: (t.subTasks || []).filter((st) => st.id !== id)
+            }))
+          }))
+        )
+      }
+      return { previous }
+    },
+    onError: (err, id, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(["projects"], context.previous)
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["projects"] })
+    }
+  })
+}
+
+// 9. Toggle subtask
+async function toggleSubTask(body: { id: string; completed: boolean }): Promise<ProjectSubTask> {
+  const res = await fetch("/api/projects/tasks/subtasks/toggle", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  })
+  if (!res.ok) {
+    throw new Error("Failed to toggle subtask status")
+  }
+  return res.json()
+}
+
+export function useToggleSubTaskMutation() {
+  const queryClient = useQueryClient()
+  return useMutation<ProjectSubTask, Error, { id: string; completed: boolean }, { previous: Project[] | undefined }>({
+    mutationFn: toggleSubTask,
+    onMutate: async (variables) => {
+      await queryClient.cancelQueries({ queryKey: ["projects"] })
+      const previous = queryClient.getQueryData<Project[]>(["projects"])
+      if (previous) {
+        queryClient.setQueryData<Project[]>(
+          ["projects"],
+          previous.map((p) => ({
+            ...p,
+            tasks: p.tasks.map((t) => ({
+              ...t,
+              subTasks: (t.subTasks || []).map((st) => 
+                st.id === variables.id ? { ...st, completed: variables.completed } : st
+              )
+            }))
+          }))
+        )
+      }
+      return { previous }
+    },
+    onError: (err, variables, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(["projects"], context.previous)
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["projects"] })
+    }
   })
 }
