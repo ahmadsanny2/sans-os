@@ -262,7 +262,7 @@ export function LanguageBoardView({
             </button>
 
             {isFilterOpen && (
-              <div className="absolute right-0 sm:right-auto sm:left-0 mt-2 z-50 w-72 rounded-2xl border border-border bg-card/95 p-4 shadow-xl backdrop-blur-xl space-y-4 animate-in fade-in slide-in-from-top-2 duration-150">
+              <div className="absolute left-0 mt-2 z-50 w-72 rounded-2xl border border-border bg-card/95 p-4 shadow-xl backdrop-blur-xl space-y-4 animate-in fade-in slide-in-from-top-2 duration-150">
                 {/* 1. Language Direction Group */}
                 <div className="space-y-1.5">
                   <span className="text-[9px] font-extrabold uppercase tracking-wider text-muted-foreground block select-none">
