@@ -48,9 +48,9 @@ export default function DailyComponent() {
         <div className="flex justify-start">
           <button
             onClick={() => setShowAddForm(true)}
-            className="flex items-center gap-2 px-5 py-3 rounded-2xl border border-border/60 bg-card/40 hover:bg-card/75 text-foreground hover:border-primary/20 transition-all font-semibold shadow-glass hover:scale-[1.01] active:scale-95 cursor-pointer"
+            className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-violet-600 px-4 py-2.5 text-xs font-semibold text-white shadow-sm transition-all hover:bg-violet-700 hover:scale-[1.02] active:scale-95 cursor-pointer"
           >
-            <Plus className="h-5 w-5 text-primary" />
+            <Plus className="h-4 w-4 text-white" />
             <span>Add Flow Item</span>
           </button>
         </div>
