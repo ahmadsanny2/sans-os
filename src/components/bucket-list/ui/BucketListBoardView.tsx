@@ -167,7 +167,7 @@ export function BucketListBoardView({
 
         <button
           onClick={() => setShowAddForm(!showAddForm)}
-          className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3.5 py-2 text-xs font-semibold text-primary-foreground shadow-sm transition-all hover:bg-primary/95 hover:scale-[1.02] active:scale-95 self-start md:self-auto cursor-pointer"
+          className="inline-flex items-center gap-1.5 rounded-xl bg-primary px-4 py-2.5 text-xs font-semibold text-primary-foreground shadow-sm transition-all hover:bg-primary/95 hover:scale-[1.02] active:scale-95 self-start md:self-auto cursor-pointer"
         >
           <Plus className="h-4 w-4" />
           {showAddForm ? "Cancel Add" : "Add Bucket Goal"}
@@ -197,7 +197,7 @@ export function BucketListBoardView({
                 value={addTitle}
                 onChange={(e) => setAddTitle(e.target.value)}
                 placeholder="e.g. Scuba Dive in Great Barrier Reef"
-                className="w-full rounded-lg border border-border/60 bg-background px-3.5 py-2 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/10"
+                className="w-full rounded-xl border border-border bg-background/50 px-3.5 py-2.5 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/10 shadow-sm"
               />
             </div>
 
@@ -212,7 +212,7 @@ export function BucketListBoardView({
                 value={addImageUrl}
                 onChange={(e) => setAddImageUrl(e.target.value)}
                 placeholder="e.g. https://images.unsplash.com/photo-..."
-                className="w-full rounded-lg border border-border/60 bg-background px-3.5 py-2 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/10"
+                className="w-full rounded-xl border border-border bg-background/50 px-3.5 py-2.5 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/10 shadow-sm"
               />
             </div>
           </div>
@@ -251,14 +251,14 @@ export function BucketListBoardView({
             <button
               type="button"
               onClick={() => setShowAddForm(false)}
-              className="rounded-lg border border-border/40 px-3 py-1.5 text-xs font-semibold hover:bg-muted cursor-pointer"
+              className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-border/80 bg-secondary/30 px-4 py-2.5 text-xs font-semibold text-muted-foreground shadow-sm transition-all hover:bg-secondary/60 hover:text-foreground hover:scale-[1.02] active:scale-95 disabled:opacity-50 disabled:pointer-events-none cursor-pointer"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isPendingCreate}
-              className="rounded-lg bg-primary px-3.5 py-1.5 text-xs font-semibold text-primary-foreground hover:bg-primary/95 flex items-center gap-1 cursor-pointer active:scale-95"
+              className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-primary px-4 py-2.5 text-xs font-semibold text-primary-foreground shadow-sm transition-all hover:bg-primary/95 hover:scale-[1.02] active:scale-95 disabled:opacity-50 disabled:pointer-events-none cursor-pointer"
             >
               {isPendingCreate ? (
                 <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -407,7 +407,7 @@ export function BucketListBoardView({
                   required
                   value={editTitle}
                   onChange={(e) => setEditTitle(e.target.value)}
-                  className="w-full rounded-lg border border-border/60 bg-background px-3 py-1.5 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/10"
+                  className="w-full rounded-xl border border-border bg-background/50 px-3.5 py-2.5 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/10 shadow-sm"
                 />
               </div>
 
@@ -419,7 +419,7 @@ export function BucketListBoardView({
                   type="text"
                   value={editImageUrl}
                   onChange={(e) => setEditImageUrl(e.target.value)}
-                  className="w-full rounded-lg border border-border/60 bg-background px-3 py-1.5 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/10"
+                  className="w-full rounded-xl border border-border bg-background/50 px-3.5 py-2.5 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/10 shadow-sm"
                 />
               </div>
 
@@ -447,14 +447,14 @@ export function BucketListBoardView({
               <button
                 type="button"
                 onClick={() => setEditingItem(null)}
-                className="rounded-lg border border-border/40 px-3.5 py-1.5 text-xs font-semibold hover:bg-muted cursor-pointer"
+                className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-border/80 bg-secondary/30 px-4 py-2.5 text-xs font-semibold text-muted-foreground shadow-sm transition-all hover:bg-secondary/60 hover:text-foreground hover:scale-[1.02] active:scale-95 disabled:opacity-50 disabled:pointer-events-none cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={isPendingUpdate}
-                className="rounded-lg bg-primary px-4 py-1.5 text-xs font-semibold text-primary-foreground hover:bg-primary/95 flex items-center gap-1 cursor-pointer active:scale-95"
+                className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-primary px-4 py-2.5 text-xs font-semibold text-primary-foreground shadow-sm transition-all hover:bg-primary/95 hover:scale-[1.02] active:scale-95 disabled:opacity-50 disabled:pointer-events-none cursor-pointer"
               >
                 {isPendingUpdate ? (
                   <Loader2 className="h-3.5 w-3.5 animate-spin" />

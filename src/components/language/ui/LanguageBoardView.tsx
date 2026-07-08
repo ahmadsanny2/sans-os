@@ -360,7 +360,7 @@ export function LanguageBoardView({
 
         <button
           onClick={() => setShowAddForm(!showAddForm)}
-          className="inline-flex items-center gap-1.5 rounded-lg bg-sidebar-primary px-3.5 py-2 text-xs font-semibold text-sidebar-primary-foreground shadow-sm transition-all hover:bg-sidebar-primary/90 hover:scale-[1.02] self-start md:self-auto"
+          className="inline-flex items-center gap-1.5 rounded-xl bg-sidebar-primary px-4 py-2.5 text-xs font-semibold text-sidebar-primary-foreground shadow-sm transition-all hover:bg-sidebar-primary/90 hover:scale-[1.02] active:scale-95 self-start md:self-auto cursor-pointer"
         >
           <Plus className="h-4 w-4" />
           {showAddForm ? "Cancel Add" : "Add Vocabulary"}
@@ -450,7 +450,7 @@ export function LanguageBoardView({
                       value={word}
                       onChange={(e) => setWord(e.target.value)}
                       placeholder={langDirection === "id-en" ? "e.g. Belajar" : "e.g. Ephemeral"}
-                      className="w-full rounded-lg border border-border bg-background px-3 py-1.5 text-sm outline-none transition-all focus:border-sidebar-primary focus:ring-2 focus:ring-sidebar-primary/10"
+                      className="w-full rounded-xl border border-border bg-background/50 px-3.5 py-2.5 text-sm outline-none transition-all focus:border-sidebar-primary focus:ring-2 focus:ring-sidebar-primary/10 shadow-sm"
                     />
                   </div>
 
@@ -466,7 +466,7 @@ export function LanguageBoardView({
                       value={translation}
                       onChange={(e) => setTranslation(e.target.value)}
                       placeholder={langDirection === "id-en" ? "e.g. Study, learn" : "e.g. Temporary, brief"}
-                      className="w-full rounded-lg border border-border bg-background px-3 py-1.5 text-sm outline-none transition-all focus:border-sidebar-primary"
+                      className="w-full rounded-xl border border-border bg-background/50 px-3.5 py-2.5 text-sm outline-none transition-all focus:border-sidebar-primary focus:ring-2 focus:ring-sidebar-primary/10 shadow-sm"
                     />
                   </div>
                 </div>
@@ -483,14 +483,14 @@ export function LanguageBoardView({
                 <button
                   type="button"
                   onClick={() => setShowAddForm(false)}
-                  className="rounded-lg border border-border px-3 py-1.5 text-xs font-semibold hover:bg-muted"
+                  className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-border bg-secondary/30 px-4 py-2.5 text-xs font-semibold text-muted-foreground shadow-sm transition-all hover:bg-secondary/60 hover:text-foreground hover:scale-[1.02] active:scale-95 disabled:opacity-50 disabled:pointer-events-none cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={vocabCreatePending}
-                  className="rounded-lg bg-sidebar-primary px-3.5 py-1.5 text-xs font-semibold text-sidebar-primary-foreground hover:bg-sidebar-primary/95 flex items-center gap-1"
+                  className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-sidebar-primary px-4 py-2.5 text-xs font-semibold text-sidebar-primary-foreground shadow-sm transition-all hover:bg-sidebar-primary/90 hover:scale-[1.02] active:scale-95 disabled:opacity-50 disabled:pointer-events-none cursor-pointer"
                 >
                   {vocabCreatePending ? (
                     <Loader2 className="h-3.5 w-3.5 animate-spin" />

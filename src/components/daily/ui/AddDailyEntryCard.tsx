@@ -377,7 +377,7 @@ export function AddDailyEntryCard({
             <button
               type="button"
               onClick={onClose}
-              className="rounded-xl border border-border bg-background px-5 py-2.5 text-sm font-semibold text-muted-foreground hover:text-foreground transition-all hover:bg-muted/30 cursor-pointer"
+              className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-border bg-secondary/35 px-5 py-2.5 text-xs font-semibold text-muted-foreground shadow-sm transition-all hover:bg-secondary/60 hover:text-foreground hover:scale-[1.02] active:scale-95 disabled:opacity-50 disabled:pointer-events-none cursor-pointer"
             >
               Cancel
             </button>
@@ -385,11 +385,11 @@ export function AddDailyEntryCard({
           <button
             type="submit"
             disabled={isPendingCombined || !entryTitle.trim() || (!targetTimetable && !targetTodo && !targetPriority)}
-            className="rounded-xl bg-violet-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-violet-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 hover:scale-[1.01]"
+            className="inline-flex items-center justify-center gap-2 rounded-xl bg-violet-600 px-5 py-2.5 text-xs font-semibold text-white shadow-sm transition-all hover:bg-violet-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center hover:scale-[1.02] active:scale-95 cursor-pointer"
           >
             {isPendingCombined ? (
               <>
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <Loader2 className="h-4 w-4 animate-spin animate-duration-1000" />
                 <span>Saving item...</span>
               </>
             ) : (

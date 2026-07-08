@@ -369,7 +369,7 @@ export function ProjectBoardView({
           </div>
           <button
             onClick={() => setShowAddProject(!showAddProject)}
-            className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-tr from-primary to-primary/80 px-4 py-2 text-xs font-bold text-primary-foreground shadow-[0_4px_14px_0_rgba(var(--primary),0.39)] transition-all hover:shadow-[0_6px_20px_rgba(var(--primary),0.23)] hover:scale-[1.02] active:scale-95 shrink-0"
+            className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-tr from-primary to-primary/80 px-4 py-2.5 text-xs font-bold text-primary-foreground shadow-[0_4px_14px_0_rgba(var(--primary),0.39)] transition-all hover:shadow-[0_6px_20px_rgba(var(--primary),0.23)] hover:scale-[1.02] active:scale-95 shrink-0 cursor-pointer"
           >
             <Plus className="h-4 w-4" />
             {showAddProject ? "Cancel" : "Add Project"}
@@ -393,7 +393,7 @@ export function ProjectBoardView({
                 value={projectName}
                 onChange={(e) => setProjectName(e.target.value)}
                 placeholder="e.g., SansOS redesign, Travel planning..."
-                className="w-full rounded-lg border border-border/60 bg-background px-3 py-1.5 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/10"
+                className="w-full rounded-xl border border-border bg-background/50 px-3.5 py-2.5 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/10 shadow-sm"
               />
             </div>
 
@@ -407,7 +407,7 @@ export function ProjectBoardView({
                 value={projectDesc}
                 onChange={(e) => setProjectDesc(e.target.value)}
                 placeholder="Write description or goals..."
-                className="w-full rounded-lg border border-border/60 bg-background px-3 py-1.5 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/10 resize-none"
+                className="w-full rounded-xl border border-border bg-background/50 p-3 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/10 resize-none shadow-sm"
               />
             </div>
 
@@ -420,7 +420,7 @@ export function ProjectBoardView({
                   id="projectPriority"
                   value={projectPriority}
                   onChange={(e) => setProjectPriority(e.target.value)}
-                  className="w-full rounded-lg border border-border/60 bg-background px-3 py-1.5 text-sm outline-none transition-all focus:border-primary"
+                  className="w-full rounded-xl border border-border bg-background/50 px-3.5 py-2.5 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/10 shadow-sm"
                 >
                   <option value="Low">Low</option>
                   <option value="Medium">Medium</option>
@@ -436,7 +436,7 @@ export function ProjectBoardView({
                   id="projectStatus"
                   value={projectStatus}
                   onChange={(e) => setProjectStatus(e.target.value)}
-                  className="w-full rounded-lg border border-border/60 bg-background px-3 py-1.5 text-sm outline-none transition-all focus:border-primary"
+                  className="w-full rounded-xl border border-border bg-background/50 px-3.5 py-2.5 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/10 shadow-sm"
                 >
                   <option value="Planning">Planning</option>
                   <option value="In Progress">In Progress</option>
@@ -455,7 +455,7 @@ export function ProjectBoardView({
                 type="date"
                 value={projectDeadline}
                 onChange={(e) => setProjectDeadline(e.target.value)}
-                className="w-full rounded-lg border border-border/60 bg-background px-3 py-1.5 text-sm outline-none transition-all focus:border-primary"
+                className="w-full rounded-xl border border-border bg-background/50 px-3.5 py-2.5 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/10 shadow-sm"
               />
             </div>
 
@@ -470,14 +470,14 @@ export function ProjectBoardView({
               <button
                 type="button"
                 onClick={() => setShowAddProject(false)}
-                className="rounded-lg border border-border/40 px-3 py-1.5 text-xs font-semibold hover:bg-muted"
+                className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-border/80 bg-secondary/30 px-4 py-2.5 text-xs font-semibold text-muted-foreground shadow-sm transition-all hover:bg-secondary/60 hover:text-foreground hover:scale-[1.02] active:scale-95 disabled:opacity-50 disabled:pointer-events-none cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={isPendingProjectCreate}
-                className="rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground hover:bg-primary/95 flex items-center gap-1"
+                className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-primary px-4 py-2.5 text-xs font-semibold text-primary-foreground shadow-sm transition-all hover:bg-primary/95 hover:scale-[1.02] active:scale-95 disabled:opacity-50 disabled:pointer-events-none cursor-pointer"
               >
                 {isPendingProjectCreate ? (
                   <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -949,14 +949,14 @@ export function ProjectBoardView({
                   value={taskName}
                   onChange={(e) => setTaskName(e.target.value)}
                   placeholder="Add new subtask deliverables..."
-                  className="flex-1 rounded-lg border border-border/60 bg-background px-3.5 py-2 text-xs outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/10 min-w-0"
+                  className="flex-1 rounded-xl border border-border bg-background/50 px-3.5 py-2.5 text-xs outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/10 min-w-0 shadow-sm"
                 />
 
                 <div className="grid grid-cols-2 sm:flex sm:flex-nowrap gap-2 shrink-0">
                   <select
                     value={taskPriority}
                     onChange={(e) => setTaskPriority(e.target.value)}
-                    className="col-span-1 sm:w-auto rounded-lg border border-border/60 bg-background px-2.5 py-2 text-xs outline-none transition-all focus:border-primary"
+                    className="col-span-1 sm:w-auto rounded-xl border border-border bg-background/50 px-3.5 py-2.5 text-xs outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/10 shadow-sm"
                     aria-label="Task priority selection"
                   >
                     <option value="Low">Low</option>
@@ -968,14 +968,14 @@ export function ProjectBoardView({
                     type="date"
                     value={taskDeadline}
                     onChange={(e) => setTaskDeadline(e.target.value)}
-                    className="col-span-1 w-full sm:w-[130px] rounded-lg border border-border/60 bg-background px-2.5 py-2 text-xs outline-none transition-all focus:border-primary"
+                    className="col-span-1 w-full sm:w-[130px] rounded-xl border border-border bg-background/50 px-3.5 py-2.5 text-xs outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/10 shadow-sm"
                     aria-label="Task deadline selection"
                   />
 
                   <button
                     type="submit"
                     disabled={isPendingTaskCreate || !taskName.trim()}
-                    className="col-span-2 sm:col-span-1 inline-flex w-full sm:w-auto items-center justify-center rounded-lg bg-primary px-3 py-2 text-xs font-semibold text-primary-foreground shadow-sm transition-all hover:bg-primary/95 disabled:opacity-50"
+                    className="col-span-2 sm:col-span-1 inline-flex w-full sm:w-auto items-center justify-center gap-1.5 rounded-xl bg-primary px-4 py-2.5 text-xs font-semibold text-primary-foreground shadow-sm transition-all hover:bg-primary/95 hover:scale-[1.02] active:scale-95 disabled:opacity-50 disabled:pointer-events-none cursor-pointer"
                   >
                     {isPendingTaskCreate ? (
                       <Loader2 className="h-4.5 w-4.5 animate-spin" />
