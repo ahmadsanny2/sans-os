@@ -1,6 +1,6 @@
 "use client"
 
-import React from "react"
+import React, { useState, useRef, useEffect } from "react"
 import { Project, ProjectTask } from "@/hooks/useProjects"
 import { formatDate, isOverdue } from "@/hooks/useProjectsPage"
 import {
@@ -17,10 +17,122 @@ import {
   Inbox,
   AlertTriangle,
   ChevronLeft,
+  ChevronDown,
 } from "lucide-react"
 import { ListSkeleton } from "@/components/ui/Skeletons"
 import { EmptyState } from "@/components/ui/EmptyState"
 import { ErrorState } from "@/components/ui/ErrorState"
+
+interface DropdownOption {
+  value: string
+  label: string
+  dotClass?: string
+}
+
+const PROJECT_STATUS_OPTIONS: DropdownOption[] = [
+  { value: "Planning", label: "Planning", dotClass: "bg-slate-400 dark:bg-slate-500" },
+  { value: "In Progress", label: "In Progress", dotClass: "bg-blue-400 dark:bg-blue-500" },
+  { value: "On Hold", label: "On Hold", dotClass: "bg-amber-400 dark:bg-amber-500" },
+  { value: "Completed", label: "Completed", dotClass: "bg-emerald-400 dark:bg-emerald-500" },
+]
+
+const PROJECT_PRIORITY_OPTIONS: DropdownOption[] = [
+  { value: "Low", label: "Low", dotClass: "bg-slate-400 dark:bg-slate-500" },
+  { value: "Medium", label: "Medium", dotClass: "bg-indigo-400 dark:bg-indigo-500" },
+  { value: "High", label: "High", dotClass: "bg-rose-400 dark:bg-rose-500" },
+]
+
+interface CustomBadgeDropdownProps {
+  value: string
+  options: DropdownOption[]
+  onChange: (value: string) => void
+  disabled?: boolean
+  theme: { bg: string; text: string; border: string }
+  showDot?: boolean
+  align?: "left" | "right"
+}
+
+function CustomBadgeDropdown({
+  value,
+  options,
+  onChange,
+  disabled = false,
+  theme,
+  showDot = false,
+  align = "left",
+}: CustomBadgeDropdownProps) {
+  const [isOpen, setIsOpen] = useState(false)
+  const dropdownRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false)
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside)
+    }
+  }, [])
+
+  const selectedOption = options.find((opt) => opt.value === value) || options[0]
+
+  return (
+    <div className="relative inline-block text-left" ref={dropdownRef}>
+      <button
+        type="button"
+        disabled={disabled}
+        onClick={(e) => {
+          e.stopPropagation()
+          if (!disabled) setIsOpen(!isOpen)
+        }}
+        className={`px-2 py-0.5 rounded border flex items-center gap-1.5 transition-all hover:scale-[1.02] active:scale-95 duration-200 select-none ${theme.bg} ${theme.text} ${theme.border} ${disabled ? "opacity-60 cursor-not-allowed" : "cursor-pointer"}`}
+      >
+        {showDot && (
+          <div className={`h-1.5 w-1.5 rounded-full shadow-[0_0_5px_currentColor] ${selectedOption.dotClass || "bg-current"}`} />
+        )}
+        <span className="text-[9px] font-bold uppercase tracking-wider">{selectedOption.label}</span>
+        <ChevronDown className="h-2.5 w-2.5 opacity-60 transition-transform duration-200" style={{ transform: isOpen ? 'rotate(180deg)' : 'none' }} />
+      </button>
+
+      {isOpen && (
+        <div className={`absolute ${align === 'right' ? 'right-0' : 'left-0'} mt-1.5 w-36 origin-top-left rounded-xl border border-border/85 bg-card/90 backdrop-blur-md p-1.5 shadow-xl ring-1 ring-black/5 focus:outline-none z-50 animate-in fade-in slide-in-from-top-2 duration-150`}>
+          <div className="space-y-0.5">
+            {options.map((option) => {
+              const isSelected = option.value === value
+              return (
+                <button
+                  key={option.value}
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    onChange(option.value)
+                    setIsOpen(false)
+                  }}
+                  className={`w-full flex items-center justify-between rounded-lg px-2.5 py-1.5 text-[10px] font-bold transition-colors duration-150 ${
+                    isSelected
+                      ? "bg-primary/10 text-primary"
+                      : "text-foreground hover:bg-secondary/60 hover:text-foreground"
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    {showDot && option.dotClass && (
+                      <div className={`h-1.5 w-1.5 rounded-full ${option.dotClass}`} />
+                    )}
+                    <span>{option.label}</span>
+                  </div>
+                  {isSelected && <Check className="h-3 w-3 text-primary stroke-[3]" />}
+                </button>
+              )
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
 
 const PRIORITY_THEMES: Record<string, { bg: string; text: string; border: string }> = {
   High: {
@@ -400,44 +512,21 @@ export function ProjectBoardView({
 
                     {/* Badges footer */}
                     <div className="flex flex-wrap items-center gap-2 pt-1 text-[9px] font-bold uppercase tracking-wider">
-                      <span className={`relative px-2.5 py-1 rounded-md border flex items-center gap-1 ${statusTheme.bg} ${statusTheme.text} ${statusTheme.border}`}>
-                        <div className={`h-1.5 w-1.5 rounded-full ${statusTheme.text.split(' ')[0].replace('text-', 'bg-')} shadow-[0_0_5px_currentColor]`} />
-                        <span>{project.status}</span>
-                        <select
-                          value={project.status}
-                          disabled={isPendingProjectUpdate}
-                          onChange={(e) => {
-                            e.stopPropagation()
-                            handleUpdateProjectStatus(project.id, e.target.value)
-                          }}
-                          onClick={(e) => e.stopPropagation()}
-                          className="absolute inset-0 opacity-0 cursor-pointer w-full h-full disabled:cursor-not-allowed"
-                          aria-label="Change project status"
-                        >
-                          <option value="Planning" className="bg-background text-foreground">Planning</option>
-                          <option value="In Progress" className="bg-background text-foreground">In Progress</option>
-                          <option value="On Hold" className="bg-background text-foreground">On Hold</option>
-                          <option value="Completed" className="bg-background text-foreground">Completed</option>
-                        </select>
-                      </span>
-                      <span className={`relative px-2.5 py-1 rounded-md border flex items-center ${priorityTheme.bg} ${priorityTheme.text} ${priorityTheme.border}`}>
-                        <span>{project.priority}</span>
-                        <select
-                          value={project.priority}
-                          disabled={isPendingProjectUpdate}
-                          onChange={(e) => {
-                            e.stopPropagation()
-                            handleUpdateProjectPriority(project.id, e.target.value)
-                          }}
-                          onClick={(e) => e.stopPropagation()}
-                          className="absolute inset-0 opacity-0 cursor-pointer w-full h-full disabled:cursor-not-allowed"
-                          aria-label="Change project priority"
-                        >
-                          <option value="Low" className="bg-background text-foreground">Low</option>
-                          <option value="Medium" className="bg-background text-foreground">Medium</option>
-                          <option value="High" className="bg-background text-foreground">High</option>
-                        </select>
-                      </span>
+                      <CustomBadgeDropdown
+                        value={project.status}
+                        options={PROJECT_STATUS_OPTIONS}
+                        onChange={(val) => handleUpdateProjectStatus(project.id, val)}
+                        disabled={isPendingProjectUpdate}
+                        theme={statusTheme}
+                        showDot={true}
+                      />
+                      <CustomBadgeDropdown
+                        value={project.priority}
+                        options={PROJECT_PRIORITY_OPTIONS}
+                        onChange={(val) => handleUpdateProjectPriority(project.id, val)}
+                        disabled={isPendingProjectUpdate}
+                        theme={priorityTheme}
+                      />
                       {project.deadline && (
                         <span className={`px-2.5 py-1 rounded-md border flex items-center gap-1.5 ${
                           isOver
@@ -509,36 +598,23 @@ export function ProjectBoardView({
                 </div>
 
                 <div className="flex flex-wrap items-center gap-1.5 text-[9px] font-bold tracking-wider uppercase self-start">
-                  <span className={`relative px-2 py-0.5 rounded border flex items-center gap-1 ${STATUS_THEMES[activeProject.status]?.bg} ${STATUS_THEMES[activeProject.status]?.text} border-border/20`}>
-                    <div className={`h-1 w-1 rounded-full ${STATUS_THEMES[activeProject.status]?.text.split(' ')[0].replace('text-', 'bg-')} shadow-[0_0_3px_currentColor]`} />
-                    <span>{activeProject.status}</span>
-                    <select
-                      value={activeProject.status}
-                      disabled={isPendingProjectUpdate}
-                      onChange={(e) => handleUpdateProjectStatus(activeProject.id, e.target.value)}
-                      className="absolute inset-0 opacity-0 cursor-pointer w-full h-full disabled:cursor-not-allowed"
-                      aria-label="Change project status"
-                    >
-                      <option value="Planning" className="bg-background text-foreground">Planning</option>
-                      <option value="In Progress" className="bg-background text-foreground">In Progress</option>
-                      <option value="On Hold" className="bg-background text-foreground">On Hold</option>
-                      <option value="Completed" className="bg-background text-foreground">Completed</option>
-                    </select>
-                  </span>
-                  <span className={`relative px-2 py-0.5 rounded border flex items-center ${PRIORITY_THEMES[activeProject.priority]?.bg} ${PRIORITY_THEMES[activeProject.priority]?.text} border-border/20`}>
-                    <span>{activeProject.priority}</span>
-                    <select
-                      value={activeProject.priority}
-                      disabled={isPendingProjectUpdate}
-                      onChange={(e) => handleUpdateProjectPriority(activeProject.id, e.target.value)}
-                      className="absolute inset-0 opacity-0 cursor-pointer w-full h-full disabled:cursor-not-allowed"
-                      aria-label="Change project priority"
-                    >
-                      <option value="Low" className="bg-background text-foreground">Low</option>
-                      <option value="Medium" className="bg-background text-foreground">Medium</option>
-                      <option value="High" className="bg-background text-foreground">High</option>
-                    </select>
-                  </span>
+                  <CustomBadgeDropdown
+                    value={activeProject.status}
+                    options={PROJECT_STATUS_OPTIONS}
+                    onChange={(val) => handleUpdateProjectStatus(activeProject.id, val)}
+                    disabled={isPendingProjectUpdate}
+                    theme={STATUS_THEMES[activeProject.status] || STATUS_THEMES.Planning}
+                    showDot={true}
+                    align="right"
+                  />
+                  <CustomBadgeDropdown
+                    value={activeProject.priority}
+                    options={PROJECT_PRIORITY_OPTIONS}
+                    onChange={(val) => handleUpdateProjectPriority(activeProject.id, val)}
+                    disabled={isPendingProjectUpdate}
+                    theme={PRIORITY_THEMES[activeProject.priority] || PRIORITY_THEMES.Medium}
+                    align="right"
+                  />
                 </div>
               </div>
 
@@ -611,20 +687,13 @@ export function ProjectBoardView({
                                 </span>
 
                                 <div className="flex flex-wrap items-center gap-1.5 mt-1 text-[8px] font-extrabold uppercase tracking-wide">
-                                  <span className={`relative px-1.5 py-0.5 rounded border flex items-center ${taskPriorityTheme.bg} ${taskPriorityTheme.text} ${taskPriorityTheme.border}`}>
-                                    <span>{task.priority}</span>
-                                    <select
-                                      value={task.priority}
-                                      disabled={isPendingTaskUpdate}
-                                      onChange={(e) => handleUpdateTaskPriority(task.id, e.target.value)}
-                                      className="absolute inset-0 opacity-0 cursor-pointer w-full h-full text-foreground bg-background disabled:cursor-not-allowed"
-                                      aria-label="Change task priority"
-                                    >
-                                      <option value="Low" className="bg-background text-foreground">Low</option>
-                                      <option value="Medium" className="bg-background text-foreground">Medium</option>
-                                      <option value="High" className="bg-background text-foreground">High</option>
-                                    </select>
-                                  </span>
+                                  <CustomBadgeDropdown
+                                    value={task.priority}
+                                    options={PROJECT_PRIORITY_OPTIONS}
+                                    onChange={(val) => handleUpdateTaskPriority(task.id, val)}
+                                    disabled={isPendingTaskUpdate}
+                                    theme={taskPriorityTheme}
+                                  />
                                   {task.deadline && (
                                     <span className={`px-1.5 py-0.5 rounded border flex items-center gap-1 ${
                                       isTaskOver
