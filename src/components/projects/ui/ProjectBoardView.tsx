@@ -216,6 +216,7 @@ interface ProjectBoardViewProps {
   handleUpdateProjectStatus: (id: string, status: string) => Promise<void>
   handleUpdateProjectPriority: (id: string, priority: string) => Promise<void>
   handleUpdateTaskPriority: (id: string, priority: string) => Promise<void>
+  handleUpdateProjectDeadline: (id: string, deadline: string) => Promise<void>
   isPendingProjectCreate: boolean
   isPendingProjectDelete: boolean
   isPendingTaskCreate: boolean
@@ -269,6 +270,7 @@ export function ProjectBoardView({
   handleUpdateProjectStatus,
   handleUpdateProjectPriority,
   handleUpdateTaskPriority,
+  handleUpdateProjectDeadline,
   isPendingProjectCreate,
   isPendingProjectDelete,
   isPendingTaskCreate,
@@ -611,17 +613,36 @@ export function ProjectBoardView({
               </div>
 
               {/* Deadline alert row */}
-              {activeProject.deadline && (
-                <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                  <Calendar className="h-4 w-4 text-primary shrink-0" />
-                  <span>Deadline: <span className="font-semibold text-foreground">{formatDate(activeProject.deadline)}</span></span>
-                  {isOverdue(activeProject.deadline, activeProject.status === "Completed") && (
-                    <span className="text-[10px] font-bold text-rose-500 flex items-center gap-1 bg-rose-500/10 px-1.5 py-0.5 rounded border border-rose-500/20 ml-2 uppercase animate-pulse">
-                      <AlertTriangle className="h-3 w-3" /> Overdue
-                    </span>
-                  )}
-                </div>
-              )}
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <Calendar className="h-4 w-4 text-primary shrink-0" />
+                <span>Deadline: </span>
+                <span className="relative inline-block font-semibold text-foreground cursor-pointer hover:text-primary transition-colors underline decoration-dotted decoration-border/60 hover:decoration-primary">
+                  {activeProject.deadline ? formatDate(activeProject.deadline) : "No deadline"}
+                  <input
+                    type="date"
+                    value={activeProject.deadline ? (() => {
+                      try {
+                        return new Date(activeProject.deadline).toISOString().split('T')[0]
+                      } catch {
+                        return ""
+                      }
+                    })() : ""}
+                    onChange={(e) => handleUpdateProjectDeadline(activeProject.id, e.target.value)}
+                    onClick={(e) => {
+                      try {
+                        e.currentTarget.showPicker();
+                      } catch {}
+                    }}
+                    className="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-10"
+                    aria-label="Change project deadline"
+                  />
+                </span>
+                {activeProject.deadline && isOverdue(activeProject.deadline, activeProject.status === "Completed") && (
+                  <span className="text-[10px] font-bold text-rose-500 flex items-center gap-1 bg-rose-500/10 px-1.5 py-0.5 rounded border border-rose-500/20 ml-2 uppercase animate-pulse">
+                    <AlertTriangle className="h-3 w-3" /> Overdue
+                  </span>
+                )}
+              </div>
             </div>
 
             {/* Task list sub-section */}

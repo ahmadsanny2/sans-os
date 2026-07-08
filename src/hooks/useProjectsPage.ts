@@ -212,6 +212,15 @@ export function useProjectsPage() {
     }
   }
 
+  const handleUpdateProjectDeadline = async (id: string, deadline: string): Promise<void> => {
+    try {
+      await updateProjectMutation.mutateAsync({ id, deadline: deadline || null })
+      showSuccessToast("Project deadline updated successfully")
+    } catch {
+      await showError("Update Failed", "Failed to update project deadline.")
+    }
+  }
+
   const handleUpdateTaskPriority = async (id: string, priority: string): Promise<void> => {
     try {
       await updateTaskMutation.mutateAsync({ id, priority })
@@ -256,6 +265,7 @@ export function useProjectsPage() {
     handleUpdateProjectStatus,
     handleUpdateProjectPriority,
     handleUpdateTaskPriority,
+    handleUpdateProjectDeadline,
     
     // Subtask helpers
     subTaskInputs,
