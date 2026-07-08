@@ -283,12 +283,36 @@ export function ProjectBoardView({
   isPendingTaskUpdate,
 }: ProjectBoardViewProps) {
   const sortedProjects = [...projectsList].sort((a, b) => {
+    // 1. Completed projects always go to the bottom
     const aCompleted = a.status === "Completed"
     const bCompleted = b.status === "Completed"
     if (aCompleted !== bCompleted) {
       return aCompleted ? 1 : -1
     }
-    return 0
+
+    // 2. Sort active projects by deadline (closest date first)
+    if (a.deadline && b.deadline) {
+      const aTime = new Date(a.deadline).getTime()
+      const bTime = new Date(b.deadline).getTime()
+      if (aTime !== bTime) {
+        return aTime - bTime
+      }
+    } else if (a.deadline) {
+      return -1 // a has deadline, b doesn't -> a comes first
+    } else if (b.deadline) {
+      return 1 // b has deadline, a doesn't -> b comes first
+    }
+
+    // 3. If deadlines are same or both are null, sort by priority (High > Medium > Low)
+    const priorityWeights: Record<string, number> = { High: 3, Medium: 2, Low: 1 }
+    const aWeight = priorityWeights[a.priority] || 2
+    const bWeight = priorityWeights[b.priority] || 2
+    if (aWeight !== bWeight) {
+      return bWeight - aWeight
+    }
+
+    // 4. Fallback to creation date (newest first)
+    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
   })
 
   return (
