@@ -41,7 +41,7 @@ export function DailyReflections({
   return (
     <div className="space-y-4">
       {/* Header & Saving State */}
-      <div className="flex items-center justify-between">
+      <div className="">
         <div>
           <h3 className="text-xl font-bold tracking-tight text-foreground">
             Daily Reflections
@@ -50,25 +50,10 @@ export function DailyReflections({
             Capture thoughts, gratitude, and notes for today
           </p>
         </div>
-
-        <button
-          onClick={handleSave}
-          disabled={isLoading || isPendingSave}
-          className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-sm transition-all hover:bg-primary/95 disabled:opacity-50 active:scale-95 animate-in"
-        >
-          {isPendingSave ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            <>
-              <Save className="h-4 w-4" />
-              Save Reflections
-            </>
-          )}
-        </button>
       </div>
 
       {/* Tabs list */}
-      <div className="flex rounded-xl bg-secondary/30 p-1 border border-border/40">
+      <div className="flex flex-col md:flex-row rounded-xl bg-secondary/30 p-1 border border-border/40">
         {tabs.map((tab) => {
           const Icon = tab.icon
           const isActive = activeTab === tab.id
@@ -76,11 +61,10 @@ export function DailyReflections({
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex-1 flex items-center justify-center gap-2 py-2 text-xs font-semibold rounded-lg transition-all ${
-                isActive
-                  ? "bg-card text-foreground shadow-sm border border-border/40"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
+              className={`flex-1 flex items-center justify-center gap-2 py-2 text-xs font-semibold rounded-lg transition-all ${isActive
+                ? "bg-card text-foreground shadow-sm border border-border/40"
+                : "text-muted-foreground hover:text-foreground"
+                }`}
             >
               <Icon className={`h-4 w-4 ${isActive ? tab.color : "text-muted-foreground"}`} />
               {tab.label}
@@ -139,6 +123,22 @@ export function DailyReflections({
             )}
           </>
         )}
+      </div>
+      <div className="flex justify-end">
+        <button
+          onClick={handleSave}
+          disabled={isLoading || isPendingSave}
+          className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-sm transition-all hover:bg-primary/95 disabled:opacity-50 active:scale-95 animate-in"
+        >
+          {isPendingSave ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <>
+              <Save className="h-4 w-4" />
+              Save Reflections
+            </>
+          )}
+        </button>
       </div>
     </div>
   )
