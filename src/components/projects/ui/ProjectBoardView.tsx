@@ -215,6 +215,7 @@ interface ProjectBoardViewProps {
   handleUpdateProjectPriority: (id: string, priority: string) => Promise<void>
   handleUpdateTaskPriority: (id: string, priority: string) => Promise<void>
   handleUpdateProjectDeadline: (id: string, deadline: string) => Promise<void>
+  handleUpdateTaskDeadline: (id: string, deadline: string) => Promise<void>
   handleUpdateProjectName: (id: string, name: string) => Promise<void>
   handleUpdateProjectDesc: (id: string, description: string | null) => Promise<void>
   handleUpdateTaskName: (id: string, name: string) => Promise<void>
@@ -272,6 +273,7 @@ export function ProjectBoardView({
   handleUpdateProjectPriority,
   handleUpdateTaskPriority,
   handleUpdateProjectDeadline,
+  handleUpdateTaskDeadline,
   handleUpdateProjectName,
   handleUpdateProjectDesc,
   handleUpdateTaskName,
@@ -843,15 +845,31 @@ export function ProjectBoardView({
                                     disabled={isPendingTaskUpdate}
                                     theme={taskPriorityTheme}
                                   />
-                                  {task.deadline && (
-                                    <span className={`px-1.5 py-0.5 rounded-full border flex items-center gap-1 ${isTaskOver
-                                      ? "bg-rose-500/10 text-rose-500 border-rose-500/20"
-                                      : "bg-slate-500/10 text-slate-500 border-slate-500/20"
-                                      }`}>
+                                  <div className="relative group/deadline">
+                                    <input
+                                      type="date"
+                                      value={task.deadline ? (() => {
+                                        try {
+                                          return new Date(task.deadline).toISOString().split('T')[0]
+                                        } catch {
+                                          return ""
+                                        }
+                                      })() : ""}
+                                      onChange={(e) => handleUpdateTaskDeadline(task.id, e.target.value)}
+                                      className="opacity-0 absolute inset-0 w-full h-full cursor-pointer z-20"
+                                      aria-label="Change task deadline"
+                                    />
+                                    <span className={`px-1.5 py-0.5 rounded-full border flex items-center gap-1 transition-all ${
+                                      task.deadline 
+                                        ? isTaskOver
+                                          ? "bg-rose-500/10 text-rose-500 border-rose-500/20 hover:bg-rose-500/20"
+                                          : "bg-slate-500/10 text-slate-500 border-slate-500/20 hover:bg-slate-500/20"
+                                        : "bg-secondary/30 text-muted-foreground border-border/30 hover:bg-secondary/60 hover:text-foreground hover:border-border/60"
+                                    }`}>
                                       <Calendar className="h-2.5 w-2.5 shrink-0" />
-                                      <span>{formatDate(task.deadline)}</span>
+                                      <span>{task.deadline ? formatDate(task.deadline) : "Set Deadline"}</span>
                                     </span>
-                                  )}
+                                  </div>
                                   <span className="px-1.5 py-0.5 rounded-full border border-border/30 bg-secondary/30 text-muted-foreground flex items-center gap-1">
                                     Added: {formatDate(task.createdAt)}
                                   </span>

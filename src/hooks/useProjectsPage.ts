@@ -53,19 +53,29 @@ export function useProjectsPage() {
   // Selected project ID
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null)
 
+  // Helper for 1-week-from-today default deadline format YYYY-MM-DD
+  const getOneWeekFromTodayStr = (): string => {
+    const d = new Date()
+    d.setDate(d.getDate() + 7)
+    const year = d.getFullYear()
+    const month = String(d.getMonth() + 1).padStart(2, "0")
+    const day = String(d.getDate()).padStart(2, "0")
+    return `${year}-${month}-${day}`
+  }
+
   // Forms states
   const [showAddProject, setShowAddProject] = useState(false)
   const [projectName, setProjectName] = useState("")
   const [projectDesc, setProjectDesc] = useState("")
   const [projectPriority, setProjectPriority] = useState("Medium")
   const [projectStatus, setProjectStatus] = useState("Planning")
-  const [projectDeadline, setProjectDeadline] = useState("")
+  const [projectDeadline, setProjectDeadline] = useState(getOneWeekFromTodayStr)
   const [projectError, setProjectError] = useState<string | null>(null)
 
   // Task form states
   const [taskName, setTaskName] = useState("")
   const [taskPriority, setTaskPriority] = useState("Medium")
-  const [taskDeadline, setTaskDeadline] = useState("")
+  const [taskDeadline, setTaskDeadline] = useState(getOneWeekFromTodayStr)
   const [taskError, setTaskError] = useState<string | null>(null)
 
   // Sub-task states (we use a map to keep track of active sub-task input per task)
@@ -92,7 +102,7 @@ export function useProjectsPage() {
       setProjectDesc("")
       setProjectPriority("Medium")
       setProjectStatus("Planning")
-      setProjectDeadline("")
+      setProjectDeadline(getOneWeekFromTodayStr())
       setShowAddProject(false)
       setSelectedProjectId(newProj.id)
       showSuccessToast("Project created successfully")
@@ -133,7 +143,7 @@ export function useProjectsPage() {
       })
       setTaskName("")
       setTaskPriority("Medium")
-      setTaskDeadline("")
+      setTaskDeadline(getOneWeekFromTodayStr())
       showSuccessToast("Task added to project")
     } catch {
       setTaskError("Failed to add task.")
@@ -221,6 +231,15 @@ export function useProjectsPage() {
     }
   }
 
+  const handleUpdateTaskDeadline = async (id: string, deadline: string): Promise<void> => {
+    try {
+      await updateTaskMutation.mutateAsync({ id, deadline: deadline || null })
+      showSuccessToast("Task deadline updated successfully")
+    } catch {
+      await showError("Update Failed", "Failed to update task deadline.")
+    }
+  }
+
   const handleUpdateTaskPriority = async (id: string, priority: string): Promise<void> => {
     try {
       await updateTaskMutation.mutateAsync({ id, priority })
@@ -295,6 +314,7 @@ export function useProjectsPage() {
     handleUpdateProjectPriority,
     handleUpdateTaskPriority,
     handleUpdateProjectDeadline,
+    handleUpdateTaskDeadline,
     handleUpdateProjectName,
     handleUpdateProjectDesc,
     handleUpdateTaskName,
