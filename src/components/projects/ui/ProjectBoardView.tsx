@@ -845,7 +845,7 @@ export function ProjectBoardView({
                                     disabled={isPendingTaskUpdate}
                                     theme={taskPriorityTheme}
                                   />
-                                  <div className="relative group/deadline">
+                                  <div className="relative inline-flex items-center group/deadline">
                                     <input
                                       type="date"
                                       value={task.deadline ? (() => {
@@ -856,6 +856,13 @@ export function ProjectBoardView({
                                         }
                                       })() : ""}
                                       onChange={(e) => handleUpdateTaskDeadline(task.id, e.target.value)}
+                                      onClick={(e) => {
+                                        try {
+                                          e.currentTarget.showPicker()
+                                        } catch (err) {
+                                          console.error(err)
+                                        }
+                                      }}
                                       className="opacity-0 absolute inset-0 w-full h-full cursor-pointer z-20"
                                       aria-label="Change task deadline"
                                     />
