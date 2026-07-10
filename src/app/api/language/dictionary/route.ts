@@ -106,9 +106,17 @@ export async function GET(request: Request): Promise<NextResponse> {
     }
     const data = await res.json()
     // Datamuse returns array of { word: string, score: number, tags?: string[] }
-    const wordsList = data
+    let wordsList = data
       .map((item: { word: string }) => ({ word: item.word }))
       .sort((a: { word: string }, b: { word: string }) => a.word.toLowerCase().localeCompare(b.word.toLowerCase()))
+    
+    if (query) {
+      const cleanQuery = query.trim().toLowerCase()
+      // Filter out any exact duplicate (case insensitive) from the list
+      wordsList = wordsList.filter((item: { word: string }) => item.word.toLowerCase() !== cleanQuery)
+      // Add the exact query at the very beginning of the list
+      wordsList.unshift({ word: cleanQuery })
+    }
     
     return NextResponse.json(wordsList)
   } catch (error) {
