@@ -6,6 +6,7 @@ export interface Habit {
   name: string
   category: string
   frequency: string
+  orderIndex: number
   createdAt: string
 }
 
@@ -225,6 +226,77 @@ export function useDeleteHabitMutation() {
       return { previousQueriesData }
     },
     onError: (err, id, context) => {
+      if (context?.previousQueriesData) {
+        context.previousQueriesData.forEach((q) => {
+          queryClient.setQueryData(q.queryKey, q.data)
+        })
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["habits"] })
+    },
+  })
+}
+
+// 6. Reorder habits mutation
+async function reorderHabits(orderedIds: string[]): Promise<{ success: boolean }> {
+  const res = await fetch("/api/habits", {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ orderedIds }),
+  })
+  if (!res.ok) {
+    const errorData = await res.json()
+    throw new Error(errorData.error || "Failed to reorder habits")
+  }
+  return res.json()
+}
+
+export function useReorderHabitsMutation() {
+  const queryClient = useQueryClient()
+  return useMutation<
+    { success: boolean },
+    Error,
+    string[],
+    { previousQueriesData: { queryKey: readonly unknown[]; data: unknown }[] }
+  >({
+    mutationFn: reorderHabits,
+    onMutate: async (orderedIds) => {
+      await queryClient.cancelQueries({ queryKey: ["habits"] })
+      const queryCache = queryClient.getQueryCache()
+      const queries = queryCache.findAll({ queryKey: ["habits"], exact: false })
+
+      const previousQueriesData = queries.map((q) => ({
+        queryKey: q.queryKey,
+        data: q.state.data,
+      }))
+
+      queries.forEach((q) => {
+        if (q.queryKey.length === 3 && q.queryKey[1] !== "stats") {
+          const oldData = q.state.data as HabitsResponse | undefined
+          if (oldData) {
+            // Sort existing habits according to the new orderedIds
+            const reorderedHabits = [...oldData.habits].sort((a, b) => {
+              const idxA = orderedIds.indexOf(a.id)
+              const idxB = orderedIds.indexOf(b.id)
+              if (idxA === -1 && idxB === -1) return 0
+              if (idxA === -1) return 1
+              if (idxB === -1) return -1
+              return idxA - idxB
+            })
+            queryClient.setQueryData(q.queryKey, {
+              ...oldData,
+              habits: reorderedHabits,
+            })
+          }
+        }
+      })
+
+      return { previousQueriesData }
+    },
+    onError: (err, orderedIds, context) => {
       if (context?.previousQueriesData) {
         context.previousQueriesData.forEach((q) => {
           queryClient.setQueryData(q.queryKey, q.data)

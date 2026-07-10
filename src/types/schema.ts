@@ -16,6 +16,7 @@ export const habits = pgTable("habits", {
   name: text("name").notNull(),
   category: text("category").default("General"), // e.g. Health, Work, Mind, Finance
   frequency: text("frequency").default("daily").notNull(), // daily, weekly, or specific days
+  orderIndex: integer("order_index").default(0).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 })
 

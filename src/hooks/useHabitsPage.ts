@@ -8,6 +8,7 @@ import {
   useToggleLogMutation,
   useDeleteHabitMutation,
   useHabitStatsQuery,
+  useReorderHabitsMutation,
 } from "@/hooks/useHabits"
 import { format, parseISO, startOfWeek, addDays, getDaysInMonth, startOfMonth, endOfMonth, eachDayOfInterval, addMonths, subMonths } from "date-fns"
 import { confirmDestructive, showError, showSuccessToast } from "@/lib/sweetalert"
@@ -48,6 +49,7 @@ export function useHabitsPage() {
   const createHabitMutation = useCreateHabitMutation()
   const toggleLogMutation = useToggleLogMutation()
   const deleteHabitMutation = useDeleteHabitMutation()
+  const reorderHabitsMutation = useReorderHabitsMutation()
 
   // Form states
   const [newHabitName, setNewHabitName] = useState("")
@@ -87,6 +89,16 @@ export function useHabitsPage() {
 
   const handleToggleLog = (habitId: string, date: string): void => {
     toggleLogMutation.mutate({ habitId, date })
+  }
+
+  const handleReorderHabits = async (orderedIds: string[]): Promise<void> => {
+    try {
+      await reorderHabitsMutation.mutateAsync(orderedIds)
+      showSuccessToast("Habits reordered")
+    } catch (err) {
+      console.error(err)
+      showError("Error", "Failed to reorder habits.")
+    }
   }
 
   const listHabits = habitsQuery.data?.habits || []
@@ -156,6 +168,10 @@ export function useHabitsPage() {
     handlePrevMonth,
     handleNextMonth,
     handleGoToToday,
+
+    // Reorder
+    handleReorderHabits,
+    isPendingReorder: reorderHabitsMutation.isPending,
   }
 }
 

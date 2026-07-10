@@ -3,7 +3,7 @@
 import React from "react"
 import { Habit } from "@/hooks/useHabits"
 import { format } from "date-fns"
-import { Plus, Trash2, Check, Loader2, Sparkles } from "lucide-react"
+import { Plus, Trash2, Check, Loader2, Sparkles, GripVertical, ChevronUp, ChevronDown } from "lucide-react"
 
 const CHECKED_THEME = {
   color: "text-primary",
@@ -25,9 +25,11 @@ interface HabitGridProps {
   handleAddHabit: (e: React.FormEvent) => Promise<void>
   handleDeleteHabit: (id: string) => Promise<void>
   handleToggleLog: (habitId: string, date: string) => void
-  isPendingToggle: boolean
-  toggleLogVariables: { habitId: string; date: string; status?: string } | undefined
-  isPendingCreate: boolean
+  isPendingToggle: boolean;
+  toggleLogVariables: { habitId: string; date: string; status?: string } | undefined;
+  isPendingCreate: boolean;
+  handleReorderHabits: (orderedIds: string[]) => Promise<void>;
+  isPendingReorder: boolean;
 }
 
 export function HabitGrid({
@@ -47,7 +49,51 @@ export function HabitGrid({
   isPendingToggle,
   toggleLogVariables,
   isPendingCreate,
+  handleReorderHabits,
+  isPendingReorder,
 }: HabitGridProps) {
+  const [draggedId, setDraggedId] = React.useState<string | null>(null)
+
+  const handleDragStart = (e: React.DragEvent, id: string) => {
+    setDraggedId(id)
+    e.dataTransfer.effectAllowed = "move"
+  }
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault()
+  }
+
+  const handleDrop = (e: React.DragEvent, targetId: string) => {
+    e.preventDefault()
+    if (!draggedId || draggedId === targetId) return
+
+    const draggedIdx = listHabits.findIndex((h) => h.id === draggedId)
+    const targetIdx = listHabits.findIndex((h) => h.id === targetId)
+    if (draggedIdx === -1 || targetIdx === -1) return
+
+    const newHabits = [...listHabits]
+    const [draggedItem] = newHabits.splice(draggedIdx, 1)
+    newHabits.splice(targetIdx, 0, draggedItem)
+
+    handleReorderHabits(newHabits.map((h) => h.id))
+    setDraggedId(null)
+  }
+
+  const handleMoveUp = (idx: number) => {
+    if (idx <= 0) return
+    const newHabits = [...listHabits]
+    const [item] = newHabits.splice(idx, 1)
+    newHabits.splice(idx - 1, 0, item)
+    handleReorderHabits(newHabits.map((h) => h.id))
+  }
+
+  const handleMoveDown = (idx: number) => {
+    if (idx >= listHabits.length - 1) return
+    const newHabits = [...listHabits]
+    const [item] = newHabits.splice(idx, 1)
+    newHabits.splice(idx + 1, 0, item)
+    handleReorderHabits(newHabits.map((h) => h.id))
+  }
   return (
     <div className="space-y-6">
       {/* Header and Toggle Button */}
@@ -168,14 +214,58 @@ export function HabitGrid({
                 </td>
               </tr>
             ) : (
-              listHabits.map((habit) => {
+              listHabits.map((habit, idx) => {
+                const isFirst = idx === 0
+                const isLast = idx === listHabits.length - 1
                 return (
-                  <tr key={habit.id} className="transition-colors hover:bg-secondary/15 group">
+                  <tr
+                    key={habit.id}
+                    onDragOver={(e) => handleDragOver(e)}
+                    onDrop={(e) => handleDrop(e, habit.id)}
+                    className={`transition-colors hover:bg-secondary/15 group ${
+                      draggedId === habit.id ? "opacity-30 bg-secondary/35" : ""
+                    }`}
+                  >
                     {/* Habit Info Cell (Sticky left) */}
-                    <td className="px-6 py-3 text-left w-64 sticky left-0 bg-card/95 backdrop-blur-md z-10 border-r border-border/60 select-none">
-                      <div className="flex items-center justify-between">
-                        <div className="space-y-1 pr-2 min-w-0">
-                          <p className="text-sm font-semibold text-foreground leading-tight truncate">
+                    <td className="px-4 py-3 text-left w-64 sticky left-0 bg-card/95 backdrop-blur-md z-10 border-r border-border/60 select-none">
+                      <div className="flex items-center justify-between gap-1.5">
+                        <div className="flex items-center gap-1 min-w-0 flex-1">
+                          {/* Drag handle */}
+                          <div
+                            draggable
+                            onDragStart={(e) => handleDragStart(e, habit.id)}
+                            onDragEnd={() => setDraggedId(null)}
+                            className="cursor-grab active:cursor-grabbing text-muted-foreground/30 hover:text-muted-foreground transition-colors p-0.5 shrink-0"
+                            title="Drag to reorder"
+                          >
+                            <GripVertical className="h-4 w-4" />
+                          </div>
+
+                          {/* Up/Down controls */}
+                          <div className="flex flex-col shrink-0">
+                            <button
+                              type="button"
+                              onClick={() => handleMoveUp(idx)}
+                              disabled={isFirst || isPendingReorder}
+                              className="text-muted-foreground/30 hover:text-foreground hover:bg-secondary rounded p-0.5 disabled:opacity-20 disabled:pointer-events-none transition-all"
+                              title="Move up"
+                              aria-label="Move habit up"
+                            >
+                              <ChevronUp className="h-3.5 w-3.5" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleMoveDown(idx)}
+                              disabled={isLast || isPendingReorder}
+                              className="text-muted-foreground/30 hover:text-foreground hover:bg-secondary rounded p-0.5 disabled:opacity-20 disabled:pointer-events-none transition-all"
+                              title="Move down"
+                              aria-label="Move habit down"
+                            >
+                              <ChevronDown className="h-3.5 w-3.5" />
+                            </button>
+                          </div>
+
+                          <p className="text-sm font-semibold text-foreground leading-tight truncate ml-1" title={habit.name}>
                             {habit.name}
                           </p>
                         </div>

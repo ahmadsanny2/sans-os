@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import { db } from "@/lib/db"
 import { habits, habitLogs } from "@/types/schema"
-import { eq, and, gte, lte } from "drizzle-orm"
+import { eq, and, gte, lte, asc, sql } from "drizzle-orm"
 import { createServerSupabaseClient } from "@/lib/supabase/server"
 
 export async function GET(request: Request): Promise<NextResponse> {
@@ -24,6 +24,7 @@ export async function GET(request: Request): Promise<NextResponse> {
       .select()
       .from(habits)
       .where(eq(habits.userId, user.id))
+      .orderBy(asc(habits.orderIndex), asc(habits.createdAt))
 
     if (!startDate || !endDate) {
       return NextResponse.json({ habits: userHabits, logs: [] })
@@ -66,6 +67,14 @@ export async function POST(request: Request): Promise<NextResponse> {
       return NextResponse.json({ error: "Name is required" }, { status: 400 })
     }
 
+    // Determine the next order index (max order index + 1)
+    const maxOrderRes = await db
+      .select({ maxOrder: sql<number>`max(${habits.orderIndex})` })
+      .from(habits)
+      .where(eq(habits.userId, user.id))
+    const maxOrder = maxOrderRes[0]?.maxOrder ?? -1
+    const nextOrder = maxOrder + 1
+
     const [newHabit] = await db
       .insert(habits)
       .values({
@@ -73,6 +82,7 @@ export async function POST(request: Request): Promise<NextResponse> {
         name,
         category: category || "General",
         frequency: frequency || "daily",
+        orderIndex: nextOrder,
       })
       .returning()
 
@@ -104,6 +114,42 @@ export async function DELETE(request: Request): Promise<NextResponse> {
     await db
       .delete(habits)
       .where(and(eq(habits.id, id), eq(habits.userId, user.id)))
+
+    return NextResponse.json({ success: true })
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : "Server Error"
+    return NextResponse.json({ error: errorMessage }, { status: 500 })
+  }
+}
+
+export async function PUT(request: Request): Promise<NextResponse> {
+  try {
+    const supabase = await createServerSupabaseClient()
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
+    const body = await request.json()
+    const { orderedIds } = body
+
+    if (!orderedIds || !Array.isArray(orderedIds)) {
+      return NextResponse.json({ error: "orderedIds is required and must be an array" }, { status: 400 })
+    }
+
+    // Update each habit with its new orderIndex
+    await db.transaction(async (tx) => {
+      for (let i = 0; i < orderedIds.length; i++) {
+        const id = orderedIds[i]
+        await tx
+          .update(habits)
+          .set({ orderIndex: i })
+          .where(and(eq(habits.id, id), eq(habits.userId, user.id)))
+      }
+    })
 
     return NextResponse.json({ success: true })
   } catch (error) {

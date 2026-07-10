@@ -38,6 +38,10 @@ export default function HabitsComponent() {
     handlePrevMonth,
     handleNextMonth,
     handleGoToToday,
+
+    // Reorder
+    handleReorderHabits,
+    isPendingReorder,
   } = useHabitsPage()
 
   // Update document title for client-side SEO
@@ -93,6 +97,8 @@ export default function HabitsComponent() {
         isPendingToggle={isPendingToggle}
         toggleLogVariables={toggleLogVariables}
         isPendingCreate={isPendingCreate}
+        handleReorderHabits={handleReorderHabits}
+        isPendingReorder={isPendingReorder}
       />
     </div>
   )
