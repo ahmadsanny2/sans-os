@@ -58,7 +58,7 @@ export async function POST(request: Request): Promise<NextResponse> {
     }
 
     const body = await request.json()
-    const { vocabId, vocabWord, sentenceType, englishSentence, indonesianTranslation, formula } = body
+    const { vocabId, vocabWord, sentenceType, englishSentence, indonesianTranslation, formulaId, formula } = body
 
     if (!englishSentence || !indonesianTranslation) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
@@ -76,6 +76,7 @@ export async function POST(request: Request): Promise<NextResponse> {
         englishSentence,
         indonesianTranslation,
         autoTranslation,
+        formulaId: formulaId || null,
         formula: formula || null,
       })
       .returning()

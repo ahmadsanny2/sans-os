@@ -86,11 +86,12 @@ export async function POST(request: Request): Promise<NextResponse> {
       indonesianQuestion,
       englishAnswer,
       indonesianAnswer,
+      formulaId,
       formula,
     } = body
 
     // Validation
-    const hasFormula = typeof formula === "string" && formula.trim().length > 0
+    const hasFormula = (typeof formula === "string" && formula.trim().length > 0) || (typeof formulaId === "string" && formulaId.trim().length > 0)
     if (
       (!hasFormula && (!vocabId || !vocabWord)) ||
       !englishQuestion?.trim() ||
@@ -116,7 +117,8 @@ export async function POST(request: Request): Promise<NextResponse> {
         indonesianAnswer: indonesianAnswer.trim(),
         autoTranslationQuestion,
         autoTranslationAnswer,
-        formula: hasFormula ? formula.trim() : null,
+        formulaId: formulaId || null,
+        formula: formula ? formula.trim() : null,
       })
       .returning()
 
