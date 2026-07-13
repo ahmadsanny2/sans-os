@@ -135,6 +135,7 @@ export const writingLogs = pgTable("writing_logs", {
   englishSentence: text("english_sentence").notNull(),
   indonesianTranslation: text("indonesian_translation").notNull(),
   autoTranslation: text("auto_translation"),
+  formula: text("formula"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 })
 

@@ -133,8 +133,10 @@ export default function LanguageComponent() {
           handleSelectVocab={languageData.handleSelectVocab}
           filteredVocabList={languageData.filteredVocabList}
           vocabWritingLogs={languageData.vocabWritingLogs}
+          formulaWritingLogs={languageData.formulaWritingLogs}
           freeWritingLogs={languageData.freeWritingLogs}
           filteredGroupedHistory={languageData.filteredGroupedHistory}
+          filteredFormulaHistory={languageData.filteredFormulaHistory}
           filteredFreeHistory={languageData.filteredFreeHistory}
           writingCreatePending={languageData.writingCreatePending}
           writingDeletePending={languageData.writingDeletePending}

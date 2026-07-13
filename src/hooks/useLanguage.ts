@@ -32,13 +32,15 @@ export interface WritingLog {
   englishSentence: string
   indonesianTranslation: string
   autoTranslation: string | null
+  formula: string | null
   createdAt: string
 }
 
 export interface GroupedWritingLog {
   id: string
-  vocabId: string
-  vocabWord: string
+  vocabId: string | null
+  vocabWord: string | null
+  formula: string | null
   createdAt: string
   positive?: WritingLog
   negative?: WritingLog
@@ -242,6 +244,7 @@ async function createWritingLog(body: {
   sentenceType?: "Positive" | "Negative" | "Interrogative" | null
   englishSentence: string
   indonesianTranslation: string
+  formula?: string | null
 }): Promise<WritingLog> {
   const res = await fetch("/api/language/writing", {
     method: "POST",
@@ -265,6 +268,7 @@ export function useCreateWritingMutation() {
       sentenceType?: "Positive" | "Negative" | "Interrogative" | null
       englishSentence: string
       indonesianTranslation: string
+      formula?: string | null
     }
   >({
     mutationFn: createWritingLog,

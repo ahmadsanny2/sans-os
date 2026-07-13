@@ -25,13 +25,21 @@ function groupVocabWritingLogs(logs: WritingLog[]): GroupedWritingLog[] {
   const groups: GroupedWritingLog[] = []
 
   sorted.forEach((log) => {
-    if (!log.vocabId) return
+    if (log.sentenceType === null) return
 
     const logTime = new Date(log.createdAt).getTime()
     const matchingGroup = groups.find((g) => {
-      if (g.vocabId !== log.vocabId) return false
-      const groupTime = new Date(g.createdAt).getTime()
-      return Math.abs(groupTime - logTime) < 60000
+      // Group by formula if both have formula
+      if (log.formula && g.formula === log.formula) {
+        const groupTime = new Date(g.createdAt).getTime()
+        return Math.abs(groupTime - logTime) < 60000
+      }
+      // Group by vocabId if both have vocabId and no formula
+      if (!log.formula && !g.formula && log.vocabId && g.vocabId === log.vocabId) {
+        const groupTime = new Date(g.createdAt).getTime()
+        return Math.abs(groupTime - logTime) < 60000
+      }
+      return false
     })
 
     if (matchingGroup) {
@@ -48,9 +56,10 @@ function groupVocabWritingLogs(logs: WritingLog[]): GroupedWritingLog[] {
       }
     } else {
       groups.push({
-        id: log.vocabId + "_" + log.createdAt,
+        id: (log.formula || log.vocabId || "unknown") + "_" + log.createdAt,
         vocabId: log.vocabId,
-        vocabWord: log.vocabWord || "",
+        vocabWord: log.vocabWord,
+        formula: log.formula,
         createdAt: log.createdAt,
         positive: log.sentenceType === "Positive" ? log : undefined,
         negative: log.sentenceType === "Negative" ? log : undefined,
@@ -99,8 +108,8 @@ export function useLanguagePage() {
   // Writing Practice States
   // ==========================================
   const [showWritingForm, setShowWritingForm] = useState(false)
-  const [practiceMode, setPracticeMode] = useState<"free" | "vocab">("free")
-  const [activeHistoryTab, setActiveHistoryTab] = useState<"vocab" | "free">("vocab")
+  const [practiceMode, setPracticeMode] = useState<"free" | "vocab" | "formula">("free")
+  const [activeHistoryTab, setActiveHistoryTab] = useState<"vocab" | "free" | "formula">("vocab")
   const [searchQueryWriting, setSearchQueryWriting] = useState("")
 
   // Autocomplete search vocab for writing
@@ -119,6 +128,7 @@ export function useLanguagePage() {
   const [vocabTransNeg, setVocabTransNeg] = useState("")
   const [vocabEngInt, setVocabEngInt] = useState("")
   const [vocabTransInt, setVocabTransInt] = useState("")
+  const [vocabFormula, setVocabFormula] = useState("")
 
   const [writingFormError, setWritingFormError] = useState<string | null>(null)
 
@@ -262,6 +272,7 @@ export function useLanguagePage() {
       vocabTransNeg?: string
       vocabEngInt?: string
       vocabTransInt?: string
+      vocabFormula?: string
     }
   ): Promise<void> => {
     e.preventDefault()
@@ -275,6 +286,7 @@ export function useLanguagePage() {
     const activeVocabTransNeg = formData?.vocabTransNeg ?? vocabTransNeg
     const activeVocabEngInt = formData?.vocabEngInt ?? vocabEngInt
     const activeVocabTransInt = formData?.vocabTransInt ?? vocabTransInt
+    const activeVocabFormula = formData?.vocabFormula ?? vocabFormula
 
     if (practiceMode === "free") {
       if (!activeFreeEnglish.trim() || !activeFreeTranslation.trim()) {
@@ -297,7 +309,7 @@ export function useLanguagePage() {
       } catch {
         setWritingFormError("Failed to add writing log.")
       }
-    } else {
+    } else if (practiceMode === "vocab") {
       if (!selectedVocabId) {
         setWritingFormError("Please select a vocabulary word.")
         return
@@ -355,6 +367,69 @@ export function useLanguagePage() {
       } catch {
         setWritingFormError("Failed to save some or all sentences. Please try again.")
       }
+    } else {
+      // practiceMode === "formula"
+      if (!activeVocabFormula.trim()) {
+        setWritingFormError("Please write the formula / rumus.")
+        return
+      }
+
+      if (
+        !activeVocabEngPos.trim() || !activeVocabTransPos.trim() ||
+        !activeVocabEngNeg.trim() || !activeVocabTransNeg.trim() ||
+        !activeVocabEngInt.trim() || !activeVocabTransInt.trim()
+      ) {
+        setWritingFormError("Please write sentences and translations for all three types (Positive, Negative, and Interrogative).")
+        return
+      }
+
+      const selectedVocabObj = selectedVocabId
+        ? vocabList.find((v) => v.id === selectedVocabId)
+        : null
+
+      try {
+        await Promise.all([
+          createWritingMutation.mutateAsync({
+            vocabId: selectedVocabObj?.id || null,
+            vocabWord: selectedVocabObj?.word || null,
+            sentenceType: "Positive",
+            englishSentence: activeVocabEngPos.trim(),
+            indonesianTranslation: activeVocabTransPos.trim(),
+            formula: activeVocabFormula.trim(),
+          }),
+          createWritingMutation.mutateAsync({
+            vocabId: selectedVocabObj?.id || null,
+            vocabWord: selectedVocabObj?.word || null,
+            sentenceType: "Negative",
+            englishSentence: activeVocabEngNeg.trim(),
+            indonesianTranslation: activeVocabTransNeg.trim(),
+            formula: activeVocabFormula.trim(),
+          }),
+          createWritingMutation.mutateAsync({
+            vocabId: selectedVocabObj?.id || null,
+            vocabWord: selectedVocabObj?.word || null,
+            sentenceType: "Interrogative",
+            englishSentence: activeVocabEngInt.trim(),
+            indonesianTranslation: activeVocabTransInt.trim(),
+            formula: activeVocabFormula.trim(),
+          }),
+        ])
+
+        setVocabFormula("")
+        setSelectedVocabId("")
+        setSearchVocabQuery("")
+        setVocabEngPos("")
+        setVocabTransPos("")
+        setVocabEngNeg("")
+        setVocabTransNeg("")
+        setVocabEngInt("")
+        setVocabTransInt("")
+        setWritingFormError(null)
+        setShowWritingForm(false)
+        showSuccessToast("Formula practice sentences added successfully")
+      } catch {
+        setWritingFormError("Failed to save some or all sentences. Please try again.")
+      }
     }
   }
 
@@ -391,10 +466,11 @@ export function useLanguagePage() {
   }, [vocabList, searchVocabQuery])
 
   // Separated writing logs lists
-  const { vocabWritingLogs, freeWritingLogs } = useMemo(() => {
+  const { vocabWritingLogs, formulaWritingLogs, freeWritingLogs } = useMemo(() => {
     return {
-      vocabWritingLogs: writingList.filter((log) => log.vocabId !== null),
-      freeWritingLogs: writingList.filter((log) => log.vocabId === null),
+      vocabWritingLogs: writingList.filter((log) => log.sentenceType !== null && !log.formula),
+      formulaWritingLogs: writingList.filter((log) => log.sentenceType !== null && log.formula),
+      freeWritingLogs: writingList.filter((log) => log.sentenceType === null),
     }
   }, [writingList])
 
@@ -402,12 +478,16 @@ export function useLanguagePage() {
     return groupVocabWritingLogs(vocabWritingLogs)
   }, [vocabWritingLogs])
 
+  const groupedFormulaLogs = useMemo(() => {
+    return groupVocabWritingLogs(formulaWritingLogs)
+  }, [formulaWritingLogs])
+
   // Search filter matching on active history list
   const filteredGroupedHistory = useMemo(() => {
     const q = searchQueryWriting.toLowerCase()
     return groupedVocabLogs.filter((group) => {
-      const matchesSearch =
-        group.vocabWord.toLowerCase().includes(q) ||
+      return (
+        (group.vocabWord && group.vocabWord.toLowerCase().includes(q)) ||
         (group.positive && (
           group.positive.englishSentence.toLowerCase().includes(q) ||
           group.positive.indonesianTranslation.toLowerCase().includes(q)
@@ -420,9 +500,31 @@ export function useLanguagePage() {
           group.interrogative.englishSentence.toLowerCase().includes(q) ||
           group.interrogative.indonesianTranslation.toLowerCase().includes(q)
         ))
-      return matchesSearch
+      )
     })
   }, [groupedVocabLogs, searchQueryWriting])
+
+  const filteredFormulaHistory = useMemo(() => {
+    const q = searchQueryWriting.toLowerCase()
+    return groupedFormulaLogs.filter((group) => {
+      return (
+        (group.formula && group.formula.toLowerCase().includes(q)) ||
+        (group.vocabWord && group.vocabWord.toLowerCase().includes(q)) ||
+        (group.positive && (
+          group.positive.englishSentence.toLowerCase().includes(q) ||
+          group.positive.indonesianTranslation.toLowerCase().includes(q)
+        )) ||
+        (group.negative && (
+          group.negative.englishSentence.toLowerCase().includes(q) ||
+          group.negative.indonesianTranslation.toLowerCase().includes(q)
+        )) ||
+        (group.interrogative && (
+          group.interrogative.englishSentence.toLowerCase().includes(q) ||
+          group.interrogative.indonesianTranslation.toLowerCase().includes(q)
+        ))
+      )
+    })
+  }, [groupedFormulaLogs, searchQueryWriting])
 
   const filteredFreeHistory = useMemo(() => {
     const q = searchQueryWriting.toLowerCase()
@@ -631,14 +733,18 @@ export function useLanguagePage() {
     setVocabEngInt,
     vocabTransInt,
     setVocabTransInt,
+    vocabFormula,
+    setVocabFormula,
     writingFormError,
     handleAddWriting,
     handleDeleteWriting,
     handleSelectVocab,
     filteredVocabList,
     vocabWritingLogs: groupedVocabLogs,
+    formulaWritingLogs: groupedFormulaLogs,
     freeWritingLogs,
     filteredGroupedHistory,
+    filteredFormulaHistory,
     filteredFreeHistory,
     writingCreatePending: createWritingMutation.isPending,
     writingDeletePending: deleteWritingMutation.isPending,
