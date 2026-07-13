@@ -5,7 +5,8 @@ import { useLanguagePage } from "@/hooks/useLanguagePage"
 import { LanguageBoardView } from "./ui/LanguageBoardView"
 import { WritingPracticeView } from "./ui/WritingPracticeView"
 import { DialoguePracticeView } from "./ui/DialoguePracticeView"
-import { BookOpen, PencilLine, Languages, MessageSquare } from "lucide-react"
+import { FormulaListView } from "./ui/FormulaListView"
+import { BookOpen, PencilLine, Languages, MessageSquare, Braces } from "lucide-react"
 import { HeaderPage } from "@/components/ui/HeaderPage"
 
 export default function LanguageComponent() {
@@ -36,6 +37,16 @@ export default function LanguageComponent() {
           }`}
         >
           <BookOpen className="h-4 w-4" /> Vocabulary Logs
+        </button>
+        <button
+          onClick={() => setActiveTab("formula")}
+          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
+            activeTab === "formula"
+              ? "bg-primary text-primary-foreground shadow-glass shadow-glow"
+              : "text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          <Braces className="h-4 w-4" /> Formula List
         </button>
         <button
           onClick={() => setActiveTab("writing")}
@@ -91,6 +102,28 @@ export default function LanguageComponent() {
           vocabCreatePending={languageData.vocabCreatePending}
           writingCount={writingList.length}
         />
+      ) : activeTab === "formula" ? (
+        <FormulaListView
+          formulaList={languageData.formulaList}
+          isLoading={languageData.formulaIsLoading}
+          isError={languageData.formulaIsError}
+          showFormulaForm={languageData.showFormulaForm}
+          setShowFormulaForm={languageData.setShowFormulaForm}
+          formulaName={languageData.formulaName}
+          setFormulaName={languageData.setFormulaName}
+          formulaString={languageData.formulaString}
+          setFormulaString={languageData.setFormulaString}
+          formulaDescription={languageData.formulaDescription}
+          setFormulaDescription={languageData.setFormulaDescription}
+          searchQueryFormula={languageData.searchQueryFormula}
+          setSearchQueryFormula={languageData.setSearchQueryFormula}
+          formulaFormError={languageData.formulaFormError}
+          handleAddFormula={languageData.handleAddFormula}
+          handleUpdateFormula={languageData.handleUpdateFormula}
+          handleDeleteFormula={languageData.handleDeleteFormula}
+          filteredFormulas={languageData.filteredFormulas}
+          formulaCreatePending={languageData.formulaCreatePending}
+        />
       ) : activeTab === "writing" ? (
         <WritingPracticeView
           showWritingForm={languageData.showWritingForm}
@@ -111,6 +144,13 @@ export default function LanguageComponent() {
           setSearchVocabQuery={languageData.setSearchVocabQuery}
           showVocabDropdown={languageData.showVocabDropdown}
           setShowVocabDropdown={languageData.setShowVocabDropdown}
+          selectedWritingFormulaId={languageData.selectedWritingFormulaId}
+          setSelectedWritingFormulaId={languageData.setSelectedWritingFormulaId}
+          searchWritingFormulaQuery={languageData.searchWritingFormulaQuery}
+          setSearchWritingFormulaQuery={languageData.setSearchWritingFormulaQuery}
+          showWritingFormulaDropdown={languageData.showWritingFormulaDropdown}
+          setShowWritingFormulaDropdown={languageData.setShowWritingFormulaDropdown}
+          filteredWritingFormulaList={languageData.filteredWritingFormulaList}
           freeEnglish={languageData.freeEnglish}
           setFreeEnglish={languageData.setFreeEnglish}
           freeTranslation={languageData.freeTranslation}
@@ -161,6 +201,13 @@ export default function LanguageComponent() {
           setSearchDialogueVocabQuery={languageData.setSearchDialogueVocabQuery}
           showDialogueVocabDropdown={languageData.showDialogueVocabDropdown}
           setShowDialogueVocabDropdown={languageData.setShowDialogueVocabDropdown}
+          selectedDialogueFormulaId={languageData.selectedDialogueFormulaId}
+          setSelectedDialogueFormulaId={languageData.setSelectedDialogueFormulaId}
+          searchDialogueFormulaQuery={languageData.searchDialogueFormulaQuery}
+          setSearchDialogueFormulaQuery={languageData.setSearchDialogueFormulaQuery}
+          showDialogueFormulaDropdown={languageData.showDialogueFormulaDropdown}
+          setShowDialogueFormulaDropdown={languageData.setShowDialogueFormulaDropdown}
+          filteredDialogueFormulaList={languageData.filteredDialogueFormulaList}
           dialogueEngQ={languageData.dialogueEngQ}
           setDialogueEngQ={languageData.setDialogueEngQ}
           dialogueTransQ={languageData.dialogueTransQ}

@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState } from "react"
-import { VocabularyLog, DialogueLog } from "@/hooks/useLanguage"
+import { VocabularyLog, DialogueLog, Formula } from "@/hooks/useLanguage"
 import {
   Plus,
   Trash2,
@@ -33,6 +33,13 @@ interface DialoguePracticeViewProps {
   setSearchDialogueVocabQuery: (q: string) => void
   showDialogueVocabDropdown: boolean
   setShowDialogueVocabDropdown: (show: boolean) => void
+  selectedDialogueFormulaId: string
+  setSelectedDialogueFormulaId: (id: string) => void
+  searchDialogueFormulaQuery: string
+  setSearchDialogueFormulaQuery: (q: string) => void
+  showDialogueFormulaDropdown: boolean
+  setShowDialogueFormulaDropdown: (show: boolean) => void
+  filteredDialogueFormulaList: Formula[]
   dialogueEngQ: string
   setDialogueEngQ: (s: string) => void
   dialogueTransQ: string
@@ -87,6 +94,13 @@ export function DialoguePracticeView({
   setSearchDialogueVocabQuery,
   showDialogueVocabDropdown,
   setShowDialogueVocabDropdown,
+  selectedDialogueFormulaId,
+  setSelectedDialogueFormulaId,
+  searchDialogueFormulaQuery,
+  setSearchDialogueFormulaQuery,
+  showDialogueFormulaDropdown,
+  setShowDialogueFormulaDropdown,
+  filteredDialogueFormulaList,
   dialogueFormError,
   revealedDialogueTranslationIds,
   handleSelectDialogueVocab,
@@ -104,6 +118,7 @@ export function DialoguePracticeView({
   dialogueDeletePending,
 }: DialoguePracticeViewProps) {
   const dropdownRef = useRef<HTMLDivElement>(null)
+  const dialogueFormulaDropdownRef = useRef<HTMLDivElement>(null)
 
   const [localDialogueEngQ, setLocalDialogueEngQ] = useState("")
   const [localDialogueTransQ, setLocalDialogueTransQ] = useState("")
@@ -120,8 +135,12 @@ export function DialoguePracticeView({
       setLocalDialogueEngA("")
       setLocalDialogueTransA("")
       setLocalDialogueFormula("")
+      setSelectedDialogueFormulaId("")
+      setSearchDialogueFormulaQuery("")
+      setSelectedDialogueVocabId("")
+      setSearchDialogueVocabQuery("")
     }
-  }, [showDialogueForm])
+  }, [showDialogueForm, setSelectedDialogueFormulaId, setSearchDialogueFormulaQuery, setSelectedDialogueVocabId, setSearchDialogueVocabQuery])
   /* eslint-enable react-hooks/set-state-in-effect */
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -141,10 +160,13 @@ export function DialoguePracticeView({
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setShowDialogueVocabDropdown(false)
       }
+      if (dialogueFormulaDropdownRef.current && !dialogueFormulaDropdownRef.current.contains(event.target as Node)) {
+        setShowDialogueFormulaDropdown(false)
+      }
     }
     document.addEventListener("mousedown", handleClickOutside)
     return () => document.removeEventListener("mousedown", handleClickOutside)
-  }, [setShowDialogueVocabDropdown])
+  }, [setShowDialogueVocabDropdown, setShowDialogueFormulaDropdown])
 
   return (
     <div className="space-y-6 animate-in fade-in duration-200">
@@ -266,20 +288,70 @@ export function DialoguePracticeView({
             {dialoguePracticeMode === "formula" && (
               <div className="space-y-4 border-b border-border/40 pb-4 animate-in fade-in duration-200">
                 <div className="grid gap-4 sm:grid-cols-2">
-                  {/* Formula Input */}
-                  <div className="space-y-1.5">
-                    <label htmlFor="dialogueFormulaInput" className="text-xs font-bold text-muted-foreground">
-                      Formula / Rumus *
+                  {/* Searchable autocomplete select formula */}
+                  <div className="space-y-1.5 relative" ref={dialogueFormulaDropdownRef}>
+                    <label className="text-xs font-bold text-muted-foreground">
+                      Search & Select Formula *
                     </label>
-                    <input
-                      id="dialogueFormulaInput"
-                      type="text"
-                      required
-                      value={localDialogueFormula}
-                      onChange={(e) => setLocalDialogueFormula(e.target.value)}
-                      placeholder="e.g. Q: Aux + S + V1? | A: S + V1"
-                      className="w-full rounded-lg border border-border/60 bg-background px-3 py-1.5 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/10"
-                    />
+                    {filteredDialogueFormulaList.length === 0 && searchDialogueFormulaQuery === "" ? (
+                      <div className="text-xs border border-destructive/25 bg-destructive/5 text-destructive rounded-lg p-2.5 flex items-center gap-1.5">
+                        <AlertCircle className="h-4 w-4 shrink-0" />
+                        No formulas found. Add formulas in the Formula List tab first.
+                      </div>
+                    ) : (
+                      <>
+                        <div className="relative">
+                          <input
+                            type="text"
+                            value={searchDialogueFormulaQuery}
+                            onFocus={() => setShowDialogueFormulaDropdown(true)}
+                            onChange={(e) => {
+                              setSearchDialogueFormulaQuery(e.target.value)
+                              setSelectedDialogueFormulaId("") // Clear selection while typing
+                              setShowDialogueFormulaDropdown(true)
+                            }}
+                            placeholder="Search registered formulas..."
+                            className="w-full rounded-lg border border-border/60 bg-background px-3 py-1.5 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/10"
+                          />
+                          {selectedDialogueFormulaId && (
+                            <span 
+                              className="absolute right-3 top-1/2 -translate-y-1/2 flex h-2 w-2 rounded-full bg-violet-500 animate-pulse" 
+                              title="Formula Selected" 
+                            />
+                          )}
+                        </div>
+
+                        {showDialogueFormulaDropdown && (
+                          <div className="absolute z-30 w-full mt-1.5 max-h-48 overflow-y-auto rounded-lg border border-border/40 bg-popover text-popover-foreground shadow-md outline-none animate-in fade-in slide-in-from-top-1 duration-150">
+                            {filteredDialogueFormulaList.length === 0 ? (
+                              <div className="px-3 py-2 text-xs text-muted-foreground">
+                                No matching formulas found
+                              </div>
+                            ) : (
+                              filteredDialogueFormulaList.map((f) => (
+                                <button
+                                  key={f.id}
+                                  type="button"
+                                  onClick={() => {
+                                    setSelectedDialogueFormulaId(f.id)
+                                    setSearchDialogueFormulaQuery(`${f.name} (${f.formula})`)
+                                    setShowDialogueFormulaDropdown(false)
+                                  }}
+                                  className={`w-full text-left px-3 py-1.5 text-xs hover:bg-accent hover:text-accent-foreground transition-colors flex items-center justify-between cursor-pointer ${
+                                    selectedDialogueFormulaId === f.id ? "bg-accent/40 font-bold" : ""
+                                  }`}
+                                >
+                                  <span className="font-semibold">{f.name}</span>
+                                  <span className="text-[10px] text-muted-foreground italic font-mono max-w-[120px] truncate">
+                                    {f.formula}
+                                  </span>
+                                </button>
+                              ))
+                            )}
+                          </div>
+                        )}
+                      </>
+                    )}
                   </div>
 
                   {/* Optional Vocab Selector */}
@@ -507,7 +579,7 @@ export function DialoguePracticeView({
                 disabled={
                   dialogueCreatePending ||
                   (dialoguePracticeMode === "vocab" && (!selectedDialogueVocabId || vocabList.length === 0)) ||
-                  (dialoguePracticeMode === "formula" && !localDialogueFormula.trim())
+                  (dialoguePracticeMode === "formula" && !selectedDialogueFormulaId)
                 }
                 className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3.5 py-1.5 text-xs font-semibold text-primary-foreground shadow-sm transition-all hover:bg-primary/95 active:scale-95 disabled:opacity-50 cursor-pointer"
               >
