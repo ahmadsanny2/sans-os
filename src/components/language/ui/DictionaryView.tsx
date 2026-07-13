@@ -73,7 +73,6 @@ export function DictionaryView({ vocabList }: DictionaryViewProps) {
     if (!searchQuery.trim()) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setWords([])
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setIsLoadingWords(false)
       return
     }

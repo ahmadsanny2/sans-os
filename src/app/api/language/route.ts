@@ -81,25 +81,6 @@ export async function GET(): Promise<NextResponse> {
   }
 }
 
-function isIndonesianVerb(indoWord: string): boolean {
-  const w = indoWord.trim().toLowerCase()
-  const commonIndoVerbs = [
-    "makan", "minum", "tidur", "pergi", "datang", "duduk", "pulang",
-    "main", "bantu", "beli", "jual", "tahu", "lihat", "dengar"
-  ]
-  if (commonIndoVerbs.includes(w)) return true
-
-  // Match prefixes: me-, ber-, ter-, di-, bel-
-  if (/^(me[nmy]?|ber|ter|di|bel|be)[a-z]+/i.test(w)) {
-    const falsePositives = [
-      "merah", "meja", "mentega", "mentimun", "terang", "terbang",
-      "terigu", "dinding", "dinas", "besok", "bebek", "belakang"
-    ]
-    if (falsePositives.includes(w)) return false
-    return true
-  }
-  return false
-}
 
 const SPECIAL_WORDS: Record<string, string> = {
   "at": "preposition",
@@ -162,7 +143,7 @@ const SPECIAL_WORDS: Record<string, string> = {
   "an": "determiner"
 }
 
-async function detectPartOfSpeech(englishWord: string, indonesianWord: string): Promise<string> {
+async function detectPartOfSpeech(englishWord: string): Promise<string> {
   const cleanWord = englishWord.split(/[,;]/)[0].trim().toLowerCase()
   if (!cleanWord) return "noun"
 
@@ -246,8 +227,7 @@ export async function POST(request: Request): Promise<NextResponse> {
 
     // Automatically detect part of speech based on the English word if not provided
     const englishWordRaw = direction === "id-en" ? capitalizedTranslation : capitalizedWord
-    const indonesianWordRaw = direction === "id-en" ? capitalizedWord : capitalizedTranslation
-    const detectedPartOfSpeech = partOfSpeech || await detectPartOfSpeech(englishWordRaw, indonesianWordRaw)
+    const detectedPartOfSpeech = partOfSpeech || await detectPartOfSpeech(englishWordRaw)
 
     let v1 = null
     let v2 = null

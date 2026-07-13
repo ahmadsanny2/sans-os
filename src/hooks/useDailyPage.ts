@@ -254,13 +254,11 @@ export function useDailyPage() {
   const deleteBlockMutation = useDeleteTimetableBlockMutation()
 
   const [showTimetableAddForm, setShowTimetableAddForm] = useState(false)
-  const [timetableTitle, setTimetableTitle] = useState("")
   const [timetableStartTime, _setTimetableStartTime] = useState("08:00")
   const [timetableEndTime, _setTimetableEndTime] = useState("09:00")
   const [timetableDuration, _setTimetableDuration] = useState("60")
   const [timetableIsTodo, setTimetableIsTodo] = useState(false)
   const [timetableCategory, setTimetableCategory] = useState("General")
-  const [timetableErrorMsg, setTimetableErrorMsg] = useState<string | null>(null)
   const [timetableScheduleType, setTimetableScheduleType] = useState<"custom" | "weekly" | "fixed">("custom")
   const [prevActiveDate, setPrevActiveDate] = useState(activeDate)
   const [timetableDayOfWeek, setTimetableDayOfWeek] = useState(() => parseISO(activeDate).getDay())
