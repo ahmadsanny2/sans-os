@@ -133,8 +133,10 @@ export function WritingPracticeView({
       setLocalVocabEngInt("")
       setLocalVocabTransInt("")
       setLocalVocabFormula("")
+      setSelectedVocabId("")
+      setSearchVocabQuery("")
     }
-  }, [showWritingForm])
+  }, [showWritingForm, setSelectedVocabId, setSearchVocabQuery])
   /* eslint-enable react-hooks/set-state-in-effect */
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -266,13 +268,8 @@ export function WritingPracticeView({
               type="button"
               onClick={() => {
                 setPracticeMode("vocab")
-                const activeObj = vocabList.find(v => v.id === selectedVocabId)
-                if (activeObj) {
-                  setSearchVocabQuery(activeObj.word)
-                } else if (vocabList.length > 0) {
-                  setSelectedVocabId(vocabList[0].id)
-                  setSearchVocabQuery(vocabList[0].word)
-                }
+                setSelectedVocabId("")
+                setSearchVocabQuery("")
               }}
               className={`flex-1 py-2 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
                 practiceMode === "vocab"
