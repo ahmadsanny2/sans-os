@@ -125,6 +125,16 @@ export const vocabularyLogs = pgTable("vocabulary_logs", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 })
 
+// 8.1 Formulas (Master data untuk rumus tata bahasa)
+export const formulas = pgTable("formulas", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: text("user_id").notNull(),
+  name: text("name").notNull(),
+  description: text("description"),
+  formula: text("formula").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+})
+
 // 8.2 Writing Logs (Sentence practice logs)
 export const writingLogs = pgTable("writing_logs", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -135,6 +145,7 @@ export const writingLogs = pgTable("writing_logs", {
   englishSentence: text("english_sentence").notNull(),
   indonesianTranslation: text("indonesian_translation").notNull(),
   autoTranslation: text("auto_translation"),
+  formulaId: uuid("formula_id").references(() => formulas.id, { onDelete: "set null" }),
   formula: text("formula"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 })
@@ -151,6 +162,7 @@ export const dialogueLogs = pgTable("dialogue_logs", {
   indonesianAnswer: text("indonesian_answer").notNull(),
   autoTranslationQuestion: text("auto_translation_question"),
   autoTranslationAnswer: text("auto_translation_answer"),
+  formulaId: uuid("formula_id").references(() => formulas.id, { onDelete: "set null" }),
   formula: text("formula"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 })
