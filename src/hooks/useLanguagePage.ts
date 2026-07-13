@@ -12,6 +12,10 @@ import {
   useDialogueQuery,
   useCreateDialogueMutation,
   useDeleteDialogueMutation,
+  useFormulasQuery,
+  useCreateFormulaMutation,
+  useUpdateFormulaMutation,
+  useDeleteFormulaMutation,
   WritingLog,
   GroupedWritingLog,
 } from "@/hooks/useLanguage"
@@ -60,6 +64,7 @@ function groupVocabWritingLogs(logs: WritingLog[]): GroupedWritingLog[] {
         vocabId: log.vocabId,
         vocabWord: log.vocabWord,
         formula: log.formula,
+        formulaId: log.formulaId || null,
         createdAt: log.createdAt,
         positive: log.sentenceType === "Positive" ? log : undefined,
         negative: log.sentenceType === "Negative" ? log : undefined,
@@ -88,7 +93,7 @@ export function useLanguagePage() {
   const deleteDialogueMutation = useDeleteDialogueMutation()
 
   // Tab switching state
-  const [activeTab, setActiveTab] = useState<"vocab" | "writing" | "dialogue" | "dictionary">("vocab")
+  const [activeTab, setActiveTab] = useState<"vocab" | "formula" | "writing" | "dialogue" | "dictionary">("vocab")
 
   // ==========================================
   // Vocabulary States
@@ -153,6 +158,119 @@ export function useLanguagePage() {
 
   // Study reveal aids
   const [revealedDialogueTranslationIds, setRevealedDialogueTranslationIds] = useState<Record<string, boolean>>({})
+
+  // ==========================================
+  // Formula States & Handlers
+  // ==========================================
+  const { data: formulaList = [], isLoading: formulaIsLoading, isError: formulaIsError } = useFormulasQuery()
+  const createFormulaMutation = useCreateFormulaMutation()
+  const updateFormulaMutation = useUpdateFormulaMutation()
+  const deleteFormulaMutation = useDeleteFormulaMutation()
+
+  const [showFormulaForm, setShowFormulaForm] = useState(false)
+  const [formulaName, setFormulaName] = useState("")
+  const [formulaString, setFormulaString] = useState("")
+  const [formulaDescription, setFormulaDescription] = useState("")
+  const [searchQueryFormula, setSearchQueryFormula] = useState("")
+  const [formulaFormError, setFormulaFormError] = useState<string | null>(null)
+
+  const [selectedWritingFormulaId, setSelectedWritingFormulaId] = useState("")
+  const [searchWritingFormulaQuery, setSearchWritingFormulaQuery] = useState("")
+  const [showWritingFormulaDropdown, setShowWritingFormulaDropdown] = useState(false)
+
+  const [selectedDialogueFormulaId, setSelectedDialogueFormulaId] = useState("")
+  const [searchDialogueFormulaQuery, setSearchDialogueFormulaQuery] = useState("")
+  const [showDialogueFormulaDropdown, setShowDialogueFormulaDropdown] = useState(false)
+
+  const handleAddFormula = async (e: React.FormEvent): Promise<void> => {
+    e.preventDefault()
+    setFormulaFormError(null)
+
+    const trimmedName = formulaName.trim()
+    const trimmedFormula = formulaString.trim()
+
+    if (!trimmedName || !trimmedFormula) {
+      setFormulaFormError("Please fill out all required fields.")
+      return
+    }
+
+    try {
+      await createFormulaMutation.mutateAsync({
+        name: trimmedName,
+        formula: trimmedFormula,
+        description: formulaDescription.trim() || undefined,
+      })
+      setFormulaName("")
+      setFormulaString("")
+      setFormulaDescription("")
+      setShowFormulaForm(false)
+      showSuccessToast("Formula added successfully")
+    } catch (err) {
+      const errMsg = err instanceof Error ? err.message : "Failed to add formula."
+      setFormulaFormError(errMsg)
+    }
+  }
+
+  const handleUpdateFormula = async (id: string, name: string, formulaVal: string, description: string | null): Promise<void> => {
+    try {
+      await updateFormulaMutation.mutateAsync({
+        id,
+        name,
+        formula: formulaVal,
+        description,
+      })
+      showSuccessToast("Formula updated successfully")
+    } catch (err) {
+      const errMsg = err instanceof Error ? err.message : "Failed to update formula."
+      showError("Update Error", errMsg)
+    }
+  }
+
+  const handleDeleteFormula = async (id: string): Promise<void> => {
+    const isConfirmed = await confirmDestructive(
+      "Delete Formula",
+      "Are you sure you want to delete this formula? Historical logs referencing it will retain their text but lose the link."
+    )
+    if (!isConfirmed) return
+
+    try {
+      await deleteFormulaMutation.mutateAsync(id)
+      showSuccessToast("Formula deleted successfully")
+    } catch {
+      showError("Delete Error", "Failed to delete formula.")
+    }
+  }
+
+  // Filter formulas for formulas list
+  const filteredFormulas = useMemo(() => {
+    const q = searchQueryFormula.toLowerCase()
+    return formulaList.filter(
+      (f) =>
+        f.name.toLowerCase().includes(q) ||
+        f.formula.toLowerCase().includes(q) ||
+        (f.description && f.description.toLowerCase().includes(q))
+    )
+  }, [formulaList, searchQueryFormula])
+
+  // Filter formulas for writing practice autocomplete
+  const filteredWritingFormulaList = useMemo(() => {
+    const q = searchWritingFormulaQuery.toLowerCase()
+    return formulaList.filter(
+      (f) =>
+        f.name.toLowerCase().includes(q) ||
+        f.formula.toLowerCase().includes(q)
+    )
+  }, [formulaList, searchWritingFormulaQuery])
+
+  // Filter formulas for dialogue practice autocomplete
+  const filteredDialogueFormulaList = useMemo(() => {
+    const q = searchDialogueFormulaQuery.toLowerCase()
+    return formulaList.filter(
+      (f) =>
+        f.name.toLowerCase().includes(q) ||
+        f.formula.toLowerCase().includes(q)
+    )
+  }, [formulaList, searchDialogueFormulaQuery])
 
   // ==========================================
   // Vocabulary Handlers
@@ -289,7 +407,6 @@ export function useLanguagePage() {
     const activeVocabTransNeg = formData?.vocabTransNeg ?? vocabTransNeg
     const activeVocabEngInt = formData?.vocabEngInt ?? vocabEngInt
     const activeVocabTransInt = formData?.vocabTransInt ?? vocabTransInt
-    const activeVocabFormula = formData?.vocabFormula ?? vocabFormula
 
     if (practiceMode === "free") {
       if (!activeFreeEnglish.trim() || !activeFreeTranslation.trim()) {
@@ -372,8 +489,14 @@ export function useLanguagePage() {
       }
     } else {
       // practiceMode === "formula"
-      if (!activeVocabFormula.trim()) {
-        setWritingFormError("Please write the formula / rumus.")
+      if (!selectedWritingFormulaId) {
+        setWritingFormError("Please select a formula.")
+        return
+      }
+
+      const selectedFormulaObj = formulaList.find((f) => f.id === selectedWritingFormulaId)
+      if (!selectedFormulaObj) {
+        setWritingFormError("Selected formula not found.")
         return
       }
 
@@ -398,7 +521,8 @@ export function useLanguagePage() {
             sentenceType: "Positive",
             englishSentence: activeVocabEngPos.trim(),
             indonesianTranslation: activeVocabTransPos.trim(),
-            formula: activeVocabFormula.trim(),
+            formulaId: selectedFormulaObj.id,
+            formula: selectedFormulaObj.formula,
           }),
           createWritingMutation.mutateAsync({
             vocabId: selectedVocabObj?.id || null,
@@ -406,7 +530,8 @@ export function useLanguagePage() {
             sentenceType: "Negative",
             englishSentence: activeVocabEngNeg.trim(),
             indonesianTranslation: activeVocabTransNeg.trim(),
-            formula: activeVocabFormula.trim(),
+            formulaId: selectedFormulaObj.id,
+            formula: selectedFormulaObj.formula,
           }),
           createWritingMutation.mutateAsync({
             vocabId: selectedVocabObj?.id || null,
@@ -414,11 +539,13 @@ export function useLanguagePage() {
             sentenceType: "Interrogative",
             englishSentence: activeVocabEngInt.trim(),
             indonesianTranslation: activeVocabTransInt.trim(),
-            formula: activeVocabFormula.trim(),
+            formulaId: selectedFormulaObj.id,
+            formula: selectedFormulaObj.formula,
           }),
         ])
 
-        setVocabFormula("")
+        setSelectedWritingFormulaId("")
+        setSearchWritingFormulaQuery("")
         setSelectedVocabId("")
         setSearchVocabQuery("")
         setVocabEngPos("")
@@ -566,7 +693,6 @@ export function useLanguagePage() {
     const activeDialogueTransQ = formData?.dialogueTransQ ?? dialogueTransQ
     const activeDialogueEngA = formData?.dialogueEngA ?? dialogueEngA
     const activeDialogueTransA = formData?.dialogueTransA ?? dialogueTransA
-    const activeDialogueFormula = formData?.dialogueFormula ?? dialogueFormula
 
     if (
       !activeDialogueEngQ.trim() || !activeDialogueTransQ.trim() ||
@@ -615,8 +741,14 @@ export function useLanguagePage() {
       }
     } else {
       // dialoguePracticeMode === "formula"
-      if (!activeDialogueFormula.trim()) {
-        setDialogueFormError("Please enter the formula / rumus.")
+      if (!selectedDialogueFormulaId) {
+        setDialogueFormError("Please select a formula.")
+        return
+      }
+
+      const selectedFormulaObj = formulaList.find((f) => f.id === selectedDialogueFormulaId)
+      if (!selectedFormulaObj) {
+        setDialogueFormError("Selected formula not found.")
         return
       }
 
@@ -632,10 +764,13 @@ export function useLanguagePage() {
           indonesianQuestion: activeDialogueTransQ.trim(),
           englishAnswer: activeDialogueEngA.trim(),
           indonesianAnswer: activeDialogueTransA.trim(),
-          formula: activeDialogueFormula.trim(),
+          formulaId: selectedFormulaObj.id,
+          formula: selectedFormulaObj.formula,
         })
 
         // Reset form
+        setSelectedDialogueFormulaId("")
+        setSearchDialogueFormulaQuery("")
         setSelectedDialogueVocabId("")
         setSearchDialogueVocabQuery("")
         setDialogueEngQ("")
@@ -764,6 +899,42 @@ export function useLanguagePage() {
     vocabDeletePending: deleteVocabMutation.isPending,
     langDirection,
     setLangDirection,
+
+    // Formula States
+    formulaList,
+    formulaIsLoading,
+    formulaIsError,
+    showFormulaForm,
+    setShowFormulaForm,
+    formulaName,
+    setFormulaName,
+    formulaString,
+    setFormulaString,
+    formulaDescription,
+    setFormulaDescription,
+    searchQueryFormula,
+    setSearchQueryFormula,
+    formulaFormError,
+    handleAddFormula,
+    handleUpdateFormula,
+    handleDeleteFormula,
+    filteredFormulas,
+    selectedWritingFormulaId,
+    setSelectedWritingFormulaId,
+    searchWritingFormulaQuery,
+    setSearchWritingFormulaQuery,
+    showWritingFormulaDropdown,
+    setShowWritingFormulaDropdown,
+    filteredWritingFormulaList,
+    selectedDialogueFormulaId,
+    setSelectedDialogueFormulaId,
+    searchDialogueFormulaQuery,
+    setSearchDialogueFormulaQuery,
+    showDialogueFormulaDropdown,
+    setShowDialogueFormulaDropdown,
+    filteredDialogueFormulaList,
+    formulaCreatePending: createFormulaMutation.isPending,
+    formulaDeletePending: deleteFormulaMutation.isPending,
 
     // Writing Practice States
     showWritingForm,

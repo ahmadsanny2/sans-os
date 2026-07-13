@@ -32,6 +32,7 @@ export interface WritingLog {
   englishSentence: string
   indonesianTranslation: string
   autoTranslation: string | null
+  formulaId: string | null
   formula: string | null
   createdAt: string
 }
@@ -40,6 +41,7 @@ export interface GroupedWritingLog {
   id: string
   vocabId: string | null
   vocabWord: string | null
+  formulaId: string | null
   formula: string | null
   createdAt: string
   positive?: WritingLog
@@ -60,6 +62,7 @@ export interface DialogueLog {
   indonesianAnswer: string
   autoTranslationQuestion: string | null
   autoTranslationAnswer: string | null
+  formulaId: string | null
   formula: string | null
   createdAt: string
 }
@@ -245,6 +248,7 @@ async function createWritingLog(body: {
   sentenceType?: "Positive" | "Negative" | "Interrogative" | null
   englishSentence: string
   indonesianTranslation: string
+  formulaId?: string | null
   formula?: string | null
 }): Promise<WritingLog> {
   const res = await fetch("/api/language/writing", {
@@ -269,6 +273,7 @@ export function useCreateWritingMutation() {
       sentenceType?: "Positive" | "Negative" | "Interrogative" | null
       englishSentence: string
       indonesianTranslation: string
+      formulaId?: string | null
       formula?: string | null
     }
   >({
@@ -345,6 +350,7 @@ async function createDialogue(body: {
   indonesianQuestion: string
   englishAnswer: string
   indonesianAnswer: string
+  formulaId?: string | null
   formula?: string | null
 }): Promise<DialogueLog> {
   const res = await fetch("/api/language/dialogue", {
@@ -371,6 +377,7 @@ export function useCreateDialogueMutation() {
       indonesianQuestion: string
       englishAnswer: string
       indonesianAnswer: string
+      formulaId?: string | null
       formula?: string | null
     }
   >({
@@ -418,6 +425,131 @@ export function useDeleteDialogueMutation() {
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["dialogues"] })
+    },
+  })
+}
+
+// ==================== FORMULA MANAGEMENT HOOKS ====================
+
+export interface Formula {
+  id: string
+  userId: string
+  name: string
+  description: string | null
+  formula: string
+  createdAt: string
+}
+
+async function fetchFormulas(): Promise<Formula[]> {
+  const res = await fetch("/api/language/formulas")
+  if (!res.ok) {
+    throw new Error("Failed to fetch formulas")
+  }
+  return res.json()
+}
+
+export function useFormulasQuery() {
+  return useQuery<Formula[]>({
+    queryKey: ["formulas"],
+    queryFn: fetchFormulas,
+  })
+}
+
+async function createFormula(body: {
+  name: string
+  formula: string
+  description?: string
+}): Promise<Formula> {
+  const res = await fetch("/api/language/formulas", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  })
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({}))
+    throw new Error(errorData.error || "Failed to create formula")
+  }
+  return res.json()
+}
+
+export function useCreateFormulaMutation() {
+  const queryClient = useQueryClient()
+  return useMutation<Formula, Error, { name: string; formula: string; description?: string }>({
+    mutationFn: createFormula,
+    onSuccess: (newFormula) => {
+      queryClient.setQueryData<Formula[]>(["formulas"], (old) => {
+        if (!old) return [newFormula]
+        return [...old, newFormula]
+      })
+      queryClient.invalidateQueries({ queryKey: ["formulas"] })
+    },
+  })
+}
+
+async function updateFormula(body: {
+  id: string
+  name: string
+  formula: string
+  description?: string | null
+}): Promise<Formula> {
+  const res = await fetch("/api/language/formulas", {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  })
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({}))
+    throw new Error(errorData.error || "Failed to update formula")
+  }
+  return res.json()
+}
+
+export function useUpdateFormulaMutation() {
+  const queryClient = useQueryClient()
+  return useMutation<Formula, Error, { id: string; name: string; formula: string; description?: string | null }>({
+    mutationFn: updateFormula,
+    onSuccess: (updatedFormula) => {
+      queryClient.setQueryData<Formula[]>(["formulas"], (old) => {
+        if (!old) return [updatedFormula]
+        return old.map((f) => (f.id === updatedFormula.id ? updatedFormula : f))
+      })
+      queryClient.invalidateQueries({ queryKey: ["formulas"] })
+    },
+  })
+}
+
+async function deleteFormula(id: string): Promise<{ success: boolean }> {
+  const res = await fetch(`/api/language/formulas?id=${id}`, {
+    method: "DELETE",
+  })
+  if (!res.ok) {
+    throw new Error("Failed to delete formula")
+  }
+  return res.json()
+}
+
+export function useDeleteFormulaMutation() {
+  const queryClient = useQueryClient()
+  return useMutation<{ success: boolean }, Error, string, { previous: Formula[] | undefined }>({
+    mutationFn: deleteFormula,
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: ["formulas"] })
+      const previous = queryClient.getQueryData<Formula[]>(["formulas"])
+      if (previous) {
+        queryClient.setQueryData<Formula[]>(
+          ["formulas"],
+          previous.filter((f) => f.id !== id)
+        )
+      }
+      return { previous }
+    },
+    onError: (err, id, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(["formulas"], context.previous)
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["formulas"] })
     },
   })
 }
