@@ -44,9 +44,9 @@ interface FormulaListViewProps {
 }
 
 export function FormulaListView({
-  formulaList,
-  writingList,
-  dialogueList,
+  formulaList = [],
+  writingList = [],
+  dialogueList = [],
   isLoading,
   isError,
   showFormulaForm,
