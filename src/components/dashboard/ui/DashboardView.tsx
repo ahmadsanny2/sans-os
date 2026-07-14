@@ -9,6 +9,7 @@ import { PrioritiesWidget } from "./PrioritiesWidget"
 import { TodosWidget } from "./TodosWidget"
 import { TimetableWidget } from "./TimetableWidget"
 import { MemoryBoxWidget } from "./MemoryBoxWidget"
+import { PomodoroWidget } from "./PomodoroWidget"
 import {
   CheckSquare,
   Calendar,
@@ -157,6 +158,8 @@ export function DashboardView({
             picUrl={picUrl}
             isLoading={logLoading}
           />
+
+          <PomodoroWidget activeDayBlocks={activeDayBlocks} />
         </div>
 
         {/* Right Column (lg:col-span-7) - Timetable */}
