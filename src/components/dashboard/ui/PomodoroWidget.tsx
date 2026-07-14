@@ -3,6 +3,7 @@
 import React, { useEffect, useMemo } from "react"
 import { usePomodoroStore, PomodoroPhase } from "@/store/pomodoroStore"
 import { TimetableBlock } from "@/hooks/useDaily"
+import { showError, showErrorToast } from "@/lib/sweetalert"
 import {
   Play,
   Pause,
@@ -129,7 +130,17 @@ export function PomodoroWidget({ activeDayBlocks }: PomodoroWidgetProps) {
     if (isRunning) {
       pauseTimer()
     } else {
-      startTimer(activeDayBlocks)
+      const started = startTimer(activeDayBlocks)
+      if (!started) {
+        if (integrationMode === "auto") {
+          showError(
+            "No Active Timetable Block",
+            "You are in Auto Mode, but there is no active todo block scheduled in your timetable right now. Please switch to Manual Mode in Pomodoro Config or schedule a timetable block for this time."
+          )
+        } else {
+          showErrorToast("Could not start timer. Please check settings.")
+        }
+      }
     }
   }
 
