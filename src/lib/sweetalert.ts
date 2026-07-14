@@ -58,7 +58,7 @@ export async function showError(title: string, text: string): Promise<void> {
     text,
     icon: "error",
     confirmButtonText: "Close",
-    iconColor: "#f43f5e",
+    iconColor: "#ef4444",
   })
 }
 
