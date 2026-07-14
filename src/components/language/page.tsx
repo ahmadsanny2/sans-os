@@ -105,6 +105,8 @@ export default function LanguageComponent() {
       ) : activeTab === "formula" ? (
         <FormulaListView
           formulaList={languageData.formulaList}
+          writingList={writingList}
+          dialogueList={languageData.dialogueList}
           isLoading={languageData.formulaIsLoading}
           isError={languageData.formulaIsError}
           showFormulaForm={languageData.showFormulaForm}
