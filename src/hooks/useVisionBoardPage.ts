@@ -86,7 +86,7 @@ export function useVisionBoardPage() {
     const newY = Math.round(item.yOffset + info.offset.y)
 
     const maxBoundX = Math.max(0, canvasEl.offsetWidth - item.width)
-    const maxBoundY = Math.max(0, 650 - item.height)
+    const maxBoundY = Math.max(0, canvasEl.offsetHeight - item.height)
 
     const constrainedX = Math.max(0, Math.min(maxBoundX, newX))
     const constrainedY = Math.max(0, Math.min(maxBoundY, newY))
