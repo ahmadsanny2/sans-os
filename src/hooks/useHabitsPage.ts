@@ -106,7 +106,7 @@ export function useHabitsPage() {
 
   // Helper check-in check
   const isLogged = (habitId: string, dateStr: string): boolean => {
-    return logs.some((l) => l.habitId === habitId && l.date === dateStr && l.status === "completed")
+    return logs.some((l) => l.habitId === habitId && l.date === dateStr && l.status.toLowerCase() === "completed")
   }
 
   // --- RECAPS LOGIC ---
@@ -122,7 +122,7 @@ export function useHabitsPage() {
   // Prepare weekly chart data from monthlyData logs in-memory
   const chartData = weekDays.map((day) => {
     const dayStr = format(day, "yyyy-MM-dd")
-    const completions = logs.filter((l) => l.date === dayStr && l.status === "completed").length || 0
+    const completions = logs.filter((l) => l.date === dayStr && l.status.toLowerCase() === "completed").length || 0
     return {
       dayLabel: format(day, "EEE"),
       completions,

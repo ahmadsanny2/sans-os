@@ -132,6 +132,54 @@ function matchCase(base: string, target: string): string {
   return target
 }
 
+function shouldDoubleConsonant(word: string): boolean {
+  const len = word.length
+  if (len <= 3) {
+    const last = word[len - 1]
+    const prev = word[len - 2]
+    const prev2 = word[len - 3]
+    return (
+      isConsonant(last) &&
+      !/[wxy]/i.test(last) &&
+      isVowel(prev) &&
+      isConsonant(prev2)
+    )
+  }
+
+  // Common verbs with stressed final syllable ending in CVC that should double
+  if (word.endsWith("gret")) return true // regret -> regretted
+  if (word.endsWith("pel")) return true  // compel, propel, dispel -> compelled
+  if (word.endsWith("fer") && !word.endsWith("offer") && !word.endsWith("suffer")) return true // refer, prefer -> referred
+  if (word.endsWith("mit") && !word.endsWith("limit") && !word.endsWith("vomit")) return true // commit, permit -> committed
+
+  // Common unstressed CVC suffixes where the final consonant should NOT double
+  const UNSTRESSED_SUFFIXES = [
+    "en",      // listen, open, happen
+    "er",      // remember, whisper, offer, suffer
+    "el",      // travel, cancel
+    "et",      // target, budget
+    "it",      // visit, edit, limit, vomit, orbit, inherit, exhibit
+    "develop",
+    "focus",
+    "benefit"
+  ]
+
+  for (const suffix of UNSTRESSED_SUFFIXES) {
+    if (word.endsWith(suffix)) return false
+  }
+
+  const last = word[len - 1]
+  const prev = word[len - 2]
+  const prev2 = word[len - 3]
+
+  return (
+    isConsonant(last) &&
+    !/[wxy]/i.test(last) &&
+    isVowel(prev) &&
+    isConsonant(prev2)
+  )
+}
+
 function getRegularV2V3(word: string): string {
   if (word.endsWith("e")) {
     return word + "d"
@@ -139,19 +187,9 @@ function getRegularV2V3(word: string): string {
   if (word.length > 2 && isConsonant(word[word.length - 2]) && word.endsWith("y")) {
     return word.slice(0, -1) + "ied"
   }
-  const len = word.length
-  if (len >= 3) {
-    const last = word[len - 1]
-    const prev = word[len - 2]
-    const prev2 = word[len - 3]
-    if (
-      isConsonant(last) &&
-      !/[wxy]/i.test(last) &&
-      isVowel(prev) &&
-      isConsonant(prev2)
-    ) {
-      return word + last + "ed"
-    }
+  if (shouldDoubleConsonant(word)) {
+    const last = word[word.length - 1]
+    return word + last + "ed"
   }
   return word + "ed"
 }
@@ -163,19 +201,9 @@ function getVIng(word: string): string {
   if (word.endsWith("e") && !word.endsWith("ee") && !word.endsWith("oe") && !word.endsWith("ye")) {
     return word.slice(0, -1) + "ing"
   }
-  const len = word.length
-  if (len >= 3) {
-    const last = word[len - 1]
-    const prev = word[len - 2]
-    const prev2 = word[len - 3]
-    if (
-      isConsonant(last) &&
-      !/[wxy]/i.test(last) &&
-      isVowel(prev) &&
-      isConsonant(prev2)
-    ) {
-      return word + last + "ing"
-    }
+  if (shouldDoubleConsonant(word)) {
+    const last = word[word.length - 1]
+    return word + last + "ing"
   }
   return word + "ing"
 }

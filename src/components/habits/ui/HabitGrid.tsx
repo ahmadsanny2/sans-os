@@ -25,11 +25,11 @@ interface HabitGridProps {
   handleAddHabit: (e: React.FormEvent) => Promise<void>
   handleDeleteHabit: (id: string) => Promise<void>
   handleToggleLog: (habitId: string, date: string) => void
-  isPendingToggle: boolean;
-  toggleLogVariables: { habitId: string; date: string; status?: string } | undefined;
-  isPendingCreate: boolean;
-  handleReorderHabits: (orderedIds: string[]) => Promise<void>;
-  isPendingReorder: boolean;
+  isPendingToggle: boolean
+  toggleLogVariables: { habitId: string; date: string; status?: string } | undefined
+  isPendingCreate: boolean
+  handleReorderHabits: (orderedIds: string[]) => Promise<void>
+  isPendingReorder: boolean
 }
 
 export function HabitGrid({

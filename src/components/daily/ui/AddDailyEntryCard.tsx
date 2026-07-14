@@ -76,7 +76,7 @@ export function AddDailyEntryCard({
   return (
     <div className="border border-border bg-card/45 dark:bg-card/20 rounded-2xl p-6 shadow-sm backdrop-blur-md">
       <div className="flex items-center gap-2 mb-4">
-        <div className="p-2 rounded-xl bg-violet-500/10 text-violet-500">
+        <div className="p-2 rounded-xl bg-primary/10 text-primary">
           <Plus className="h-5 w-5" />
         </div>
         <div>
@@ -103,7 +103,7 @@ export function AddDailyEntryCard({
               value={entryTitle}
               onChange={(e) => setEntryTitle(e.target.value)}
               placeholder="e.g. Code Review, Gym Session, Morning Standup..."
-              className="w-full rounded-xl border border-border bg-background px-3.5 py-2.5 text-sm outline-none transition-all focus:border-violet-500 focus:ring-2 focus:ring-violet-500/10"
+              className="w-full rounded-xl border border-border bg-background px-3.5 py-2.5 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/10"
             />
           </div>
 
@@ -118,7 +118,7 @@ export function AddDailyEntryCard({
               value={entryLink}
               onChange={(e) => setEntryLink(e.target.value)}
               placeholder="e.g. https://github.com/pulls, https://zoom.us/j/..."
-              className="w-full rounded-xl border border-border bg-background px-3.5 py-2.5 text-sm outline-none transition-all focus:border-violet-500 focus:ring-2 focus:ring-violet-500/10"
+              className="w-full rounded-xl border border-border bg-background px-3.5 py-2.5 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/10"
             />
           </div>
         </div>
@@ -135,7 +135,7 @@ export function AddDailyEntryCard({
               onClick={() => setTargetTimetable(!targetTimetable)}
               className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border text-sm font-semibold transition-all duration-200 cursor-pointer select-none ${
                 targetTimetable
-                  ? "bg-violet-500/10 border-violet-500/50 text-violet-600 dark:text-violet-400"
+                  ? "bg-primary/10 border-primary/30 text-primary"
                   : "bg-background border-border text-muted-foreground hover:border-border/80 hover:bg-muted/30"
               }`}
             >
@@ -149,7 +149,7 @@ export function AddDailyEntryCard({
               onClick={() => setTargetTodo(!targetTodo)}
               className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border text-sm font-semibold transition-all duration-200 cursor-pointer select-none ${
                 targetTodo
-                  ? "bg-violet-500/10 border-violet-500/50 text-violet-600 dark:text-violet-400"
+                  ? "bg-primary/10 border-primary/30 text-primary"
                   : "bg-background border-border text-muted-foreground hover:border-border/80 hover:bg-muted/30"
               }`}
             >
@@ -163,7 +163,7 @@ export function AddDailyEntryCard({
               onClick={() => setTargetPriority(!targetPriority)}
               className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border text-sm font-semibold transition-all duration-200 cursor-pointer select-none ${
                 targetPriority
-                  ? "bg-violet-500/10 border-violet-500/50 text-violet-600 dark:text-violet-400"
+                  ? "bg-primary/10 border-primary/30 text-primary"
                   : "bg-background border-border text-muted-foreground hover:border-border/80 hover:bg-muted/30"
               }`}
             >
@@ -193,7 +193,7 @@ export function AddDailyEntryCard({
                   required
                   value={chooseDate}
                   onChange={(e) => setChooseDate(e.target.value)}
-                  className="w-full rounded-xl border border-border bg-background px-3.5 py-2.5 text-sm outline-none transition-all focus:border-violet-500 focus:ring-2 focus:ring-violet-500/10"
+                  className="w-full rounded-xl border border-border bg-background px-3.5 py-2.5 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/10"
                 />
               </div>
             </motion.div>
@@ -223,7 +223,7 @@ export function AddDailyEntryCard({
                       required={targetTimetable}
                       value={timetableStartTime}
                       onChange={(e) => setTimetableStartTime(e.target.value)}
-                      className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none transition-all focus:border-violet-500 focus:ring-2 focus:ring-violet-500/10"
+                      className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/10"
                     />
                   </div>
 
@@ -239,7 +239,7 @@ export function AddDailyEntryCard({
                       required={targetTimetable}
                       value={timetableDuration}
                       onChange={(e) => setTimetableDuration(e.target.value)}
-                      className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none transition-all focus:border-violet-500 focus:ring-2 focus:ring-violet-500/10"
+                      className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/10"
                     />
                   </div>
 
@@ -254,7 +254,7 @@ export function AddDailyEntryCard({
                       required={targetTimetable}
                       value={timetableEndTime}
                       onChange={(e) => setTimetableEndTime(e.target.value)}
-                      className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none transition-all focus:border-violet-500 focus:ring-2 focus:ring-violet-500/10"
+                      className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/10"
                     />
                   </div>
 
@@ -267,7 +267,7 @@ export function AddDailyEntryCard({
                       id="category"
                       value={timetableCategory}
                       onChange={(e) => setTimetableCategory(e.target.value)}
-                      className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none transition-all focus:border-violet-500 focus:ring-2 focus:ring-violet-500/10"
+                      className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/10"
                     >
                       <option value="Personal">Personal</option>
                       <option value="Work">Work</option>
@@ -290,7 +290,7 @@ export function AddDailyEntryCard({
                       id="scheduleType"
                       value={timetableScheduleType}
                       onChange={(e) => setTimetableScheduleType(e.target.value as "custom" | "weekly" | "fixed")}
-                      className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none transition-all focus:border-violet-500 focus:ring-2 focus:ring-violet-500/10"
+                      className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/10"
                     >
                       <option value="custom">Specific Date (One-off)</option>
                       <option value="weekly">Specific Day of Week (Weekly)</option>
@@ -310,7 +310,7 @@ export function AddDailyEntryCard({
                         id="timetableDayOfWeek"
                         value={timetableDayOfWeek}
                         onChange={(e) => setTimetableDayOfWeek(Number(e.target.value))}
-                        className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none transition-all focus:border-violet-500 focus:ring-2 focus:ring-violet-500/10"
+                        className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/10"
                       >
                         <option value={0}>Sunday</option>
                         <option value={1}>Monday</option>
@@ -385,7 +385,7 @@ export function AddDailyEntryCard({
           <button
             type="submit"
             disabled={isPendingCombined || !entryTitle.trim() || (!targetTimetable && !targetTodo && !targetPriority)}
-            className="inline-flex items-center justify-center gap-2 rounded-xl bg-violet-600 px-5 py-2.5 text-xs font-semibold text-white shadow-sm transition-all hover:bg-violet-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center hover:scale-[1.02] active:scale-95 cursor-pointer"
+            className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-xs font-semibold text-primary-foreground shadow-sm transition-all hover:bg-primary/95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center hover:scale-[1.02] active:scale-95 cursor-pointer"
           >
             {isPendingCombined ? (
               <>
