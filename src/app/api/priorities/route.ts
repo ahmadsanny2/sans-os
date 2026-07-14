@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import { db } from "@/lib/db"
 import { priorities, timetableBlocks } from "@/types/schema"
-import { eq, and, lt, asc, sql, gte, lte } from "drizzle-orm"
+import { eq, and, lt, asc, gte, lte } from "drizzle-orm"
 import { createServerSupabaseClient } from "@/lib/supabase/server"
 
 export async function GET(request: Request): Promise<NextResponse> {
@@ -49,13 +49,10 @@ export async function GET(request: Request): Promise<NextResponse> {
       today = `${year}-${month}-${day}`
     }
 
-    // Auto-rollover: Find incomplete priorities from before the real today's date and move to real today's date
-    await db
-      .update(priorities)
-      .set({
-        date: today,
-        rolloverCount: sql`${priorities.rolloverCount} + 1`,
-      })
+    // Auto-rollover: Find incomplete priorities from before the real today's date and move to real today's date, respecting the limit of 5.
+    const oldIncomplete = await db
+      .select()
+      .from(priorities)
       .where(
         and(
           eq(priorities.userId, user.id),
@@ -63,6 +60,36 @@ export async function GET(request: Request): Promise<NextResponse> {
           lt(priorities.date, today)
         )
       )
+      .orderBy(asc(priorities.date), asc(priorities.orderIndex))
+
+    if (oldIncomplete.length > 0) {
+      const todayPriorities = await db
+        .select()
+        .from(priorities)
+        .where(
+          and(
+            eq(priorities.userId, user.id),
+            eq(priorities.date, today)
+          )
+        )
+
+      const availableSlots = 5 - todayPriorities.length
+      if (availableSlots > 0) {
+        const toRollover = oldIncomplete.slice(0, availableSlots)
+        let nextIndex = todayPriorities.length
+
+        for (const item of toRollover) {
+          await db
+            .update(priorities)
+            .set({
+              date: today,
+              orderIndex: nextIndex++,
+              rolloverCount: (item.rolloverCount || 0) + 1,
+            })
+            .where(eq(priorities.id, item.id))
+        }
+      }
+    }
 
     // Now query all priorities for the target date
     const dailyPriorities = await db
