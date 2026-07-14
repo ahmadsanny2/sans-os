@@ -132,6 +132,8 @@ export function DashboardView({
         />
       </div>
 
+      <PomodoroWidget activeDayBlocks={activeDayBlocks} />
+
       {/* Widgets Workspace */}
       <div className="grid gap-6 lg:grid-cols-12">
         {/* Left Column (lg:col-span-5) - Priorities & Checklist */}
@@ -158,8 +160,6 @@ export function DashboardView({
             picUrl={picUrl}
             isLoading={logLoading}
           />
-
-          <PomodoroWidget activeDayBlocks={activeDayBlocks} />
         </div>
 
         {/* Right Column (lg:col-span-7) - Timetable */}
