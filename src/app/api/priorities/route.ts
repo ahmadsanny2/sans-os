@@ -198,3 +198,46 @@ export async function POST(request: Request): Promise<NextResponse> {
     return NextResponse.json({ error: errorMessage }, { status: 500 })
   }
 }
+
+export async function PATCH(request: Request): Promise<NextResponse> {
+  try {
+    const supabase = await createServerSupabaseClient()
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
+    const body = await request.json()
+    const { id, text, link } = body
+
+    if (!id) {
+      return NextResponse.json({ error: "Missing priority ID" }, { status: 400 })
+    }
+
+    const updateData: Partial<typeof priorities.$inferInsert> = {}
+    if (text !== undefined) {
+      updateData.text = text
+    }
+    if (link !== undefined) {
+      updateData.link = link || null
+    }
+
+    const [updatedPriority] = await db
+      .update(priorities)
+      .set(updateData)
+      .where(and(eq(priorities.id, id), eq(priorities.userId, user.id)))
+      .returning()
+
+    if (!updatedPriority) {
+      return NextResponse.json({ error: "Priority not found" }, { status: 404 })
+    }
+
+    return NextResponse.json(updatedPriority)
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : "Server Error"
+    return NextResponse.json({ error: errorMessage }, { status: 500 })
+  }
+}

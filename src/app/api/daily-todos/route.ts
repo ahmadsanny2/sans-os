@@ -83,7 +83,7 @@ export async function PATCH(request: Request): Promise<NextResponse> {
     }
 
     const body = await request.json()
-    const { id, completed, text } = body
+    const { id, completed, text, link } = body
 
     if (!id) {
       return NextResponse.json({ error: "Missing todo ID" }, { status: 400 })
@@ -95,6 +95,9 @@ export async function PATCH(request: Request): Promise<NextResponse> {
     }
     if (text !== undefined) {
       updateData.text = text
+    }
+    if (link !== undefined) {
+      updateData.link = link || null
     }
 
     const [updatedTodo] = await db
