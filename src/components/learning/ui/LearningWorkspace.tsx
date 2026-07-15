@@ -85,96 +85,92 @@ export function LearningWorkspace() {
   }, [filteredSubjects])
 
   return (
-    <div className="space-y-6">
-      {/* Title section */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="space-y-1">
-          <h1 className="text-3xl font-black tracking-tight text-foreground flex items-center gap-2">
-            <GraduationCap className="h-8 w-8 text-primary" /> Learning Hub
-          </h1>
-          <p className="text-xs font-semibold text-muted-foreground">
-            Manage learning materials, topics, references, and daily tasks visually.
-          </p>
-        </div>
-        <button
-          onClick={handleOpenAddSubject}
-          className="inline-flex items-center gap-1.5 rounded-xl bg-primary px-4 py-2 text-xs font-extrabold uppercase tracking-wider text-primary-foreground shadow-sm hover:bg-primary/95 transition-all hover:scale-[1.02] active:scale-95 cursor-pointer"
-        >
-          <Plus className="h-4 w-4 stroke-[3]" /> Add Subject
-        </button>
-      </div>
-
-      {/* Stats Cards */}
-      <div className="grid gap-4 sm:grid-cols-4 select-none">
+    <div className="space-y-6 animate-in fade-in duration-200">
+      {/* 1. Statistics Cards */}
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4 select-none">
         <StatCard
           title="Total Subjects"
           value={stats.total}
-          icon={<BookOpen className="h-5 w-5" />}
+          icon={<BookOpen className="h-6 w-6" />}
           iconBgClass="bg-primary/10"
           iconTextClass="text-primary"
+          isLoading={isLoading}
+          description="Subjects registered"
         />
 
         <StatCard
           title="Learning"
           value={stats.active}
-          icon={<GraduationCap className="h-5 w-5" />}
+          icon={<GraduationCap className="h-6 w-6" />}
           iconBgClass="bg-primary/10"
           iconTextClass="text-primary"
+          isLoading={isLoading}
+          description="Subjects in progress"
         />
 
         <StatCard
           title="Planned"
           value={stats.planned}
-          icon={<CheckSquare className="h-5 w-5" />}
+          icon={<CheckSquare className="h-6 w-6" />}
           iconBgClass="bg-amber-500/10"
           iconTextClass="text-amber-500"
+          isLoading={isLoading}
+          description="Subjects planned"
         />
 
         <StatCard
           title="Completed"
           value={stats.completed}
-          icon={<Trophy className="h-5 w-5" />}
+          icon={<Trophy className="h-6 w-6" />}
           iconBgClass="bg-emerald-500/10"
           iconTextClass="text-emerald-500"
+          isLoading={isLoading}
+          description="Finished learning"
         />
       </div>
 
-      {/* Filter and Search */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center justify-between">
-        <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+      {/* 2. Controls Section (Search, Add button) */}
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between border-b border-border/40 pb-5">
+        <div className="relative flex-1 max-w-lg">
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-muted-foreground" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search learning subjects..."
-            className="w-full rounded-xl border border-border/60 bg-card/45 dark:bg-card/15 pl-9 pr-4 py-2 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/10 backdrop-blur-md"
+            className="w-full rounded-xl border border-border/60 bg-card/40 pl-10 pr-4 py-2 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/10"
           />
         </div>
 
-        <div className="flex items-center gap-2">
-          <span className="text-xs font-bold text-muted-foreground select-none">Status:</span>
-          <div className="flex rounded-xl bg-card/45 dark:bg-card/15 border border-border p-1 backdrop-blur-md">
-            {["All", "Planned", "Learning", "Completed"].map((status) => (
-              <button
-                key={status}
-                onClick={() => setStatusFilter(status)}
-                className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                  statusFilter === status
-                    ? "bg-primary text-primary-foreground shadow-sm"
-                    : "text-muted-foreground hover:text-foreground/80"
-                }`}
-              >
-                {status === "All" ? "All" : status === "Planned" ? "Planned" : status === "Learning" ? "Learning" : "Completed"}
-              </button>
-            ))}
-          </div>
-        </div>
+        <button
+          onClick={handleOpenAddSubject}
+          className="inline-flex items-center gap-1.5 rounded-xl bg-primary px-4 py-2.5 text-xs font-semibold text-primary-foreground shadow-sm transition-all hover:bg-primary/95 hover:scale-[1.02] active:scale-95 self-start md:self-auto cursor-pointer"
+        >
+          <Plus className="h-4 w-4" />
+          Add Subject
+        </button>
       </div>
 
-      {/* Main Grid View */}
+      {/* 3. Filter Section */}
+      <div className="flex flex-wrap gap-2">
+        {["All", "Planned", "Learning", "Completed"].map((status) => (
+          <button
+            key={status}
+            onClick={() => setStatusFilter(status)}
+            className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer ${
+              statusFilter === status
+                ? "bg-primary text-primary-foreground shadow-sm"
+                : "bg-secondary/40 text-muted-foreground hover:text-foreground/80 hover:bg-secondary/70 border border-border/40"
+            }`}
+          >
+            {status}
+          </button>
+        ))}
+      </div>
+
+      {/* 4. Main Grid View */}
       {isLoading ? (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           <GridCardSkeleton />
           <GridCardSkeleton />
           <GridCardSkeleton />
@@ -188,7 +184,7 @@ export function LearningWorkspace() {
           icon={<GraduationCap className="h-10 w-10 text-muted-foreground/50" />}
         />
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {filteredSubjects.map((subj) => {
             const totalItems = subj.materials.length + subj.tasks.length
             const completedItems =
