@@ -166,38 +166,38 @@ export function SubjectDetailModal({
           {activeTab === "materials" ? (
             <div className="space-y-4">
               {/* Add Material Inline Form */}
-              <form onSubmit={onAddMaterial} className="bg-secondary/15 dark:bg-zinc-950/20 border border-border/40 rounded-xl p-3.5 space-y-3">
+              <form onSubmit={onAddMaterial} className="bg-card/45 dark:bg-card/15 border border-border/60 shadow-sm rounded-2xl p-4.5 space-y-4">
                 <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground block select-none">
                   Add New Material
                 </span>
-                <div className="grid gap-2 sm:grid-cols-2">
+                <div className="grid gap-3 sm:grid-cols-2">
                   <input
                     type="text"
                     required
                     value={matTitle}
                     onChange={(e) => setMatTitle(e.target.value)}
                     placeholder="Material title..."
-                    className="rounded-lg border border-border/60 bg-background px-2.5 py-1.5 text-xs outline-none focus:border-primary"
+                    className="rounded-xl border border-border/60 bg-background px-3.5 py-2 text-xs outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all shadow-sm"
                   />
                   <input
                     type="url"
                     value={matLink}
                     onChange={(e) => setMatLink(e.target.value)}
                     placeholder="Reference URL link (optional)..."
-                    className="rounded-lg border border-border/60 bg-background px-2.5 py-1.5 text-xs outline-none focus:border-primary"
+                    className="rounded-xl border border-border/60 bg-background px-3.5 py-2 text-xs outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all shadow-sm"
                   />
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-3">
                   <input
                     type="text"
                     value={matNotes}
                     onChange={(e) => setMatNotes(e.target.value)}
                     placeholder="Brief notes about the material..."
-                    className="flex-1 rounded-lg border border-border/60 bg-background px-2.5 py-1.5 text-xs outline-none focus:border-primary"
+                    className="flex-1 rounded-xl border border-border/60 bg-background px-3.5 py-2 text-xs outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all shadow-sm"
                   />
                   <button
                     type="submit"
-                    className="px-3 py-1.5 rounded-lg bg-primary text-primary-foreground hover:bg-primary/95 text-xs font-black uppercase tracking-wider flex items-center gap-1 transition-all cursor-pointer shrink-0"
+                    className="px-4 py-2 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm cursor-pointer shrink-0"
                   >
                     <Plus className="h-3.5 w-3.5" /> Add
                   </button>
@@ -277,28 +277,28 @@ export function SubjectDetailModal({
           ) : (
             <div className="space-y-4">
               {/* Add Task Inline Form */}
-              <form onSubmit={onAddTask} className="bg-secondary/15 dark:bg-zinc-950/20 border border-border/40 rounded-xl p-3.5 space-y-3">
+              <form onSubmit={onAddTask} className="bg-card/45 dark:bg-card/15 border border-border/60 shadow-sm rounded-2xl p-4.5 space-y-4">
                 <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground block select-none">
                   Add New Task
                 </span>
-                <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+                <div className="flex items-center gap-3 flex-wrap sm:flex-nowrap">
                   <input
                     type="text"
                     required
                     value={taskTitle}
                     onChange={(e) => setTaskTitle(e.target.value)}
                     placeholder="Task/todo title..."
-                    className="flex-1 min-w-[200px] rounded-lg border border-border/60 bg-background px-2.5 py-1.5 text-xs outline-none focus:border-primary"
+                    className="flex-1 min-w-[200px] rounded-xl border border-border/60 bg-background px-3.5 py-2 text-xs outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all shadow-sm"
                   />
                   <input
                     type="date"
                     value={taskDueDate}
                     onChange={(e) => setTaskDueDate(e.target.value)}
-                    className="rounded-lg border border-border/60 bg-background px-2.5 py-1.5 text-xs outline-none focus:border-primary text-muted-foreground"
+                    className="rounded-xl border border-border/60 bg-background px-3.5 py-2 text-xs outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all shadow-sm text-muted-foreground"
                   />
                   <button
                     type="submit"
-                    className="px-3 py-1.5 rounded-lg bg-primary text-primary-foreground hover:bg-primary/95 text-xs font-black uppercase tracking-wider flex items-center gap-1 transition-all cursor-pointer shrink-0"
+                    className="px-4 py-2 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm cursor-pointer shrink-0"
                   >
                     <Plus className="h-3.5 w-3.5" /> Add
                   </button>
