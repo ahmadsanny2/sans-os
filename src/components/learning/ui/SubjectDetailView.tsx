@@ -70,6 +70,26 @@ export function SubjectDetailView({ subjectId }: SubjectDetailViewProps) {
     handleAddTask,
     handleToggleTask,
     handleDeleteTask,
+    // Material Edit States & Handlers
+    showEditMaterialModal,
+    setShowEditMaterialModal,
+    editMatTitle,
+    setEditMatTitle,
+    editMatNotes,
+    setEditMatNotes,
+    editMatLink,
+    setEditMatLink,
+    handleOpenEditMaterial,
+    handleSaveEditMaterial,
+    // Task Edit States & Handlers
+    showEditTaskModal,
+    setShowEditTaskModal,
+    editTaskTitle,
+    setEditTaskTitle,
+    editTaskDueDate,
+    setEditTaskDueDate,
+    handleOpenEditTask,
+    handleSaveEditTask,
   } = useLearningSubjectPage(subjectId)
 
   if (isLoading) {
@@ -120,16 +140,6 @@ export function SubjectDetailView({ subjectId }: SubjectDetailViewProps) {
 
   return (
     <div className="mx-auto max-w-7xl gap-6 flex flex-col py-4 animate-in fade-in duration-200">
-      {/* Back button */}
-      <div>
-        <Link
-          href="/learning"
-          className="inline-flex items-center gap-1.5 text-xs font-semibold text-muted-foreground hover:text-foreground transition-all"
-        >
-          <ArrowLeft className="h-3.5 w-3.5" /> Back to Learning Hub
-        </Link>
-      </div>
-
       {/* Header Banner */}
       <HeaderPage
         title={subject.name}
@@ -177,6 +187,16 @@ export function SubjectDetailView({ subjectId }: SubjectDetailViewProps) {
           </div>
         }
       />
+
+      {/* Back button (Moved below header banner) */}
+      <div>
+        <Link
+          href="/learning"
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-muted-foreground hover:text-foreground transition-all"
+        >
+          <ArrowLeft className="h-3.5 w-3.5" /> Back to Learning Hub
+        </Link>
+      </div>
 
       {/* Split Progress Columns */}
       <div className="grid gap-4 md:grid-cols-2">
@@ -372,14 +392,26 @@ export function SubjectDetailView({ subjectId }: SubjectDetailViewProps) {
                         </div>
                       </div>
 
-                      <button
-                        type="button"
-                        onClick={() => handleDeleteMaterial(mat.id)}
-                        className="opacity-0 group-hover:opacity-100 focus:opacity-100 p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all shrink-0 cursor-pointer"
-                        aria-label="Delete material"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
+                      {/* Hover action buttons (Edit & Delete) */}
+                      <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
+                        <button
+                          type="button"
+                          onClick={() => handleOpenEditMaterial(mat)}
+                          className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-all cursor-pointer"
+                          title="Edit Material"
+                        >
+                          <Edit2 className="h-3.5 w-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteMaterial(mat.id)}
+                          className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all shrink-0 cursor-pointer"
+                          aria-label="Delete material"
+                          title="Delete Material"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -480,14 +512,26 @@ export function SubjectDetailView({ subjectId }: SubjectDetailViewProps) {
                           </div>
                         </div>
 
-                        <button
-                          type="button"
-                          onClick={() => handleDeleteTask(task.id)}
-                          className="opacity-0 group-hover:opacity-100 focus:opacity-100 p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all shrink-0 cursor-pointer"
-                          aria-label="Delete task"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
+                        {/* Hover action buttons (Edit & Delete) */}
+                        <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
+                          <button
+                            type="button"
+                            onClick={() => handleOpenEditTask(task)}
+                            className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-all cursor-pointer"
+                            title="Edit Task"
+                          >
+                            <Edit2 className="h-3.5 w-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteTask(task.id)}
+                            className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all shrink-0 cursor-pointer"
+                            aria-label="Delete task"
+                            title="Delete Task"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </div>
                       </div>
                     )
                   })}
@@ -565,6 +609,107 @@ export function SubjectDetailView({ subjectId }: SubjectDetailViewProps) {
               <button
                 type="button"
                 onClick={() => setShowEditModal(false)}
+                className="px-4 py-2.5 rounded-xl border border-border bg-secondary/30 text-xs font-bold text-muted-foreground hover:bg-secondary/60 hover:text-foreground transition-all cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="px-4 py-2.5 rounded-xl bg-primary text-primary-foreground hover:bg-primary/95 text-xs font-bold transition-all cursor-pointer shadow-sm"
+              >
+                Save Changes
+              </button>
+            </div>
+          </form>
+        </Modal>
+      )}
+
+      {/* Edit Material Modal */}
+      {showEditMaterialModal && (
+        <Modal
+          isOpen={showEditMaterialModal}
+          onClose={() => setShowEditMaterialModal(false)}
+          title="Edit Learning Material"
+        >
+          <form onSubmit={handleSaveEditMaterial} className="space-y-4">
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-bold text-muted-foreground">Material Title</label>
+              <input
+                type="text"
+                required
+                value={editMatTitle}
+                onChange={(e) => setEditMatTitle(e.target.value)}
+                className="rounded-xl border border-border/60 bg-background px-3.5 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all shadow-sm"
+              />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-bold text-muted-foreground">Reference URL Link (optional)</label>
+              <input
+                type="url"
+                value={editMatLink}
+                onChange={(e) => setEditMatLink(e.target.value)}
+                className="rounded-xl border border-border/60 bg-background px-3.5 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all shadow-sm"
+              />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-bold text-muted-foreground">Brief Notes</label>
+              <textarea
+                value={editMatNotes}
+                onChange={(e) => setEditMatNotes(e.target.value)}
+                rows={3}
+                className="rounded-xl border border-border/60 bg-background px-3.5 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all shadow-sm resize-none"
+              />
+            </div>
+            <div className="flex items-center justify-end gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => setShowEditMaterialModal(false)}
+                className="px-4 py-2.5 rounded-xl border border-border bg-secondary/30 text-xs font-bold text-muted-foreground hover:bg-secondary/60 hover:text-foreground transition-all cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="px-4 py-2.5 rounded-xl bg-primary text-primary-foreground hover:bg-primary/95 text-xs font-bold transition-all cursor-pointer shadow-sm"
+              >
+                Save Changes
+              </button>
+            </div>
+          </form>
+        </Modal>
+      )}
+
+      {/* Edit Task Modal */}
+      {showEditTaskModal && (
+        <Modal
+          isOpen={showEditTaskModal}
+          onClose={() => setShowEditTaskModal(false)}
+          title="Edit Learning Task"
+        >
+          <form onSubmit={handleSaveEditTask} className="space-y-4">
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-bold text-muted-foreground">Task Title</label>
+              <input
+                type="text"
+                required
+                value={editTaskTitle}
+                onChange={(e) => setEditTaskTitle(e.target.value)}
+                className="rounded-xl border border-border/60 bg-background px-3.5 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all shadow-sm"
+              />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-bold text-muted-foreground">Due Date</label>
+              <input
+                type="date"
+                value={editTaskDueDate}
+                onChange={(e) => setEditTaskDueDate(e.target.value)}
+                className="rounded-xl border border-border/60 bg-background px-3.5 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all shadow-sm text-muted-foreground"
+              />
+            </div>
+            <div className="flex items-center justify-end gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => setShowEditTaskModal(false)}
                 className="px-4 py-2.5 rounded-xl border border-border bg-secondary/30 text-xs font-bold text-muted-foreground hover:bg-secondary/60 hover:text-foreground transition-all cursor-pointer"
               >
                 Cancel

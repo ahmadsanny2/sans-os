@@ -9,6 +9,8 @@ import {
   useCreateLearningTaskMutation,
   useUpdateLearningTaskMutation,
   useDeleteLearningTaskMutation,
+  LearningMaterial,
+  LearningTask,
 } from "./useLearning"
 import { confirmDestructive, showSuccessToast, showErrorToast } from "@/lib/sweetalert"
 
@@ -44,6 +46,19 @@ export function useLearningSubjectPage(subjectId: string) {
   // Form states - Task
   const [taskTitle, setTaskTitle] = useState("")
   const [taskDueDate, setTaskDueDate] = useState("")
+
+  // Edit Material State
+  const [editingMaterial, setEditingMaterial] = useState<LearningMaterial | null>(null)
+  const [showEditMaterialModal, setShowEditMaterialModal] = useState(false)
+  const [editMatTitle, setEditMatTitle] = useState("")
+  const [editMatNotes, setEditMatNotes] = useState("")
+  const [editMatLink, setEditMatLink] = useState("")
+
+  // Edit Task State
+  const [editingTask, setEditingTask] = useState<LearningTask | null>(null)
+  const [showEditTaskModal, setShowEditTaskModal] = useState(false)
+  const [editTaskTitle, setEditTaskTitle] = useState("")
+  const [editTaskDueDate, setEditTaskDueDate] = useState("")
 
   const handleOpenEdit = () => {
     if (!subject) return
@@ -147,6 +162,33 @@ export function useLearningSubjectPage(subjectId: string) {
     }
   }
 
+  const handleOpenEditMaterial = (mat: LearningMaterial) => {
+    setEditingMaterial(mat)
+    setEditMatTitle(mat.title)
+    setEditMatNotes(mat.notes || "")
+    setEditMatLink(mat.linkUrl || "")
+    setShowEditMaterialModal(true)
+  }
+
+  const handleSaveEditMaterial = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!editingMaterial || !editMatTitle.trim()) return
+
+    try {
+      await updateMaterialMutation.mutateAsync({
+        id: editingMaterial.id,
+        title: editMatTitle.trim(),
+        notes: editMatNotes.trim() || null,
+        linkUrl: editMatLink.trim() || null,
+      })
+      showSuccessToast("Material updated successfully")
+      setShowEditMaterialModal(false)
+      setEditingMaterial(null)
+    } catch {
+      showErrorToast("Failed to update material")
+    }
+  }
+
   // Task Actions
   const handleAddTask = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -193,6 +235,33 @@ export function useLearningSubjectPage(subjectId: string) {
     }
   }
 
+  const handleOpenEditTask = (task: LearningTask) => {
+    setEditingTask(task)
+    setEditTaskTitle(task.title)
+    setEditTaskDueDate(
+      task.dueDate ? new Date(task.dueDate).toISOString().split("T")[0] : ""
+    )
+    setShowEditTaskModal(true)
+  }
+
+  const handleSaveEditTask = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!editingTask || !editTaskTitle.trim()) return
+
+    try {
+      await updateTaskMutation.mutateAsync({
+        id: editingTask.id,
+        title: editTaskTitle.trim(),
+        dueDate: editTaskDueDate || null,
+      })
+      showSuccessToast("Task updated successfully")
+      setShowEditTaskModal(false)
+      setEditingTask(null)
+    } catch {
+      showErrorToast("Failed to update task")
+    }
+  }
+
   return {
     subject,
     isLoading,
@@ -230,5 +299,25 @@ export function useLearningSubjectPage(subjectId: string) {
     handleAddTask,
     handleToggleTask,
     handleDeleteTask,
+    // Material Edit States & Handlers
+    showEditMaterialModal,
+    setShowEditMaterialModal,
+    editMatTitle,
+    setEditMatTitle,
+    editMatNotes,
+    setEditMatNotes,
+    editMatLink,
+    setEditMatLink,
+    handleOpenEditMaterial,
+    handleSaveEditMaterial,
+    // Task Edit States & Handlers
+    showEditTaskModal,
+    setShowEditTaskModal,
+    editTaskTitle,
+    setEditTaskTitle,
+    editTaskDueDate,
+    setEditTaskDueDate,
+    handleOpenEditTask,
+    handleSaveEditTask,
   }
 }
