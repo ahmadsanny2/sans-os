@@ -74,7 +74,7 @@ export function SubjectDetailView({ subjectId }: SubjectDetailViewProps) {
 
   if (isLoading) {
     return (
-      <div className="space-y-6">
+      <div className="mx-auto max-w-7xl gap-6 flex flex-col py-4 animate-in fade-in duration-200">
         <div className="h-6 w-32 bg-secondary/40 rounded animate-pulse" />
         <div className="h-32 w-full bg-secondary/20 rounded-2xl animate-pulse" />
         <div className="grid gap-4 md:grid-cols-2">
@@ -87,7 +87,7 @@ export function SubjectDetailView({ subjectId }: SubjectDetailViewProps) {
 
   if (isError || !subject) {
     return (
-      <div className="space-y-4">
+      <div className="mx-auto max-w-7xl gap-6 flex flex-col py-4 animate-in fade-in duration-200">
         <Link
           href="/learning"
           className="inline-flex items-center gap-1.5 text-xs font-semibold text-muted-foreground hover:text-foreground transition-all"
@@ -119,7 +119,7 @@ export function SubjectDetailView({ subjectId }: SubjectDetailViewProps) {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="mx-auto max-w-7xl gap-6 flex flex-col py-4 animate-in fade-in duration-200">
       {/* Back button */}
       <div>
         <Link
