@@ -639,37 +639,6 @@ const VocabCard = React.memo(function VocabCard({
             <span className="text-[10px] font-extrabold text-muted-foreground/50 tracking-wider">
               VOCAB
             </span>
-            {vocab.partOfSpeech && vocab.partOfSpeech !== "n/a" && (
-              <div className="flex flex-wrap gap-1">
-                {vocab.partOfSpeech.split(",").map((pos) => {
-                  const cleanPos = pos.trim().toLowerCase()
-                  return (
-                    <span
-                      key={cleanPos}
-                      className={`px-1.5 py-0.5 rounded-full text-[8px] font-extrabold uppercase tracking-wider ${
-                        cleanPos === "verb"
-                          ? "bg-violet-500/10 text-violet-400 border border-violet-500/20"
-                          : cleanPos === "noun"
-                          ? "bg-blue-500/10 text-blue-400 border border-blue-500/20"
-                          : cleanPos === "adjective"
-                          ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                          : cleanPos === "adverb"
-                          ? "bg-amber-500/10 text-amber-400 border border-amber-500/20"
-                          : cleanPos === "preposition"
-                          ? "bg-indigo-500/10 text-indigo-400 border border-indigo-500/20"
-                          : cleanPos === "conjunction"
-                          ? "bg-orange-500/10 text-orange-400 border border-orange-500/20"
-                          : cleanPos === "pronoun"
-                          ? "bg-rose-500/10 text-rose-400 border border-rose-500/20"
-                          : "bg-zinc-500/10 text-zinc-400 border border-zinc-500/20"
-                      }`}
-                    >
-                      {cleanPos}
-                    </span>
-                  )
-                })}
-              </div>
-            )}
           </div>
           <div className="flex items-center gap-2">
             {/* Memorized Checklist Toggle */}
@@ -713,67 +682,12 @@ const VocabCard = React.memo(function VocabCard({
             onClick={() => toggleRevealTranslation(vocab.id)}
             className={`relative min-h-[48px] flex rounded-lg border transition-all p-3 select-none cursor-pointer ${
               isRevealed
-                ? "bg-secondary/40 border-border/60 text-foreground items-start justify-start"
+                ? "bg-secondary/40 border-border/60 text-foreground items-center justify-center text-center"
                 : "bg-secondary/10 border-dashed border-border/40 text-muted-foreground backdrop-blur-[2px] items-center justify-center"
             }`}
           >
             {isRevealed ? (
-              <div className="flex flex-col gap-2 w-full text-left">
-                <div>
-                  <span className="text-[9px] font-extrabold uppercase tracking-wider text-muted-foreground block select-none">
-                    Manual
-                  </span>
-                  <span className="text-xs font-bold text-foreground leading-normal">{capitalizeFirstLetter(vocab.translation)}</span>
-                </div>
-                {vocab.autoTranslation && (
-                  <div className="border-t border-border/40 pt-1.5 mt-1">
-                    <span className="text-[9px] font-extrabold uppercase tracking-wider text-muted-foreground block select-none">
-                      Google Translate
-                    </span>
-                    <span className="text-xs font-medium text-muted-foreground leading-normal italic">{capitalizeFirstLetter(vocab.autoTranslation)}</span>
-                  </div>
-                )}
-                {vocab.partOfSpeech.split(",").map(p => p.trim().toLowerCase()).includes("verb") && vocab.v1 && (
-                  <div className="border-t border-border/40 pt-1.5 mt-2 space-y-1.5">
-                    <span className="text-[9px] font-extrabold uppercase tracking-wider text-violet-400 block select-none">
-                      Verb Conjugations
-                    </span>
-                    <div className="grid grid-cols-2 gap-x-3 gap-y-1.5 text-[10px] rounded-lg bg-zinc-950/40 p-2 border border-white/5 font-mono">
-                      <div className="break-words whitespace-normal">
-                        <span className="text-muted-foreground mr-1">V1:</span>
-                        <span className="font-bold text-white">{vocab.v1}</span>
-                      </div>
-                      <div className="text-muted-foreground break-words whitespace-normal">
-                        {capitalizeFirstLetter(vocab.v1Translation)}
-                      </div>
-                      
-                      <div className="break-words whitespace-normal">
-                        <span className="text-muted-foreground mr-1">V2:</span>
-                        <span className="font-bold text-white">{vocab.v2}</span>
-                      </div>
-                      <div className="text-muted-foreground break-words whitespace-normal">
-                        {capitalizeFirstLetter(vocab.v2Translation)}
-                      </div>
-
-                      <div className="break-words whitespace-normal">
-                        <span className="text-muted-foreground mr-1">V3:</span>
-                        <span className="font-bold text-white">{vocab.v3}</span>
-                      </div>
-                      <div className="text-muted-foreground break-words whitespace-normal">
-                        {capitalizeFirstLetter(vocab.v3Translation)}
-                      </div>
-
-                      <div className="break-words whitespace-normal">
-                        <span className="text-muted-foreground mr-1">V-ing:</span>
-                        <span className="font-bold text-white">{vocab.vIng}</span>
-                      </div>
-                      <div className="text-muted-foreground break-words whitespace-normal">
-                        {capitalizeFirstLetter(vocab.vIngTranslation)}
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
+              <span className="text-sm font-bold text-foreground leading-normal">{capitalizeFirstLetter(vocab.translation)}</span>
             ) : (
               <div className="flex items-center gap-1 text-[10px] font-extrabold uppercase tracking-wider select-none text-muted-foreground/60 group-hover:text-muted-foreground/95 transition-colors">
                 <Eye className="h-3.5 w-3.5" /> Click to reveal

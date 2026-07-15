@@ -358,83 +358,21 @@ export function DictionaryView({ vocabList }: DictionaryViewProps) {
                                             </div>
                                           ) : details ? (
                                             <div className="space-y-4">
-                                              {/* Definition & Part of Speech Badge */}
-                                              <div className="space-y-2">
-                                                <div className="flex items-center gap-2">
-                                                  <span className="text-[10px] font-extrabold uppercase tracking-widest text-muted-foreground">
-                                                    English Definition
-                                                  </span>
-                                                  {details.partOfSpeech && (
-                                                    <div className="flex flex-wrap gap-1">
-                                                      {details.partOfSpeech.split(",").map((pos) => {
-                                                        const cleanPos = pos.trim().toLowerCase()
-                                                        return (
-                                                          <span
-                                                            key={cleanPos}
-                                                            className={`px-1.5 py-0.5 rounded text-[8px] font-extrabold uppercase tracking-wider ${
-                                                              cleanPos === "verb"
-                                                                ? "bg-violet-500/10 text-violet-400 border border-violet-500/20"
-                                                                : cleanPos === "noun"
-                                                                ? "bg-blue-500/10 text-blue-400 border border-blue-500/20"
-                                                                : cleanPos === "adjective"
-                                                                ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                                                                : cleanPos === "adverb"
-                                                                ? "bg-amber-500/10 text-amber-400 border border-amber-500/20"
-                                                                : "bg-zinc-500/10 text-zinc-400 border border-zinc-500/20"
-                                                            }`}
-                                                          >
-                                                            {cleanPos}
-                                                          </span>
-                                                        )
-                                                      })}
-                                                    </div>
-                                                  )}
-                                                </div>
-                                                <p className="text-xs font-semibold text-foreground/80 leading-relaxed bg-secondary/10 dark:bg-zinc-950/20 p-3 rounded-xl border border-border/30">
-                                                  {details.definition}
-                                                </p>
-                                              </div>
+                                               {/* Indonesian Translation */}
+                                               <div className="space-y-2">
+                                                 <span className="text-[10px] font-extrabold uppercase tracking-widest text-muted-foreground block">
+                                                   Indonesian Meaning
+                                                 </span>
 
-                                              {/* Indonesian Translations */}
-                                              <div className="space-y-2.5">
-                                                <span className="text-[10px] font-extrabold uppercase tracking-widest text-muted-foreground block">
-                                                  Indonesian Meanings
-                                                </span>
-
-                                                {/* Primary Google Translation */}
-                                                <div className="p-3 bg-primary/5 border border-primary/15 rounded-xl space-y-1">
-                                                  <span className="text-[9px] font-extrabold uppercase tracking-wider text-primary block select-none">
-                                                    Primary Translation
-                                                  </span>
-                                                  <span className="text-sm font-bold text-foreground">
-                                                    {details.translation}
-                                                  </span>
-                                                </div>
-
-                                                {/* Bilingual alternative meanings */}
-                                                {details.alternativeTranslations && details.alternativeTranslations.length > 0 && (
-                                                  <div className="space-y-2">
-                                                    <span className="text-[9px] font-extrabold uppercase tracking-widest text-muted-foreground block mt-3">
-                                                      Alternative Meanings (by Part of Speech)
-                                                    </span>
-                                                    <div className="grid gap-3 sm:grid-cols-2">
-                                                      {details.alternativeTranslations.map((alt, index) => (
-                                                        <div
-                                                          key={index}
-                                                          className="p-3 bg-secondary/20 dark:bg-zinc-950/15 border border-border/40 rounded-xl space-y-1.5"
-                                                        >
-                                                          <span className="inline-block px-1.5 py-0.5 rounded text-[8px] font-extrabold uppercase tracking-wider bg-zinc-500/10 text-zinc-400 border border-zinc-500/20">
-                                                            {alt.partOfSpeech}
-                                                          </span>
-                                                          <div className="text-xs font-bold text-foreground/80 flex flex-wrap gap-1">
-                                                            {alt.translations.join(", ")}
-                                                          </div>
-                                                        </div>
-                                                      ))}
-                                                    </div>
-                                                  </div>
-                                                )}
-                                              </div>
+                                                 <div className="p-4 bg-primary/5 border border-primary/15 rounded-xl">
+                                                   <span className="text-[9px] font-extrabold uppercase tracking-wider text-primary block select-none mb-0.5">
+                                                     Translation
+                                                   </span>
+                                                   <span className="text-base font-extrabold text-foreground">
+                                                     {details.translation}
+                                                   </span>
+                                                 </div>
+                                               </div>
 
                                               {/* Action Row */}
                                               <div className="flex justify-end border-t border-border/30 pt-4 mt-2">
