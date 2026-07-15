@@ -624,19 +624,25 @@ const VocabCard = React.memo(function VocabCard({
   handleDeleteVocabulary,
   toggleRevealTranslation,
 }: VocabCardProps) {
+  // Split translation by comma or semicolon to render as clean chips
+  const meanings = vocab.translation
+    .split(/[,;]/)
+    .map((t) => t.trim())
+    .filter(Boolean)
+
   return (
     <div
-      className={`group relative rounded-xl border p-5 shadow-sm transition-all duration-300 flex flex-col justify-between ${
+      className={`group relative rounded-2xl border p-5 shadow-sm transition-all duration-300 flex flex-col justify-between backdrop-blur-md ${
         vocab.memorized
-          ? "border-border/50 bg-secondary/15 opacity-75"
-          : "border-border bg-card/45 dark:bg-card/15 hover:border-sidebar-primary/30"
+          ? "border-border/40 bg-secondary/10 dark:bg-card/5 opacity-70"
+          : "border-border bg-card/45 dark:bg-card/15 hover:border-primary/40 hover:shadow-md hover:shadow-primary/5 hover:translate-y-[-2px]"
       }`}
     >
       {/* Header row */}
       <div>
         <div className="flex items-center justify-between gap-2 border-b border-border/40 pb-2.5">
           <div className="flex items-center gap-1.5">
-            <span className="text-[10px] font-extrabold text-muted-foreground/50 tracking-wider">
+            <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-primary/10 text-primary border border-primary/20 select-none">
               VOCAB
             </span>
           </div>
@@ -644,20 +650,20 @@ const VocabCard = React.memo(function VocabCard({
             {/* Memorized Checklist Toggle */}
             <button
               onClick={() => handleToggleMemorized(vocab.id, vocab.memorized)}
-              className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-lg border transition-all active:scale-95 cursor-pointer ${
+              className={`flex h-5.5 w-5.5 shrink-0 items-center justify-center rounded-xl border transition-all active:scale-95 cursor-pointer ${
                 vocab.memorized
-                  ? "bg-sidebar-primary border-sidebar-primary text-sidebar-primary-foreground"
-                  : "border-border hover:border-sidebar-primary/50 hover:bg-sidebar-primary/10"
+                  ? "bg-primary border-primary text-primary-foreground shadow-glow"
+                  : "border-border/80 hover:border-primary/50 hover:bg-primary/10 bg-card"
               }`}
               aria-label="Toggle word memorized"
-              title={vocab.memorized ? "Mark as unmemorized" : "Mark as memorized"}
+              title={vocab.memorized ? "Mark as learning" : "Mark as memorized"}
             >
               {vocab.memorized && <Check className="h-3.5 w-3.5 stroke-[3]" />}
             </button>
 
             <button
               onClick={() => handleDeleteVocabulary(vocab.id, vocab.word)}
-              className="opacity-0 group-hover:opacity-100 focus:opacity-100 p-1 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all shrink-0"
+              className="opacity-0 group-hover:opacity-100 focus:opacity-100 p-1.5 rounded-xl text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all shrink-0 cursor-pointer"
               aria-label={`Delete word ${vocab.word}`}
             >
               <Trash2 className="h-3.5 w-3.5" />
@@ -666,31 +672,40 @@ const VocabCard = React.memo(function VocabCard({
         </div>
 
         {/* Word */}
-        <div className="space-y-2 mt-3 flex-1">
-          <h4 className={`text-xl font-bold tracking-tight text-foreground leading-none ${vocab.memorized ? "text-muted-foreground" : ""}`}>
+        <div className="space-y-2 mt-3.5 flex-1">
+          <h4 className={`text-2xl font-black tracking-tight text-foreground leading-none ${vocab.memorized ? "text-muted-foreground" : ""}`}>
             {capitalizeFirstLetter(vocab.word)}
           </h4>
         </div>
 
         {/* Translation clicking review block */}
         <div className="my-4.5">
-          <div className="text-[10px] font-extrabold uppercase tracking-widest text-muted-foreground mb-1.5 select-none flex items-center gap-1">
+          <div className="text-[10px] font-extrabold uppercase tracking-widest text-muted-foreground mb-2 select-none flex items-center gap-1">
             <Lightbulb className="h-3 w-3 text-violet-500" /> Translation
           </div>
 
           <div
             onClick={() => toggleRevealTranslation(vocab.id)}
-            className={`relative min-h-[48px] flex rounded-lg border transition-all p-3 select-none cursor-pointer ${
+            className={`relative min-h-[56px] flex flex-col items-center justify-center rounded-xl border-2 border-dashed transition-all p-4 cursor-pointer select-none ${
               isRevealed
-                ? "bg-secondary/40 border-border/60 text-foreground items-center justify-center text-center"
-                : "bg-secondary/10 border-dashed border-border/40 text-muted-foreground backdrop-blur-[2px] items-center justify-center"
+                ? "bg-secondary/20 dark:bg-zinc-950/20 border-border/50 text-foreground"
+                : "bg-primary/5 hover:bg-primary/10 border-primary/20 hover:border-primary/45 text-primary hover:scale-[1.01] active:scale-95 shadow-sm"
             }`}
           >
             {isRevealed ? (
-              <span className="text-sm font-bold text-foreground leading-normal">{capitalizeFirstLetter(vocab.translation)}</span>
+              <div className="flex flex-wrap gap-1.5 justify-center w-full">
+                {meanings.map((meaning, idx) => (
+                  <span
+                    key={idx}
+                    className="px-2.5 py-1.5 text-xs font-bold rounded-xl border bg-card/65 text-foreground border-border/60 shadow-sm transition-all hover:bg-card hover:scale-[1.02]"
+                  >
+                    {capitalizeFirstLetter(meaning)}
+                  </span>
+                ))}
+              </div>
             ) : (
-              <div className="flex items-center gap-1 text-[10px] font-extrabold uppercase tracking-wider select-none text-muted-foreground/60 group-hover:text-muted-foreground/95 transition-colors">
-                <Eye className="h-3.5 w-3.5" /> Click to reveal
+              <div className="flex items-center gap-2 text-xs font-black uppercase tracking-wider transition-colors">
+                <Eye className="h-4 w-4 stroke-[2.5]" /> Click to reveal
               </div>
             )}
           </div>
