@@ -125,8 +125,8 @@ export function useLearningPage() {
   const handleDeleteSubject = async (id: string, name: string, e: React.MouseEvent) => {
     e.stopPropagation()
     const isConfirmed = await confirmDestructive(
-      "Hapus Subjek Pembelajaran",
-      `Apakah Anda yakin ingin menghapus "${name}" beserta semua materi dan tugas di dalamnya?`
+      "Delete Learning Subject",
+      `Are you sure you want to delete "${name}" and all of its materials and tasks?`
     )
 
     if (isConfirmed) {
@@ -183,8 +183,8 @@ export function useLearningPage() {
 
   const handleDeleteMaterial = async (id: string) => {
     const isConfirmed = await confirmDestructive(
-      "Hapus Materi",
-      "Apakah Anda yakin ingin menghapus materi pembelajaran ini?"
+      "Delete Material",
+      "Are you sure you want to delete this learning material?"
     )
 
     if (isConfirmed) {
@@ -229,8 +229,8 @@ export function useLearningPage() {
 
   const handleDeleteTask = async (id: string) => {
     const isConfirmed = await confirmDestructive(
-      "Hapus Tugas",
-      "Apakah Anda yakin ingin menghapus tugas ini?"
+      "Delete Task",
+      "Are you sure you want to delete this task?"
     )
 
     if (isConfirmed) {

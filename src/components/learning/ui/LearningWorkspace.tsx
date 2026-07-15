@@ -91,14 +91,14 @@ export function LearningWorkspace() {
             <GraduationCap className="h-8 w-8 text-primary" /> Learning Hub
           </h1>
           <p className="text-xs font-semibold text-muted-foreground">
-            Kelola materi pembelajaran, topik, referensi, dan tugas harian secara visual.
+            Manage learning materials, topics, references, and daily tasks visually.
           </p>
         </div>
         <button
           onClick={handleOpenAddSubject}
           className="inline-flex items-center gap-1.5 rounded-xl bg-primary px-4 py-2 text-xs font-extrabold uppercase tracking-wider text-primary-foreground shadow-sm hover:bg-primary/95 transition-all hover:scale-[1.02] active:scale-95 cursor-pointer"
         >
-          <Plus className="h-4 w-4 stroke-[3]" /> Tambah Subjek
+          <Plus className="h-4 w-4 stroke-[3]" /> Add Subject
         </button>
       </div>
 
@@ -109,7 +109,7 @@ export function LearningWorkspace() {
             <BookOpen className="h-5 w-5" />
           </div>
           <div>
-            <span className="text-[10px] font-extrabold text-muted-foreground/60 uppercase tracking-widest block">Total Subjek</span>
+            <span className="text-[10px] font-extrabold text-muted-foreground/60 uppercase tracking-widest block">Total Subjects</span>
             <span className="text-2xl font-black text-foreground">{stats.total}</span>
           </div>
         </div>
@@ -119,7 +119,7 @@ export function LearningWorkspace() {
             <GraduationCap className="h-5 w-5" />
           </div>
           <div>
-            <span className="text-[10px] font-extrabold text-muted-foreground/60 uppercase tracking-widest block">Mempelajari</span>
+            <span className="text-[10px] font-extrabold text-muted-foreground/60 uppercase tracking-widest block">Learning</span>
             <span className="text-2xl font-black text-foreground">{stats.active}</span>
           </div>
         </div>
@@ -129,7 +129,7 @@ export function LearningWorkspace() {
             <CheckSquare className="h-5 w-5" />
           </div>
           <div>
-            <span className="text-[10px] font-extrabold text-muted-foreground/60 uppercase tracking-widest block">Direncanakan</span>
+            <span className="text-[10px] font-extrabold text-muted-foreground/60 uppercase tracking-widest block">Planned</span>
             <span className="text-2xl font-black text-foreground">{stats.planned}</span>
           </div>
         </div>
@@ -139,7 +139,7 @@ export function LearningWorkspace() {
             <Trophy className="h-5 w-5" />
           </div>
           <div>
-            <span className="text-[10px] font-extrabold text-muted-foreground/60 uppercase tracking-widest block">Selesai</span>
+            <span className="text-[10px] font-extrabold text-muted-foreground/60 uppercase tracking-widest block">Completed</span>
             <span className="text-2xl font-black text-foreground">{stats.completed}</span>
           </div>
         </div>
@@ -153,7 +153,7 @@ export function LearningWorkspace() {
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Cari subjek pembelajaran..."
+            placeholder="Search learning subjects..."
             className="w-full rounded-xl border border-border/60 bg-card/45 dark:bg-card/15 pl-9 pr-4 py-2 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/10 backdrop-blur-md"
           />
         </div>
@@ -171,7 +171,7 @@ export function LearningWorkspace() {
                     : "text-muted-foreground hover:text-foreground/80"
                 }`}
               >
-                {status === "All" ? "Semua" : status === "Planned" ? "Rencana" : status === "Learning" ? "Belajar" : "Selesai"}
+                {status === "All" ? "All" : status === "Planned" ? "Planned" : status === "Learning" ? "Learning" : "Completed"}
               </button>
             ))}
           </div>
@@ -182,22 +182,22 @@ export function LearningWorkspace() {
       {isLoading ? (
         <div className="flex flex-col items-center justify-center py-24 gap-3 select-none">
           <Loader2 className="h-10 w-10 text-primary animate-spin" />
-          <p className="text-sm font-semibold text-muted-foreground">Memuat subjek pembelajaran...</p>
+          <p className="text-sm font-semibold text-muted-foreground">Loading learning subjects...</p>
         </div>
       ) : isError ? (
         <div className="rounded-2xl border border-destructive/20 bg-destructive/5 py-12 text-center text-sm text-destructive flex flex-col items-center gap-2 select-none">
           <AlertCircle className="h-8 w-8" />
-          <p className="font-semibold">Gagal memuat subjek pembelajaran. Silakan coba lagi nanti.</p>
+          <p className="font-semibold">Failed to load learning subjects. Please try again later.</p>
         </div>
       ) : filteredSubjects.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-border/40 py-20 text-center text-sm text-muted-foreground bg-card/10 select-none flex flex-col items-center gap-2">
           <GraduationCap className="h-10 w-10 text-muted-foreground/50" />
-          <p className="font-semibold">Belum ada subjek pembelajaran yang sesuai.</p>
+          <p className="font-semibold">No matching learning subjects found.</p>
           <button
             onClick={handleOpenAddSubject}
             className="mt-2 inline-flex items-center gap-1 text-xs font-black uppercase tracking-wider text-primary hover:underline cursor-pointer"
           >
-            Buat Subjek Pertama <Plus className="h-3 w-3 stroke-[3]" />
+            Create First Subject <Plus className="h-3 w-3 stroke-[3]" />
           </button>
         </div>
       ) : (
@@ -235,7 +235,7 @@ export function LearningWorkspace() {
                           ? "bg-primary/10 text-primary border border-primary/20"
                           : "bg-secondary text-muted-foreground border border-border/60"
                       }`}>
-                        {subj.status === "Planned" ? "Rencana" : subj.status === "Learning" ? "Belajar" : "Selesai"}
+                        {subj.status === "Planned" ? "Planned" : subj.status === "Learning" ? "Learning" : "Completed"}
                       </span>
                     </div>
 
@@ -244,14 +244,14 @@ export function LearningWorkspace() {
                       <button
                         onClick={(e) => handleOpenEditSubject(subj, e)}
                         className="p-1 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/60 cursor-pointer"
-                        title="Edit Subjek"
+                        title="Edit Subject"
                       >
                         <Edit2 className="h-3.5 w-3.5" />
                       </button>
                       <button
                         onClick={(e) => handleDeleteSubject(subj.id, subj.name, e)}
                         className="p-1 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 cursor-pointer"
-                        title="Hapus Subjek"
+                        title="Delete Subject"
                       >
                         <Trash2 className="h-3.5 w-3.5" />
                       </button>
@@ -281,8 +281,8 @@ export function LearningWorkspace() {
                       />
                     </div>
                     <div className="flex items-center justify-between text-[9px] font-bold text-muted-foreground/80">
-                      <span>Materi: {subj.materials.length}</span>
-                      <span>Tugas: {subj.tasks.filter(t => t.completed).length}/{subj.tasks.length}</span>
+                      <span>Materials: {subj.materials.length}</span>
+                      <span>Tasks: {subj.tasks.filter(t => t.completed).length}/{subj.tasks.length}</span>
                     </div>
                   </div>
                 </div>

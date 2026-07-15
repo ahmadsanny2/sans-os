@@ -97,7 +97,7 @@ export function SubjectDetailModal({
                   ? "bg-primary/10 text-primary border border-primary/20"
                   : "bg-secondary text-muted-foreground border border-border/60"
               }`}>
-                {subject.status === "Planned" ? "Direncanakan" : subject.status === "Learning" ? "Belajar" : "Selesai"}
+                {subject.status === "Planned" ? "Planned" : subject.status === "Learning" ? "Learning" : "Completed"}
               </span>
             </div>
             {subject.description && (
@@ -118,8 +118,8 @@ export function SubjectDetailModal({
         {/* Overall Progress */}
         <div className="bg-secondary/15 rounded-2xl p-4 border border-border/60 mb-5 space-y-2 select-none">
           <div className="flex items-center justify-between text-xs font-bold">
-            <span className="text-muted-foreground">Progress Keseluruhan</span>
-            <span className="text-foreground">{progressPercent}% ({completedItems}/{totalItems} Selesai)</span>
+            <span className="text-muted-foreground">Overall Progress</span>
+            <span className="text-foreground">{progressPercent}% ({completedItems}/{totalItems} Completed)</span>
           </div>
           <div className="w-full h-2 rounded-full bg-secondary/80 overflow-hidden border border-border/30">
             <div
@@ -131,9 +131,9 @@ export function SubjectDetailModal({
             />
           </div>
           <div className="grid grid-cols-3 gap-2 pt-1 text-[10px] font-bold text-muted-foreground text-center">
-            <div>Materi: {completedMats}/{totalMats}</div>
-            <div>Tugas: {completedTasks}/{totalTasks}</div>
-            <div>Sedang Dipelajari: {inProgressMats}</div>
+            <div>Materials: {completedMats}/{totalMats}</div>
+            <div>Tasks: {completedTasks}/{totalTasks}</div>
+            <div>In Progress: {inProgressMats}</div>
           </div>
         </div>
 
@@ -149,7 +149,7 @@ export function SubjectDetailModal({
             }`}
           >
             <BookOpen className="h-3.5 w-3.5" />
-            Materi ({totalMats})
+            Materials ({totalMats})
           </button>
           <button
             type="button"
@@ -161,7 +161,7 @@ export function SubjectDetailModal({
             }`}
           >
             <ListTodo className="h-3.5 w-3.5" />
-            Tugas Todo ({totalTasks})
+            Tasks ({totalTasks})
           </button>
         </div>
 
@@ -172,7 +172,7 @@ export function SubjectDetailModal({
               {/* Add Material Inline Form */}
               <form onSubmit={onAddMaterial} className="bg-secondary/15 dark:bg-zinc-950/20 border border-border/40 rounded-xl p-3.5 space-y-3">
                 <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground block select-none">
-                  Tambah Materi Baru
+                  Add New Material
                 </span>
                 <div className="grid gap-2 sm:grid-cols-2">
                   <input
@@ -180,14 +180,14 @@ export function SubjectDetailModal({
                     required
                     value={matTitle}
                     onChange={(e) => setMatTitle(e.target.value)}
-                    placeholder="Judul bab/materi..."
+                    placeholder="Material title..."
                     className="rounded-lg border border-border/60 bg-background px-2.5 py-1.5 text-xs outline-none focus:border-primary"
                   />
                   <input
                     type="url"
                     value={matLink}
                     onChange={(e) => setMatLink(e.target.value)}
-                    placeholder="Tautan URL referensi (opsional)..."
+                    placeholder="Reference URL link (optional)..."
                     className="rounded-lg border border-border/60 bg-background px-2.5 py-1.5 text-xs outline-none focus:border-primary"
                   />
                 </div>
@@ -196,14 +196,14 @@ export function SubjectDetailModal({
                     type="text"
                     value={matNotes}
                     onChange={(e) => setMatNotes(e.target.value)}
-                    placeholder="Catatan ringkas materi..."
+                    placeholder="Brief notes about the material..."
                     className="flex-1 rounded-lg border border-border/60 bg-background px-2.5 py-1.5 text-xs outline-none focus:border-primary"
                   />
                   <button
                     type="submit"
                     className="px-3 py-1.5 rounded-lg bg-primary text-primary-foreground hover:bg-primary/95 text-xs font-black uppercase tracking-wider flex items-center gap-1 transition-all cursor-pointer shrink-0"
                   >
-                    <Plus className="h-3.5 w-3.5" /> Tambah
+                    <Plus className="h-3.5 w-3.5" /> Add
                   </button>
                 </div>
               </form>
@@ -211,7 +211,7 @@ export function SubjectDetailModal({
               {/* Materials List */}
               {subject.materials.length === 0 ? (
                 <div className="text-center text-xs text-muted-foreground py-8 border border-dashed border-border/40 rounded-xl">
-                  Belum ada materi pembelajaran yang ditambahkan.
+                  No learning materials added yet.
                 </div>
               ) : (
                 <div className="space-y-2">
@@ -227,7 +227,7 @@ export function SubjectDetailModal({
                             type="button"
                             onClick={() => onToggleMaterial(mat.id, mat.status)}
                             className="mt-0.5 cursor-pointer"
-                            title={`Status: ${mat.status}. Klik untuk mengubah.`}
+                            title={`Status: ${mat.status}. Click to change.`}
                           >
                             {mat.status === "Completed" ? (
                               <CheckCircle className="h-4.5 w-4.5 text-emerald-500 stroke-[2.5]" />
@@ -283,7 +283,7 @@ export function SubjectDetailModal({
               {/* Add Task Inline Form */}
               <form onSubmit={onAddTask} className="bg-secondary/15 dark:bg-zinc-950/20 border border-border/40 rounded-xl p-3.5 space-y-3">
                 <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground block select-none">
-                  Tambah Tugas Baru
+                  Add New Task
                 </span>
                 <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
                   <input
@@ -291,7 +291,7 @@ export function SubjectDetailModal({
                     required
                     value={taskTitle}
                     onChange={(e) => setTaskTitle(e.target.value)}
-                    placeholder="Judul tugas/todo..."
+                    placeholder="Task/todo title..."
                     className="flex-1 min-w-[200px] rounded-lg border border-border/60 bg-background px-2.5 py-1.5 text-xs outline-none focus:border-primary"
                   />
                   <input
@@ -304,7 +304,7 @@ export function SubjectDetailModal({
                     type="submit"
                     className="px-3 py-1.5 rounded-lg bg-primary text-primary-foreground hover:bg-primary/95 text-xs font-black uppercase tracking-wider flex items-center gap-1 transition-all cursor-pointer shrink-0"
                   >
-                    <Plus className="h-3.5 w-3.5" /> Tambah
+                    <Plus className="h-3.5 w-3.5" /> Add
                   </button>
                 </div>
               </form>
@@ -312,7 +312,7 @@ export function SubjectDetailModal({
               {/* Tasks List */}
               {subject.tasks.length === 0 ? (
                 <div className="text-center text-xs text-muted-foreground py-8 border border-dashed border-border/40 rounded-xl">
-                  Belum ada tugas pembelajaran yang ditambahkan.
+                  No learning tasks added yet.
                 </div>
               ) : (
                 <div className="space-y-2">
@@ -348,12 +348,12 @@ export function SubjectDetailModal({
                                 isOverdue ? "text-rose-500" : "text-muted-foreground"
                               }`}>
                                 <Calendar className="h-3 w-3" />
-                                Tenggat: {new Date(task.dueDate).toLocaleDateString("id-ID", {
+                                Due: {new Date(task.dueDate).toLocaleDateString("en-US", {
                                   day: "numeric",
                                   month: "short",
                                   year: "numeric",
                                 })}
-                                {isOverdue && " (Terlambat)"}
+                                {isOverdue && " (Overdue)"}
                               </span>
                             )}
                           </div>
