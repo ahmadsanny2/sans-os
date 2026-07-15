@@ -1,6 +1,5 @@
 import React, { useState } from "react"
 import {
-  X,
   Plus,
   Trash2,
   ExternalLink,
@@ -12,6 +11,7 @@ import {
   HelpCircle,
 } from "lucide-react"
 import { LearningSubject, LearningMaterial, LearningTask } from "@/hooks/useLearning"
+import { Modal } from "@/components/ui/Modal"
 
 interface SubjectDetailModalProps {
   isOpen: boolean
@@ -61,7 +61,7 @@ export function SubjectDetailModal({
 }: SubjectDetailModalProps) {
   const [activeTab, setActiveTab] = useState<"materials" | "tasks">("materials")
 
-  if (!isOpen || !subject) return null
+  if (!subject) return null
 
   // Calculate stats
   const totalMats = subject.materials.length
@@ -75,48 +75,44 @@ export function SubjectDetailModal({
   const completedItems = completedMats + completedTasks
   const progressPercent = totalItems > 0 ? Math.round((completedItems / totalItems) * 100) : 0
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="relative w-full max-w-2xl rounded-2xl border border-border bg-card shadow-2xl p-6 overflow-hidden flex flex-col max-h-[85vh] animate-in zoom-in-95 duration-200">
-        
-        {/* Header */}
-        <div className="flex items-start justify-between border-b border-border/40 pb-4 mb-4">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2.5">
-              <span
-                className="w-3.5 h-3.5 rounded-full inline-block shrink-0 shadow-sm"
-                style={{ backgroundColor: subject.color }}
-              />
-              <h3 className="text-xl font-black tracking-tight text-foreground leading-none">
-                {subject.name}
-              </h3>
-              <span className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider ${
-                subject.status === "Completed"
-                  ? "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20"
-                  : subject.status === "Learning"
-                  ? "bg-primary/10 text-primary border border-primary/20"
-                  : "bg-secondary text-muted-foreground border border-border/60"
-              }`}>
-                {subject.status === "Planned" ? "Planned" : subject.status === "Learning" ? "Learning" : "Completed"}
-              </span>
-            </div>
-            {subject.description && (
-              <p className="text-xs text-muted-foreground leading-relaxed max-w-[500px]">
-                {subject.description}
-              </p>
-            )}
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="p-1 rounded-xl text-muted-foreground hover:bg-secondary/80 hover:text-foreground transition-all cursor-pointer"
-          >
-            <X className="h-4.5 w-4.5" />
-          </button>
-        </div>
+  const titleNode = (
+    <div className="space-y-1">
+      <div className="flex items-center gap-2.5">
+        <span
+          className="w-3.5 h-3.5 rounded-full inline-block shrink-0 shadow-sm"
+          style={{ backgroundColor: subject.color }}
+        />
+        <span className="text-lg font-black tracking-tight text-foreground leading-none">
+          {subject.name}
+        </span>
+        <span className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider ${
+          subject.status === "Completed"
+            ? "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20"
+            : subject.status === "Learning"
+            ? "bg-primary/10 text-primary border border-primary/20"
+            : "bg-secondary text-muted-foreground border border-border/60"
+        }`}>
+          {subject.status === "Planned" ? "Planned" : subject.status === "Learning" ? "Learning" : "Completed"}
+        </span>
+      </div>
+      {subject.description && (
+        <p className="text-xs font-semibold text-muted-foreground leading-relaxed max-w-[500px]">
+          {subject.description}
+        </p>
+      )}
+    </div>
+  )
 
+  return (
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={titleNode}
+      maxWidth="max-w-2xl"
+    >
+      <div className="space-y-4">
         {/* Overall Progress */}
-        <div className="bg-secondary/15 rounded-2xl p-4 border border-border/60 mb-5 space-y-2 select-none">
+        <div className="bg-secondary/15 rounded-2xl p-4 border border-border/60 space-y-2 select-none">
           <div className="flex items-center justify-between text-xs font-bold">
             <span className="text-muted-foreground">Overall Progress</span>
             <span className="text-foreground">{progressPercent}% ({completedItems}/{totalItems} Completed)</span>
@@ -138,7 +134,7 @@ export function SubjectDetailModal({
         </div>
 
         {/* Tabs switcher */}
-        <div className="flex border-b border-border/40 mb-4.5">
+        <div className="flex border-b border-border/40 mb-1">
           <button
             type="button"
             onClick={() => setActiveTab("materials")}
@@ -166,7 +162,7 @@ export function SubjectDetailModal({
         </div>
 
         {/* Tab Content Area */}
-        <div className="flex-1 overflow-y-auto min-h-[220px] max-h-[360px] pr-1.5 space-y-4">
+        <div className="overflow-y-auto min-h-[220px] max-h-[360px] pr-1.5 space-y-4">
           {activeTab === "materials" ? (
             <div className="space-y-4">
               {/* Add Material Inline Form */}
@@ -376,6 +372,6 @@ export function SubjectDetailModal({
           )}
         </div>
       </div>
-    </div>
+    </Modal>
   )
 }

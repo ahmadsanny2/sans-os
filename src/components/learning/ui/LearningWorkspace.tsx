@@ -6,14 +6,16 @@ import {
   BookOpen,
   CheckSquare,
   Trophy,
-  Loader2,
   Trash2,
   Edit2,
-  AlertCircle,
 } from "lucide-react"
 import { useLearningPage } from "@/hooks/useLearningPage"
 import { SubjectFormModal } from "./SubjectFormModal"
 import { SubjectDetailModal } from "./SubjectDetailModal"
+import { StatCard } from "@/components/ui/StatCard"
+import { GridCardSkeleton } from "@/components/ui/Skeletons"
+import { EmptyState } from "@/components/ui/EmptyState"
+import { ErrorState } from "@/components/ui/ErrorState"
 
 export function LearningWorkspace() {
   const {
@@ -104,45 +106,37 @@ export function LearningWorkspace() {
 
       {/* Stats Cards */}
       <div className="grid gap-4 sm:grid-cols-4 select-none">
-        <div className="rounded-2xl border border-border/60 bg-card/45 dark:bg-card/15 p-4.5 shadow-sm backdrop-blur-md flex items-center gap-4">
-          <div className="p-3 rounded-xl bg-primary/10 text-primary">
-            <BookOpen className="h-5 w-5" />
-          </div>
-          <div>
-            <span className="text-[10px] font-extrabold text-muted-foreground/60 uppercase tracking-widest block">Total Subjects</span>
-            <span className="text-2xl font-black text-foreground">{stats.total}</span>
-          </div>
-        </div>
+        <StatCard
+          title="Total Subjects"
+          value={stats.total}
+          icon={<BookOpen className="h-5 w-5" />}
+          iconBgClass="bg-primary/10"
+          iconTextClass="text-primary"
+        />
 
-        <div className="rounded-2xl border border-border/60 bg-card/45 dark:bg-card/15 p-4.5 shadow-sm backdrop-blur-md flex items-center gap-4">
-          <div className="p-3 rounded-xl bg-violet-500/10 text-violet-500">
-            <GraduationCap className="h-5 w-5" />
-          </div>
-          <div>
-            <span className="text-[10px] font-extrabold text-muted-foreground/60 uppercase tracking-widest block">Learning</span>
-            <span className="text-2xl font-black text-foreground">{stats.active}</span>
-          </div>
-        </div>
+        <StatCard
+          title="Learning"
+          value={stats.active}
+          icon={<GraduationCap className="h-5 w-5" />}
+          iconBgClass="bg-primary/10"
+          iconTextClass="text-primary"
+        />
 
-        <div className="rounded-2xl border border-border/60 bg-card/45 dark:bg-card/15 p-4.5 shadow-sm backdrop-blur-md flex items-center gap-4">
-          <div className="p-3 rounded-xl bg-amber-500/10 text-amber-500">
-            <CheckSquare className="h-5 w-5" />
-          </div>
-          <div>
-            <span className="text-[10px] font-extrabold text-muted-foreground/60 uppercase tracking-widest block">Planned</span>
-            <span className="text-2xl font-black text-foreground">{stats.planned}</span>
-          </div>
-        </div>
+        <StatCard
+          title="Planned"
+          value={stats.planned}
+          icon={<CheckSquare className="h-5 w-5" />}
+          iconBgClass="bg-amber-500/10"
+          iconTextClass="text-amber-500"
+        />
 
-        <div className="rounded-2xl border border-border/60 bg-card/45 dark:bg-card/15 p-4.5 shadow-sm backdrop-blur-md flex items-center gap-4">
-          <div className="p-3 rounded-xl bg-emerald-500/10 text-emerald-500">
-            <Trophy className="h-5 w-5" />
-          </div>
-          <div>
-            <span className="text-[10px] font-extrabold text-muted-foreground/60 uppercase tracking-widest block">Completed</span>
-            <span className="text-2xl font-black text-foreground">{stats.completed}</span>
-          </div>
-        </div>
+        <StatCard
+          title="Completed"
+          value={stats.completed}
+          icon={<Trophy className="h-5 w-5" />}
+          iconBgClass="bg-emerald-500/10"
+          iconTextClass="text-emerald-500"
+        />
       </div>
 
       {/* Filter and Search */}
@@ -180,26 +174,19 @@ export function LearningWorkspace() {
 
       {/* Main Grid View */}
       {isLoading ? (
-        <div className="flex flex-col items-center justify-center py-24 gap-3 select-none">
-          <Loader2 className="h-10 w-10 text-primary animate-spin" />
-          <p className="text-sm font-semibold text-muted-foreground">Loading learning subjects...</p>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <GridCardSkeleton />
+          <GridCardSkeleton />
+          <GridCardSkeleton />
         </div>
       ) : isError ? (
-        <div className="rounded-2xl border border-destructive/20 bg-destructive/5 py-12 text-center text-sm text-destructive flex flex-col items-center gap-2 select-none">
-          <AlertCircle className="h-8 w-8" />
-          <p className="font-semibold">Failed to load learning subjects. Please try again later.</p>
-        </div>
+        <ErrorState message="Failed to load learning subjects. Please try again later." />
       ) : filteredSubjects.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-border/40 py-20 text-center text-sm text-muted-foreground bg-card/10 select-none flex flex-col items-center gap-2">
-          <GraduationCap className="h-10 w-10 text-muted-foreground/50" />
-          <p className="font-semibold">No matching learning subjects found.</p>
-          <button
-            onClick={handleOpenAddSubject}
-            className="mt-2 inline-flex items-center gap-1 text-xs font-black uppercase tracking-wider text-primary hover:underline cursor-pointer"
-          >
-            Create First Subject <Plus className="h-3 w-3 stroke-[3]" />
-          </button>
-        </div>
+        <EmptyState
+          title="No matching learning subjects found."
+          description="Click 'Add Subject' to register a new learning subject."
+          icon={<GraduationCap className="h-10 w-10 text-muted-foreground/50" />}
+        />
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {filteredSubjects.map((subj) => {

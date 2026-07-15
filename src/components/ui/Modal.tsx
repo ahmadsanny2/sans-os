@@ -4,7 +4,7 @@ import { X } from "lucide-react"
 interface ModalProps {
   isOpen: boolean
   onClose: () => void
-  title: string
+  title: React.ReactNode
   icon?: React.ReactNode
   children: React.ReactNode
   maxWidth?: string // e.g. "max-w-lg", "max-w-md", "max-w-xl", "max-w-2xl"
@@ -54,10 +54,12 @@ export function Modal({
         </button>
 
         {/* Header title */}
-        <h3 className="text-lg font-bold text-foreground flex items-center gap-2 border-b border-border/40 pb-2.5 select-none">
-          {icon && <span className="shrink-0">{icon}</span>}
-          {title}
-        </h3>
+        {title && (
+          <h3 className="text-lg font-bold text-foreground flex items-center gap-2 border-b border-border/40 pb-2.5 select-none w-[90%]">
+            {icon && <span className="shrink-0">{icon}</span>}
+            {title}
+          </h3>
+        )}
 
         {/* Modal content */}
         <div className="pt-1">{children}</div>
