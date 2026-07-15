@@ -149,7 +149,7 @@ function shouldDoubleConsonant(word: string): boolean {
   // Common verbs with stressed final syllable ending in CVC that should double
   if (word.endsWith("gret")) return true // regret -> regretted
   if (word.endsWith("pel")) return true  // compel, propel, dispel -> compelled
-  if (word.endsWith("fer") && !word.endsWith("offer") && !word.endsWith("suffer")) return true // refer, prefer -> referred
+  if (word.endsWith("fer") && !word.endsWith("offer") && !word.endsWith("suffer") && !word.endsWith("differ")) return true // refer, prefer -> referred
   if (word.endsWith("mit") && !word.endsWith("limit") && !word.endsWith("vomit")) return true // commit, permit -> committed
 
   // Common unstressed CVC suffixes where the final consonant should NOT double

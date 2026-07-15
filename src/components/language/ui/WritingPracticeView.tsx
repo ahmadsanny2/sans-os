@@ -828,7 +828,7 @@ export function WritingPracticeView({
                       {/* Top Badges Row */}
                       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border/30 pb-2 mb-2">
                         <div className="flex flex-wrap gap-1.5 items-center">
-                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[9px] font-extrabold uppercase tracking-wider bg-violet-500/10 text-violet-600 dark:text-violet-400 border border-violet-500/20 shadow-sm">
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[9px] font-extrabold uppercase tracking-wider bg-primary/10 text-primary border border-primary/20 shadow-sm">
                             Formula: {log.formula}
                           </span>
                           {log.vocabWord && (

@@ -40,7 +40,7 @@ export async function GET(request: Request): Promise<NextResponse> {
       )
 
     const totalHabits = userHabits.length
-    const completedCount = monthlyLogs.filter((log) => log.status === "completed").length
+    const completedCount = monthlyLogs.filter((log) => log.status.toLowerCase() === "completed").length
 
     return NextResponse.json({
       totalHabits,

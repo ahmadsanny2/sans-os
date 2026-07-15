@@ -249,14 +249,14 @@ export function LanguageBoardView({
               type="button"
               className={`inline-flex items-center gap-2 px-3.5 py-2 text-xs font-semibold rounded-xl border transition-all select-none cursor-pointer ${
                 isFilterOpen || dirFilter !== "all" || memorizedFilter !== "all"
-                  ? "bg-violet-500/10 border-violet-500/30 text-violet-400"
+                  ? "bg-primary/10 border-primary/30 text-primary"
                   : "border-border bg-card/60 text-muted-foreground hover:text-foreground hover:bg-secondary/40"
               }`}
             >
               <Filter className="h-4 w-4" />
               <span>Filter & Actions</span>
               {(dirFilter !== "all" || memorizedFilter !== "all") && (
-                <span className="h-1.5 w-1.5 rounded-full bg-violet-400" />
+                <span className="h-1.5 w-1.5 rounded-full bg-primary" />
               )}
               <ChevronDown className={`h-3 w-3 transition-transform duration-200 ${isFilterOpen ? "rotate-180" : ""}`} />
             </button>
@@ -417,7 +417,7 @@ export function LanguageBoardView({
                       onClick={() => setLangDirection("en-id")}
                       className={`flex-1 py-2 px-3 text-xs font-extrabold rounded-xl border transition-all active:scale-[0.99] cursor-pointer ${
                         langDirection === "en-id"
-                          ? "bg-violet-500/10 text-violet-400 border-violet-500/30"
+                          ? "bg-primary/10 text-primary border-primary/30"
                           : "border-border text-muted-foreground hover:bg-secondary/40"
                       }`}
                     >
@@ -428,7 +428,7 @@ export function LanguageBoardView({
                       onClick={() => setLangDirection("id-en")}
                       className={`flex-1 py-2 px-3 text-xs font-extrabold rounded-xl border transition-all active:scale-[0.99] cursor-pointer ${
                         langDirection === "id-en"
-                          ? "bg-violet-500/10 text-violet-400 border-violet-500/30"
+                          ? "bg-primary/10 text-primary border-primary/30"
                           : "border-border text-muted-foreground hover:bg-secondary/40"
                       }`}
                     >

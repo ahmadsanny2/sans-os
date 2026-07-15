@@ -780,7 +780,7 @@ export function DialoguePracticeView({
                     {/* Log Header Actions */}
                     <div className="flex items-center justify-between mb-4 border-b border-border/40 pb-2.5">
                       <div className="flex flex-wrap items-center gap-2">
-                        <span className="bg-violet-500/10 text-violet-600 dark:text-violet-400 border border-violet-500/20 rounded-lg px-2.5 py-1 text-xs font-bold flex items-center gap-1.5">
+                        <span className="bg-primary/10 text-primary border border-primary/20 rounded-lg px-2.5 py-1 text-xs font-bold flex items-center gap-1.5">
                           <MessageSquare className="h-3.5 w-3.5" />
                           Formula: {log.formula}
                         </span>

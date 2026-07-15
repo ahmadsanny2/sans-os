@@ -139,7 +139,7 @@ export function PrioritiesList({
                         {priority.rolloverCount > 0 && !priority.completed && (
                           <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-500 mt-0.5">
                             <RefreshCw className="h-3 w-3 animate-spin-slow" />
-                            Rolled over {priority.rolloverCount}x
+                            {priority.rolloverCount} {priority.rolloverCount === 1 ? "rollover" : "rollovers"}
                           </span>
                         )}
                       </>
