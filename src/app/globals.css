@@ -97,8 +97,8 @@
 
 /* Bento Card Styles (Functional Glassmorphic Accents & Soft Depth) */
 .bento-card {
-  @apply rounded-2xl border border-border/60 bg-card/70 backdrop-blur-md 
-         shadow-glass transition-all duration-300 overflow-hidden;
+  @apply rounded-2xl border border-border/60 bg-card/45 dark:bg-card/15 backdrop-blur-md 
+         shadow-sm transition-all duration-300 overflow-hidden;
 }
 
 .bento-card-interactive {
