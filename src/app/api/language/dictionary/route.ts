@@ -7,7 +7,7 @@ export async function GET(request: Request): Promise<NextResponse> {
     const query = searchParams.get("q")
     const word = searchParams.get("word")
 
-    // Case 1: Fetch word details (translation only)
+    // Case 1: Fetch word details (translation and definition)
     if (word) {
       const cleanWord = word.trim().toLowerCase()
 
@@ -27,10 +27,33 @@ export async function GET(request: Request): Promise<NextResponse> {
         console.error("Translation API error:", err)
       }
 
+      // Fetch Definition & Part of Speech from Free Dictionary API
+      let partOfSpeech = "noun"
+      let definition = "No definition found."
+
+      try {
+        const dictRes = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${cleanWord}`)
+        if (dictRes.ok) {
+          const dictData = await dictRes.json()
+          if (dictData && dictData[0]) {
+            const entry = dictData[0]
+            if (entry.meanings && entry.meanings[0]) {
+              const meaning = entry.meanings[0]
+              partOfSpeech = meaning.partOfSpeech || "noun"
+              if (meaning.definitions && meaning.definitions[0]) {
+                definition = meaning.definitions[0].definition || "No definition found."
+              }
+            }
+          }
+        }
+      } catch (err) {
+        console.error("Dictionary API error:", err)
+      }
+
       return NextResponse.json({
         word: cleanWord,
-        partOfSpeech: "noun",
-        definition: "n/a",
+        partOfSpeech,
+        definition,
         translation: translation || "No translation found.",
         alternativeTranslations: [],
         dictionaryData: null
