@@ -1,6 +1,7 @@
 "use client"
 
-import React, { useState, useMemo, useCallback } from "react"
+import React, { useState, useMemo, useCallback, useEffect } from "react"
+import { useSearchParams } from "next/navigation"
 import {
   useVocabularyQuery,
   useCreateVocabularyMutation,
@@ -94,6 +95,21 @@ export function useLanguagePage() {
 
   // Tab switching state
   const [activeTab, setActiveTab] = useState<"vocab" | "formula" | "writing" | "dialogue" | "dictionary">("vocab")
+  
+  const searchParams = useSearchParams()
+  const tabParam = searchParams?.get("tab")
+
+  useEffect(() => {
+    const validTabs = ["vocab", "formula", "writing", "dialogue", "dictionary"] as const
+    type TabType = typeof validTabs[number]
+
+    if (tabParam && validTabs.includes(tabParam as TabType)) {
+      const timer = setTimeout(() => {
+        setActiveTab(tabParam as TabType)
+      }, 0)
+      return () => clearTimeout(timer)
+    }
+  }, [tabParam])
 
   // ==========================================
   // Vocabulary States
