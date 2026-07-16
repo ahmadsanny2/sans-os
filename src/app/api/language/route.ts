@@ -3,6 +3,8 @@ import { db } from "@/lib/db"
 import { vocabularyLogs } from "@/types/schema"
 import { eq, and, asc, sql } from "drizzle-orm"
 import { createServerSupabaseClient } from "@/lib/supabase/server"
+import { translateText } from "@/lib/translate"
+import { conjugateVerb } from "@/lib/verbs"
 
 export async function GET(): Promise<NextResponse> {
   try {
@@ -40,13 +42,15 @@ export async function POST(request: Request): Promise<NextResponse> {
     }
 
     const body = await request.json()
-    const { word, translation, langDirection, masteryLevel } = body
+    const { word, translation, langDirection, masteryLevel, partOfSpeech, definition } = body
 
     if (!word || !translation) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
     }
 
     const direction = langDirection || "en-id"
+    const pos = partOfSpeech || "noun"
+    const def = definition || "n/a"
 
     // Check if the word already exists for the user (case-insensitive & trimmed)
     const existingWords = await db
@@ -67,26 +71,76 @@ export async function POST(request: Request): Promise<NextResponse> {
     const capitalizedWord = word.trim().charAt(0).toUpperCase() + word.trim().slice(1)
     const capitalizedTranslation = translation.trim().charAt(0).toUpperCase() + translation.trim().slice(1)
 
+    // Calculate auto-translation
+    let autoTranslationVal: string | null = null
+    const fromLang = direction.split("-")[0] || "en"
+    const toLang = direction.split("-")[1] || "id"
+    try {
+      autoTranslationVal = await translateText(word, fromLang, toLang, false)
+    } catch (err) {
+      console.error("Auto translation error:", err)
+    }
+
+    // Verb conjugation
+    let v1Val: string | null = null
+    let v2Val: string | null = null
+    let v3Val: string | null = null
+    let vIngVal: string | null = null
+    let v1Trans: string | null = null
+    let v2Trans: string | null = null
+    let v3Trans: string | null = null
+    let vIngTrans: string | null = null
+
+    if (pos.toLowerCase() === "verb") {
+      const conjugated = conjugateVerb(word)
+      const v1 = word.trim()
+      const v2 = conjugated.v2
+      const v3 = conjugated.v3
+      const vIng = conjugated.vIng
+
+      v1Val = v1
+      v2Val = v2
+      v3Val = v3
+      vIngVal = vIng
+
+      if (fromLang === "en") {
+        try {
+          const [t1, t2, t3, tIng] = await Promise.all([
+            translateText(v1, "en", "id", false),
+            translateText(v2, "en", "id", false),
+            translateText(v3, "en", "id", false),
+            translateText(vIng, "en", "id", false),
+          ])
+          v1Trans = t1 || null
+          v2Trans = t2 || null
+          v3Trans = t3 || null
+          vIngTrans = tIng || null
+        } catch (err) {
+          console.error("Conjugation translation error:", err)
+        }
+      }
+    }
+
     const [newLog] = await db
       .insert(vocabularyLogs)
       .values({
         userId: user.id,
         word: capitalizedWord,
-        partOfSpeech: "noun",
-        definition: "n/a",
+        partOfSpeech: pos,
+        definition: def,
         translation: capitalizedTranslation,
         exampleSentence: null,
         masteryLevel: masteryLevel !== undefined ? Number(masteryLevel) : 3,
         memorized: false,
-        autoTranslation: null,
-        v1: null,
-        v2: null,
-        v3: null,
-        vIng: null,
-        v1Translation: null,
-        v2Translation: null,
-        v3Translation: null,
-        vIngTranslation: null,
+        autoTranslation: autoTranslationVal,
+        v1: v1Val,
+        v2: v2Val,
+        v3: v3Val,
+        vIng: vIngVal,
+        v1Translation: v1Trans,
+        v2Translation: v2Trans,
+        v3Translation: v3Trans,
+        vIngTranslation: vIngTrans,
         langDirection: direction,
       })
       .returning()
