@@ -41,8 +41,6 @@ export function LearningWorkspace() {
     setSubjectDesc,
     subjectStatus,
     setSubjectStatus,
-    subjectColor,
-    setSubjectColor,
 
     // Subject Handlers
     handleOpenAddSubject,
@@ -170,6 +168,17 @@ export function LearningWorkspace() {
               subj.tasks.filter((t) => t.completed).length
             const progress = totalItems > 0 ? Math.round((completedItems / totalItems) * 100) : 0
 
+            const cardColor =
+              statusFilter === "All"
+                ? "#8b5cf6"
+                : subj.status === "Planned"
+                ? "#8b5cf6"
+                : subj.status === "Learning"
+                ? "#f59e0b"
+                : subj.status === "Completed"
+                ? "#10b981"
+                : "#8b5cf6"
+
             return (
               <div
                 key={subj.id}
@@ -179,7 +188,7 @@ export function LearningWorkspace() {
                 {/* Accent Side Ribbon */}
                 <div
                   className="absolute left-0 top-4 bottom-4 w-1 rounded-r-md transition-all group-hover:top-3 group-hover:bottom-3"
-                  style={{ backgroundColor: subj.color }}
+                  style={{ backgroundColor: cardColor }}
                 />
 
                 <div className="pl-2 space-y-4">
@@ -239,7 +248,7 @@ export function LearningWorkspace() {
                         className="h-full rounded-full transition-all duration-300"
                         style={{
                           width: `${progress}%`,
-                          backgroundColor: subj.color || "hsl(var(--primary))",
+                          backgroundColor: cardColor,
                         }}
                       />
                     </div>
@@ -267,8 +276,6 @@ export function LearningWorkspace() {
         setDescription={setSubjectDesc}
         status={subjectStatus}
         setStatus={setSubjectStatus}
-        color={subjectColor}
-        setColor={setSubjectColor}
         isPending={isSaveSubjectPending}
       />
     </div>

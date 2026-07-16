@@ -43,7 +43,6 @@ export function useLearningPage() {
   const [subjectName, setSubjectName] = useState("")
   const [subjectDesc, setSubjectDesc] = useState("")
   const [subjectStatus, setSubjectStatus] = useState<"Planned" | "Learning" | "Completed">("Learning")
-  const [subjectColor, setSubjectColor] = useState("hsl(var(--primary))")
 
   // Form states - Material Add
   const [matTitle, setMatTitle] = useState("")
@@ -79,7 +78,6 @@ export function useLearningPage() {
     setSubjectName("")
     setSubjectDesc("")
     setSubjectStatus("Learning")
-    setSubjectColor("hsl(var(--primary))")
     setShowAddSubjectModal(true)
   }
 
@@ -89,7 +87,6 @@ export function useLearningPage() {
     setSubjectName(subj.name)
     setSubjectDesc(subj.description || "")
     setSubjectStatus(subj.status)
-    setSubjectColor(subj.color)
     setShowAddSubjectModal(true)
   }
 
@@ -104,7 +101,7 @@ export function useLearningPage() {
           name: subjectName.trim(),
           description: subjectDesc.trim() || null,
           status: subjectStatus,
-          color: subjectColor,
+          color: "#8b5cf6",
         })
         showSuccessToast("Subject updated successfully")
       } else {
@@ -112,7 +109,7 @@ export function useLearningPage() {
           name: subjectName.trim(),
           description: subjectDesc.trim() || null,
           status: subjectStatus,
-          color: subjectColor,
+          color: "#8b5cf6",
         })
         showSuccessToast("Subject added successfully")
       }
@@ -266,8 +263,6 @@ export function useLearningPage() {
     setSubjectDesc,
     subjectStatus,
     setSubjectStatus,
-    subjectColor,
-    setSubjectColor,
 
     // Form inputs Material
     matTitle,

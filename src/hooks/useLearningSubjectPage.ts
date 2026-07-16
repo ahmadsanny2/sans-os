@@ -36,7 +36,6 @@ export function useLearningSubjectPage(subjectId: string) {
   const [subjectName, setSubjectName] = useState("")
   const [subjectDesc, setSubjectDesc] = useState("")
   const [subjectStatus, setSubjectStatus] = useState<"Planned" | "Learning" | "Completed">("Learning")
-  const [subjectColor, setSubjectColor] = useState("#8b5cf6")
 
   // Form states - Material
   const [matTitle, setMatTitle] = useState("")
@@ -65,7 +64,6 @@ export function useLearningSubjectPage(subjectId: string) {
     setSubjectName(subject.name)
     setSubjectDesc(subject.description || "")
     setSubjectStatus(subject.status)
-    setSubjectColor(subject.color)
     setShowEditModal(true)
   }
 
@@ -79,7 +77,7 @@ export function useLearningSubjectPage(subjectId: string) {
         name: subjectName.trim(),
         description: subjectDesc.trim() || null,
         status: subjectStatus,
-        color: subjectColor,
+        color: "#8b5cf6",
       })
       showSuccessToast("Subject updated successfully")
       setShowEditModal(false)
@@ -279,8 +277,6 @@ export function useLearningSubjectPage(subjectId: string) {
     setSubjectDesc,
     subjectStatus,
     setSubjectStatus,
-    subjectColor,
-    setSubjectColor,
     // Material states & handlers
     matTitle,
     setMatTitle,

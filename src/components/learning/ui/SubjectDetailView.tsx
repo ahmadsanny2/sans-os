@@ -50,8 +50,6 @@ export function SubjectDetailView({ subjectId }: SubjectDetailViewProps) {
     setSubjectDesc,
     subjectStatus,
     setSubjectStatus,
-    subjectColor,
-    setSubjectColor,
     // Material states & handlers
     matTitle,
     setMatTitle,
@@ -153,7 +151,7 @@ export function SubjectDetailView({ subjectId }: SubjectDetailViewProps) {
             <div className="flex items-center gap-2 pt-1">
               <span
                 className="w-3 h-3 rounded-full inline-block shadow-sm"
-                style={{ backgroundColor: subject.color }}
+                style={{ backgroundColor: "#8b5cf6" }}
               />
               <Badge
                 variant={
@@ -218,7 +216,7 @@ export function SubjectDetailView({ subjectId }: SubjectDetailViewProps) {
               className="h-full rounded-full transition-all duration-500"
               style={{
                 width: `${progressPercentMats}%`,
-                backgroundColor: subject.color || "hsl(var(--primary))",
+                backgroundColor: "#8b5cf6",
               }}
             />
           </div>
@@ -246,7 +244,7 @@ export function SubjectDetailView({ subjectId }: SubjectDetailViewProps) {
               className="h-full rounded-full transition-all duration-500"
               style={{
                 width: `${progressPercentTasks}%`,
-                backgroundColor: subject.color || "hsl(var(--primary))",
+                backgroundColor: "#8b5cf6",
               }}
             />
           </div>
@@ -604,20 +602,6 @@ export function SubjectDetailView({ subjectId }: SubjectDetailViewProps) {
               </div>
             </div>
 
-            <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-bold text-muted-foreground">Card Theme Color</label>
-              <div className="flex items-center gap-2 h-[42px]">
-                <input
-                  type="color"
-                  value={subjectColor}
-                  onChange={(e) => setSubjectColor(e.target.value)}
-                  className="w-10 h-8 rounded border border-border/65 bg-transparent p-0 overflow-hidden cursor-pointer"
-                />
-                <span className="text-xs font-semibold text-muted-foreground select-none uppercase">
-                  {subjectColor}
-                </span>
-              </div>
-            </div>
 
             <div className="flex items-center justify-end gap-2 pt-2">
               <button

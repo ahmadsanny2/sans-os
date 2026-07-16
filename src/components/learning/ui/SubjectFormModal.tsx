@@ -14,19 +14,8 @@ interface SubjectFormModalProps {
   setDescription: (s: string) => void
   status: "Planned" | "Learning" | "Completed"
   setStatus: (s: "Planned" | "Learning" | "Completed") => void
-  color: string
-  setColor: (s: string) => void
   isPending: boolean
 }
-
-const COLOR_OPTIONS = [
-  { label: "Violet", value: "hsl(262, 83%, 58%)" },
-  { label: "Blue", value: "hsl(217, 91%, 60%)" },
-  { label: "Emerald", value: "hsl(142, 72%, 45%)" },
-  { label: "Amber", value: "hsl(38, 92%, 50%)" },
-  { label: "Rose", value: "hsl(340, 82%, 55%)" },
-  { label: "Indigo", value: "hsl(239, 84%, 60%)" },
-]
 
 export function SubjectFormModal({
   isOpen,
@@ -39,8 +28,6 @@ export function SubjectFormModal({
   setDescription,
   status,
   setStatus,
-  color,
-  setColor,
   isPending,
 }: SubjectFormModalProps) {
   return (
@@ -111,27 +98,6 @@ export function SubjectFormModal({
                 </button>
               )
             })}
-          </div>
-        </div>
-
-        {/* Theme Color */}
-        <div className="space-y-1.5">
-          <label className="text-xs font-bold text-muted-foreground">Card Theme Color</label>
-          <div className="flex flex-wrap gap-2 pt-0.5">
-            {COLOR_OPTIONS.map((opt) => (
-              <button
-                key={opt.value}
-                type="button"
-                onClick={() => setColor(opt.value)}
-                className={`w-6 h-6 rounded-full border-2 transition-all cursor-pointer ${
-                  color === opt.value
-                    ? "border-foreground scale-110 shadow-sm"
-                    : "border-transparent hover:scale-105"
-                }`}
-                style={{ backgroundColor: opt.value }}
-                title={opt.label}
-              />
-            ))}
           </div>
         </div>
 
