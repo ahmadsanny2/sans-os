@@ -1,6 +1,6 @@
 "use client"
 
-import React from "react"
+import React, { useState } from "react"
 import { BucketItem } from "@/hooks/useBucketList"
 import { formatDate } from "@/hooks/useBucketListPage"
 import {
@@ -106,16 +106,38 @@ export function BucketListBoardView({
   isPendingUpdate,
   isPendingDelete,
 }: BucketListBoardViewProps) {
+  // Optional multi-item batch creation state
+  const [extraBucketRows, setExtraBucketRows] = useState<Array<{ id: string; title: string; imageUrl: string }>>([])
+
+  const handleBucketBatchSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!addTitle.trim()) return
+
+    await handleAddItem(e)
+
+    if (extraBucketRows.length > 0) {
+      for (const row of extraBucketRows) {
+        if (row.title.trim()) {
+          setAddTitle(row.title.trim())
+          setAddImageUrl(row.imageUrl.trim())
+          const fakeEvent = { preventDefault: () => {} } as React.FormEvent
+          await handleAddItem(fakeEvent)
+        }
+      }
+      setExtraBucketRows([])
+    }
+  }
+
   return (
     <div className="space-y-6">
-      {/* 1. Statistics / Progress Card */}
-      <div className="grid gap-6 md:grid-cols-3">
+      {/* 1. Statistics Cards */}
+      <div className="grid gap-6 sm:grid-cols-3 animate-in fade-in duration-200">
         <StatCard
-          title="Total Dreams"
-          value={isError ? "N/A" : totalCount}
+          title="Total Bucket List Goals"
+          value={totalCount}
           icon={<Compass className="h-6 w-6" />}
-          iconBgClass="bg-primary/10"
-          iconTextClass="text-primary"
+          iconBgClass="bg-violet-500/10"
+          iconTextClass="text-violet-500"
           isLoading={isLoading}
           description="Dreams registered"
         />
@@ -167,7 +189,7 @@ export function BucketListBoardView({
 
         <button
           onClick={() => setShowAddForm(!showAddForm)}
-          className="inline-flex items-center gap-1.5 rounded-xl bg-primary px-4 py-2.5 text-xs font-semibold text-primary-foreground shadow-sm transition-all hover:bg-primary/95 hover:scale-[1.02] active:scale-95 self-start md:self-auto cursor-pointer"
+          className="inline-flex items-center gap-1.5 rounded-xl bg-primary px-4 py-2.5 text-xs font-semibold text-primary-foreground shadow-sm transition-all hover:bg-primary/90 hover:scale-[1.02] active:scale-95 self-start md:self-auto cursor-pointer"
         >
           <Plus className="h-4 w-4" />
           {showAddForm ? "Cancel Add" : "Add Bucket Goal"}
@@ -177,7 +199,7 @@ export function BucketListBoardView({
       {/* 3. Add Goal Form */}
       {showAddForm && (
         <form
-          onSubmit={handleAddItem}
+          onSubmit={handleBucketBatchSubmit}
           className="bento-card p-5 space-y-4 animate-in slide-in-from-top-4 duration-200"
         >
           <h4 className="text-sm font-bold text-foreground flex items-center gap-1.5 border-b border-border/40 pb-2">
@@ -240,6 +262,77 @@ export function BucketListBoardView({
             </div>
           </div>
 
+          {/* Extra Bucket Goal Rows (Optional Multi-Item Batch Creation) */}
+          {extraBucketRows.map((row, idx) => (
+            <div key={row.id} className="pt-3 border-t border-dashed border-border/40 relative space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-primary">Goal #{idx + 2}</span>
+                <button
+                  type="button"
+                  onClick={() => setExtraBucketRows(extraBucketRows.filter((r) => r.id !== row.id))}
+                  className="p-1 rounded-lg text-rose-500 hover:bg-rose-500/10 transition-all cursor-pointer"
+                  title="Remove goal"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </div>
+
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-muted-foreground">
+                    Dream Title #{idx + 2} *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={row.title}
+                    onChange={(e) => {
+                      const updated = [...extraBucketRows]
+                      updated[idx].title = e.target.value
+                      setExtraBucketRows(updated)
+                    }}
+                    placeholder="Dream title..."
+                    className="w-full rounded-xl border border-border bg-background/50 px-3.5 py-2.5 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/10 shadow-sm"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-muted-foreground">
+                    Inspirational Photo Image URL #{idx + 2}
+                  </label>
+                  <input
+                    type="text"
+                    value={row.imageUrl}
+                    onChange={(e) => {
+                      const updated = [...extraBucketRows]
+                      updated[idx].imageUrl = e.target.value
+                      setExtraBucketRows(updated)
+                    }}
+                    placeholder="Image URL..."
+                    className="w-full rounded-xl border border-border bg-background/50 px-3.5 py-2.5 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/10 shadow-sm"
+                  />
+                </div>
+              </div>
+            </div>
+          ))}
+
+          {/* + Add Another Goal Button */}
+          <div className="pt-1">
+            <button
+              type="button"
+              onClick={() =>
+                setExtraBucketRows([
+                  ...extraBucketRows,
+                  { id: Math.random().toString(), title: "", imageUrl: "" },
+                ])
+              }
+              className="inline-flex items-center gap-1.5 text-xs font-bold text-primary hover:text-primary/80 transition-colors py-1 cursor-pointer"
+            >
+              <Plus className="h-3.5 w-3.5" />
+              <span>+ Add Another Goal</span>
+            </button>
+          </div>
+
           {addError && (
             <p className="text-xs text-destructive flex items-center gap-1 font-semibold">
               <AlertCircle className="h-3.5 w-3.5" />
@@ -250,7 +343,10 @@ export function BucketListBoardView({
           <div className="flex justify-end gap-2 border-t border-border/40 pt-3">
             <button
               type="button"
-              onClick={() => setShowAddForm(false)}
+              onClick={() => {
+                setShowAddForm(false)
+                setExtraBucketRows([])
+              }}
               className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-border/80 bg-secondary/30 px-4 py-2.5 text-xs font-semibold text-muted-foreground shadow-sm transition-all hover:bg-secondary/60 hover:text-foreground hover:scale-[1.02] active:scale-95 disabled:opacity-50 disabled:pointer-events-none cursor-pointer"
             >
               Cancel
@@ -262,6 +358,8 @@ export function BucketListBoardView({
             >
               {isPendingCreate ? (
                 <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              ) : extraBucketRows.length > 0 ? (
+                `Save ${extraBucketRows.length + 1} Dreams`
               ) : (
                 "Save Dream"
               )}
