@@ -127,6 +127,25 @@ export function PomodoroWidget({ activeDayBlocks }: PomodoroWidgetProps) {
     return completed === 0 ? totalSessionsNeeded : completed
   }, [phase, sessionCount, totalSessionsNeeded])
 
+  // Compute active timetable session block currently running
+  const [nowTime, setNowTime] = React.useState(() => new Date())
+  useEffect(() => {
+    const timer = setInterval(() => setNowTime(new Date()), 10000)
+    return () => clearInterval(timer)
+  }, [])
+
+  const activeSessionBlock = useMemo(() => {
+    const currentMins = nowTime.getHours() * 60 + nowTime.getMinutes()
+    const todayBlocks = activeDayBlocks.filter((b) => b.isTodo)
+    return todayBlocks.find((b) => {
+      const [sh, sm] = b.startTime.split(":").map(Number)
+      const [eh, em] = b.endTime.split(":").map(Number)
+      const startMins = sh * 60 + sm
+      const endMins = eh * 60 + em
+      return currentMins >= startMins && currentMins < endMins
+    })
+  }, [activeDayBlocks, nowTime])
+
   const handleToggleTimer = () => {
     if (isRunning) {
       pauseTimer()
@@ -147,6 +166,33 @@ export function PomodoroWidget({ activeDayBlocks }: PomodoroWidgetProps) {
 
   return (
     <div className={`bento-card p-5 space-y-4 transition-all duration-300 border ${meta.borderClass} ${meta.bgClass}`}>
+      {/* Active Session Banner */}
+      <div className="rounded-xl border border-primary/25 bg-primary/10 p-3 flex items-center justify-between gap-3 shadow-sm">
+        <div className="flex items-center gap-2.5 min-w-0">
+          <div className="relative flex h-3 w-3 items-center justify-center shrink-0">
+            <span className={`animate-ping absolute inline-flex h-full w-full rounded-full ${isRunning || activeSessionBlock ? "bg-primary" : "bg-muted-foreground/40"} opacity-75`} />
+            <span className={`relative inline-flex rounded-full h-2 w-2 ${isRunning || activeSessionBlock ? "bg-primary" : "bg-muted-foreground/60"}`} />
+          </div>
+          <div className="min-w-0">
+            <span className="text-[9px] font-extrabold uppercase tracking-widest text-primary block">
+              Active Session
+            </span>
+            <h4 className="text-xs font-extrabold text-foreground truncate leading-tight">
+              {activeSessionBlock
+                ? activeSessionBlock.title
+                : isRunning
+                ? "Focus Timer Session"
+                : "No Scheduled Session Right Now"}
+            </h4>
+          </div>
+        </div>
+        {activeSessionBlock && (
+          <span className="text-[11px] font-bold text-primary bg-primary/15 border border-primary/25 px-2.5 py-0.5 rounded-full shrink-0">
+            {activeSessionBlock.startTime} - {activeSessionBlock.endTime}
+          </span>
+        )}
+      </div>
+
       {/* 1. Header Area */}
       <div className="flex items-center justify-between border-b border-border/30 pb-2">
         <div className="flex items-center gap-2">
