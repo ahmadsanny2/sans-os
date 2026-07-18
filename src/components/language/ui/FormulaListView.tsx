@@ -139,6 +139,29 @@ export function FormulaListView({
     return stats
   }, [formulaList, writingList, dialogueList])
 
+  // Optional multi-item batch creation state
+  const [extraFormulaRows, setExtraFormulaRows] = useState<Array<{ id: string; name: string; formula: string; description: string }>>([])
+
+  const handleFormulaBatchSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!formulaName.trim() || !formulaString.trim()) return
+
+    await handleAddFormula(e)
+
+    if (extraFormulaRows.length > 0) {
+      for (const row of extraFormulaRows) {
+        if (row.name.trim() && row.formula.trim()) {
+          setFormulaName(row.name.trim())
+          setFormulaString(row.formula.trim())
+          setFormulaDescription(row.description.trim())
+          const fakeEvent = { preventDefault: () => {} } as React.FormEvent
+          await handleAddFormula(fakeEvent)
+        }
+      }
+      setExtraFormulaRows([])
+    }
+  }
+
   return (
     <div className="space-y-6">
       {/* 1. Statistics Cards */}
@@ -209,51 +232,143 @@ export function FormulaListView({
             <Sparkles className="h-4.5 w-4.5 text-primary" /> Register a New Grammar Formula
           </h4>
 
-          <form onSubmit={handleAddFormula} className="space-y-4 pt-1">
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-1.5">
-                <label htmlFor="formulaNameInput" className="text-xs font-bold text-muted-foreground">
-                  Formula Name *
-                </label>
-                <input
-                  id="formulaNameInput"
-                  type="text"
-                  required
-                  value={formulaName}
-                  onChange={(e) => setFormulaName(e.target.value)}
-                  placeholder="e.g. Present Continuous, Simple Past"
-                  className="w-full rounded-xl border border-border bg-background/50 px-3.5 py-2.5 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/10 shadow-sm"
-                />
+          <form onSubmit={handleFormulaBatchSubmit} className="space-y-4 pt-1">
+            <div className="space-y-4">
+              {/* Primary Input Row */}
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-1.5">
+                  <label htmlFor="formulaNameInput" className="text-xs font-bold text-muted-foreground">
+                    Formula Name *
+                  </label>
+                  <input
+                    id="formulaNameInput"
+                    type="text"
+                    required
+                    value={formulaName}
+                    onChange={(e) => setFormulaName(e.target.value)}
+                    placeholder="e.g. Present Continuous, Simple Past"
+                    className="w-full rounded-xl border border-border bg-background/50 px-3.5 py-2.5 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/10 shadow-sm"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label htmlFor="formulaStringInput" className="text-xs font-bold text-muted-foreground">
+                    Formula Pattern *
+                  </label>
+                  <input
+                    id="formulaStringInput"
+                    type="text"
+                    required
+                    value={formulaString}
+                    onChange={(e) => setFormulaString(e.target.value)}
+                    placeholder="e.g. S + am/is/are + V-ing | Q: Aux + S + V1?"
+                    className="w-full rounded-xl border border-border bg-background/50 px-3.5 py-2.5 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/10 shadow-sm"
+                  />
+                </div>
               </div>
 
               <div className="space-y-1.5">
-                <label htmlFor="formulaStringInput" className="text-xs font-bold text-muted-foreground">
-                  Formula Pattern *
+                <label htmlFor="formulaDescInput" className="text-xs font-bold text-muted-foreground">
+                  Description (Optional)
                 </label>
-                <input
-                  id="formulaStringInput"
-                  type="text"
-                  required
-                  value={formulaString}
-                  onChange={(e) => setFormulaString(e.target.value)}
-                  placeholder="e.g. S + am/is/are + V-ing | Q: Aux + S + V1?"
-                  className="w-full rounded-xl border border-border bg-background/50 px-3.5 py-2.5 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/10 shadow-sm"
+                <textarea
+                  id="formulaDescInput"
+                  value={formulaDescription}
+                  onChange={(e) => setFormulaDescription(e.target.value)}
+                  placeholder="Briefly explain the use case or grammar context for this pattern..."
+                  rows={2}
+                  className="w-full rounded-xl border border-border bg-background/50 px-3.5 py-2.5 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/10 shadow-sm resize-none"
                 />
               </div>
-            </div>
 
-            <div className="space-y-1.5">
-              <label htmlFor="formulaDescInput" className="text-xs font-bold text-muted-foreground">
-                Description (Optional)
-              </label>
-              <textarea
-                id="formulaDescInput"
-                value={formulaDescription}
-                onChange={(e) => setFormulaDescription(e.target.value)}
-                placeholder="Briefly explain the use case or grammar context for this pattern..."
-                rows={2}
-                className="w-full rounded-xl border border-border bg-background/50 px-3.5 py-2.5 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/10 shadow-sm resize-none"
-              />
+              {/* Extra Formula Rows (Optional Multi-Item Batch Creation) */}
+              {extraFormulaRows.map((row, idx) => (
+                <div key={row.id} className="space-y-3 pt-3 border-t border-dashed border-border/40 relative">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-primary">Formula #{idx + 2}</span>
+                    <button
+                      type="button"
+                      onClick={() => setExtraFormulaRows(extraFormulaRows.filter((r) => r.id !== row.id))}
+                      className="p-1 rounded-lg text-rose-500 hover:bg-rose-500/10 transition-all cursor-pointer"
+                      title="Remove item"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
+
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-bold text-muted-foreground">
+                        Formula Name #{idx + 2} *
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={row.name}
+                        onChange={(e) => {
+                          const updated = [...extraFormulaRows]
+                          updated[idx].name = e.target.value
+                          setExtraFormulaRows(updated)
+                        }}
+                        placeholder="Formula Name..."
+                        className="w-full rounded-xl border border-border bg-background/50 px-3.5 py-2.5 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/10 shadow-sm"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-bold text-muted-foreground">
+                        Formula Pattern #{idx + 2} *
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={row.formula}
+                        onChange={(e) => {
+                          const updated = [...extraFormulaRows]
+                          updated[idx].formula = e.target.value
+                          setExtraFormulaRows(updated)
+                        }}
+                        placeholder="Pattern..."
+                        className="w-full rounded-xl border border-border bg-background/50 px-3.5 py-2.5 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/10 shadow-sm"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-muted-foreground">
+                      Description #{idx + 2} (Optional)
+                    </label>
+                    <textarea
+                      value={row.description}
+                      onChange={(e) => {
+                        const updated = [...extraFormulaRows]
+                        updated[idx].description = e.target.value
+                        setExtraFormulaRows(updated)
+                      }}
+                      placeholder="Description..."
+                      rows={2}
+                      className="w-full rounded-xl border border-border bg-background/50 px-3.5 py-2.5 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/10 shadow-sm resize-none"
+                    />
+                  </div>
+                </div>
+              ))}
+
+              {/* + Add Another Formula Button */}
+              <div className="pt-1">
+                <button
+                  type="button"
+                  onClick={() =>
+                    setExtraFormulaRows([
+                      ...extraFormulaRows,
+                      { id: Math.random().toString(), name: "", formula: "", description: "" },
+                    ])
+                  }
+                  className="inline-flex items-center gap-1.5 text-xs font-bold text-primary hover:text-primary/80 transition-colors py-1 cursor-pointer"
+                >
+                  <Plus className="h-3.5 w-3.5" />
+                  <span>+ Add Another Formula</span>
+                </button>
+              </div>
             </div>
 
             {formulaFormError && (
@@ -266,7 +381,10 @@ export function FormulaListView({
             <div className="flex justify-end gap-2 border-t border-border/40 pt-3">
               <button
                 type="button"
-                onClick={() => setShowFormulaForm(false)}
+                onClick={() => {
+                  setShowFormulaForm(false)
+                  setExtraFormulaRows([])
+                }}
                 className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-border bg-secondary/30 px-4 py-2.5 text-xs font-semibold text-muted-foreground shadow-sm transition-all hover:bg-secondary/60 hover:text-foreground hover:scale-[1.02] active:scale-95 disabled:opacity-50 disabled:pointer-events-none cursor-pointer"
               >
                 Cancel
@@ -278,6 +396,8 @@ export function FormulaListView({
               >
                 {formulaCreatePending ? (
                   <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                ) : extraFormulaRows.length > 0 ? (
+                  `Save ${extraFormulaRows.length + 1} Formulas`
                 ) : (
                   "Save Formula"
                 )}
