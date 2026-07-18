@@ -473,20 +473,11 @@ export function ReadingBoardView({
 
                   {/* Progress Tracker Block */}
                   {book.status !== "Completed" && (
-                    <div className="mt-4 rounded-xl border border-border/50 bg-secondary/20 p-3.5 space-y-2">
-                      <div className="flex items-center justify-between gap-2">
-                        <span className="text-[10px] font-black uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-                          <BookOpen className="h-3.5 w-3.5 text-primary shrink-0" />
-                          <span>Progress</span>
-                        </span>
-                        <button
-                          onClick={() => setSelectedProgressBook(book)}
-                          className="inline-flex items-center gap-1 text-[11px] font-bold text-primary hover:bg-primary/15 transition-all shrink-0 cursor-pointer bg-primary/10 px-2.5 py-1 rounded-lg border border-primary/20 active:scale-95 shadow-sm"
-                          title="Log progress or view history timeline"
-                        >
-                          <TrendingUp className="h-3 w-3" /> Progress
-                        </button>
-                      </div>
+                    <div className="mt-4 rounded-xl border border-border/50 bg-secondary/20 p-3.5 space-y-1.5">
+                      <span className="text-[10px] font-black uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+                        <BookOpen className="h-3.5 w-3.5 text-primary shrink-0" />
+                        <span>Current Progress</span>
+                      </span>
                       <p className="text-xs font-semibold text-foreground leading-snug break-words">
                         {book.currentProgress || (
                           <span className="text-muted-foreground italic font-normal text-[11px]">
@@ -539,12 +530,21 @@ export function ReadingBoardView({
 
                 {/* Quick Action Footer Buttons */}
                 {book.status !== "Completed" && (
-                  <div className="border-t border-border/35 pt-4 mt-5">
+                  <div className="border-t border-border/35 pt-4 mt-5 grid grid-cols-2 gap-2">
+                    <button
+                      onClick={() => setSelectedProgressBook(book)}
+                      className="flex items-center justify-center gap-1.5 rounded-xl border border-primary/30 hover:border-primary bg-primary/10 hover:bg-primary/20 py-2 text-xs font-bold text-primary transition-all active:scale-[0.98] cursor-pointer"
+                      title="Add progress update or view history timeline"
+                    >
+                      <TrendingUp className="h-3.5 w-3.5" />
+                      Add Progress
+                    </button>
+
                     {book.status === "To Read" ? (
                       <button
                         onClick={() => handleQuickStartReading(book.id)}
                         disabled={isPendingUpdate}
-                        className="w-full flex items-center justify-center gap-1.5 rounded-lg border border-blue-500/30 hover:border-blue-500 bg-blue-500/5 hover:bg-blue-500/15 py-1.5 text-xs font-bold text-blue-500 transition-all active:scale-[0.98]"
+                        className="flex items-center justify-center gap-1.5 rounded-xl border border-blue-500/30 hover:border-blue-500 bg-blue-500/10 hover:bg-blue-500/20 py-2 text-xs font-bold text-blue-500 transition-all active:scale-[0.98] cursor-pointer"
                       >
                         <Clock className="h-3.5 w-3.5" />
                         Start Reading
@@ -553,7 +553,7 @@ export function ReadingBoardView({
                       <button
                         onClick={() => handleQuickMarkCompleted(book)}
                         disabled={isPendingUpdate}
-                        className="w-full flex items-center justify-center gap-1.5 rounded-lg border border-emerald-500/30 hover:border-emerald-500 bg-emerald-500/5 hover:bg-emerald-500/15 py-1.5 text-xs font-bold text-emerald-500 transition-all active:scale-[0.98]"
+                        className="flex items-center justify-center gap-1.5 rounded-xl border border-emerald-500/30 hover:border-emerald-500 bg-emerald-500/10 hover:bg-emerald-500/20 py-2 text-xs font-bold text-emerald-500 transition-all active:scale-[0.98] cursor-pointer"
                       >
                         <Sparkles className="h-3.5 w-3.5" />
                         Complete Book
