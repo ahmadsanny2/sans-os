@@ -368,8 +368,14 @@ export const usePomodoroStore = create<PomodoroState>()(
         // Auto mode recalculation
         if (integrationMode === "auto") {
           if (timetableList && timetableList.length > 0) {
+            const currentPhase = get().phase
             const autoState = getAutoState(timetableList, new Date(), config)
-            set(autoState)
+            // Trigger extend modal when auto state transitions from focus to long-break
+            const isEnteringLongBreak = currentPhase === "focus" && autoState.phase === "long-break"
+            set({
+              ...autoState,
+              showExtendModal: isEnteringLongBreak ? true : get().showExtendModal,
+            })
           }
           return
         }
@@ -436,6 +442,7 @@ export const usePomodoroStore = create<PomodoroState>()(
       extendFocusTime: (extraMinutes) => {
         const now = Date.now()
         set({
+          integrationMode: "manual", // Switch to manual mode so the extension isn't overwritten!
           phase: "focus",
           remainingSeconds: Math.max(1, extraMinutes * 60),
           isRunning: true,
@@ -487,8 +494,13 @@ export const usePomodoroStore = create<PomodoroState>()(
         // Auto mode boundary recalculation
         if (integrationMode === "auto") {
           if (timetableList && timetableList.length > 0) {
+            const currentPhase = get().phase
             const autoState = getAutoState(timetableList, new Date(), config)
-            set(autoState)
+            const isEnteringLongBreak = currentPhase === "focus" && autoState.phase === "long-break"
+            set({
+              ...autoState,
+              showExtendModal: isEnteringLongBreak ? true : get().showExtendModal,
+            })
           }
           return
         }
