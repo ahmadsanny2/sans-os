@@ -20,7 +20,6 @@ import {
   eachDayOfInterval,
   isToday,
 } from "date-fns"
-import { Badge } from "@/components/ui/Badge"
 import { CustomSelect } from "@/components/ui/CustomSelect"
 
 const TIMETABLE_COLORS: Record<string, { bg: string; text: string; border: string; bullet: string }> = {
@@ -412,32 +411,30 @@ export function CalendarView({
           </div>
 
           {/* Month & Year Custom Selectors */}
-          <div className="grid grid-cols-2 sm:flex sm:items-center gap-2 w-full sm:w-auto select-none">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3 w-full sm:w-auto select-none">
             <CustomSelect
               label="Month:"
               value={agendaMonth}
               onChange={(val) => setAgendaMonth(Number(val))}
               options={MONTH_NAMES.map((mName, idx) => ({ value: idx, label: mName }))}
-              className="w-full sm:w-auto"
+              className="flex-1 sm:flex-initial"
             />
 
-            <div className="flex items-center gap-2 w-full sm:w-auto">
-              <CustomSelect
-                label="Year:"
-                value={agendaYear}
-                onChange={(val) => setAgendaYear(Number(val))}
-                options={YEARS_LIST.map((yVal) => ({ value: yVal, label: String(yVal) }))}
-                className="flex-1 sm:w-auto"
-              />
+            <CustomSelect
+              label="Year:"
+              value={agendaYear}
+              onChange={(val) => setAgendaYear(Number(val))}
+              options={YEARS_LIST.map((yVal) => ({ value: yVal, label: String(yVal) }))}
+              className="flex-1 sm:flex-initial"
+            />
 
-              <button
-                onClick={handleResetToCurrentMonth}
-                className="inline-flex items-center justify-center gap-1 rounded-xl border border-border/80 bg-secondary/30 px-3 py-1.5 text-xs font-semibold text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-all shadow-sm cursor-pointer shrink-0"
-                title="Reset to current month"
-              >
-                <Sparkles className="h-3.5 w-3.5 text-primary" /> Today
-              </button>
-            </div>
+            <button
+              onClick={handleResetToCurrentMonth}
+              className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-border/80 bg-secondary/30 px-3 py-1.5 text-xs font-semibold text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-all shadow-sm cursor-pointer shrink-0"
+              title="Reset to current month"
+            >
+              <Sparkles className="h-3.5 w-3.5 text-primary" /> Today
+            </button>
           </div>
         </div>
 
@@ -508,28 +505,28 @@ export function CalendarView({
         </div>
 
         {/* Summary Metric Pills */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <div className="rounded-xl border border-border/50 bg-card/40 p-3 space-y-0.5">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Total Events</span>
-            <p className="text-xl font-extrabold text-foreground">{totalAgendasCount}</p>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3">
+          <div className="rounded-xl border border-border/50 bg-card/30 p-3 space-y-1">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block">Total Events</span>
+            <p className="text-xl font-black text-foreground">{totalAgendasCount}</p>
           </div>
-          <div className="rounded-xl border border-border/50 bg-card/40 p-3 space-y-0.5">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1">
-              <ListTodo className="h-3 w-3 text-primary" /> Priorities
+          <div className="rounded-xl border border-primary/20 bg-primary/5 p-3 space-y-1">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-primary flex items-center gap-1">
+              <ListTodo className="h-3 w-3" /> Priorities
             </span>
-            <p className="text-xl font-extrabold text-foreground">{totalPrioritiesCount}</p>
+            <p className="text-xl font-black text-foreground">{totalPrioritiesCount}</p>
           </div>
-          <div className="rounded-xl border border-border/50 bg-card/40 p-3 space-y-0.5">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1">
-              <Clock className="h-3 w-3 text-blue-500" /> Timetable
+          <div className="rounded-xl border border-blue-500/20 bg-blue-500/5 p-3 space-y-1">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-blue-500 flex items-center gap-1">
+              <Clock className="h-3 w-3" /> Timetable
             </span>
-            <p className="text-xl font-extrabold text-foreground">{totalTimetableCount}</p>
+            <p className="text-xl font-black text-foreground">{totalTimetableCount}</p>
           </div>
-          <div className="rounded-xl border border-border/50 bg-card/40 p-3 space-y-0.5">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1">
-              <Briefcase className="h-3 w-3 text-amber-500" /> Projects
+          <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-3 space-y-1">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-amber-500 flex items-center gap-1">
+              <Briefcase className="h-3 w-3" /> Projects
             </span>
-            <p className="text-xl font-extrabold text-foreground">{totalProjectsCount}</p>
+            <p className="text-xl font-black text-foreground">{totalProjectsCount}</p>
           </div>
         </div>
 
@@ -550,7 +547,7 @@ export function CalendarView({
             </p>
           </div>
         ) : (
-          <div className="space-y-4 max-h-[550px] overflow-y-auto pr-1">
+          <div className="space-y-4 max-h-[580px] overflow-y-auto pr-1">
             {sortedGroupedAgendas.map((group) => {
               const isSelected = group.dayStr === selectedDate
               const isTodayDate = isToday(group.dayDate)
@@ -558,15 +555,15 @@ export function CalendarView({
               return (
                 <div
                   key={group.dayStr}
-                  className={`rounded-2xl border transition-all p-4 space-y-3 ${
+                  className={`rounded-2xl border transition-all p-4 space-y-3.5 ${
                     isSelected
                       ? "border-primary/40 bg-primary/5 shadow-glass"
-                      : "border-border/60 bg-card/30 hover:bg-card/60"
+                      : "border-border/60 bg-card/25 hover:bg-card/50"
                   }`}
                 >
                   {/* Date Header Row */}
-                  <div className="flex items-center justify-between border-b border-border/30 pb-2.5">
-                    <div className="flex items-center gap-2">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-border/30 pb-3">
+                    <div className="flex flex-wrap items-center gap-2">
                       <button
                         onClick={() => setSelectedDate(group.dayStr)}
                         className="text-sm font-extrabold text-foreground hover:text-primary transition-colors flex items-center gap-1.5 group cursor-pointer"
@@ -575,26 +572,37 @@ export function CalendarView({
                         <span>{format(group.dayDate, "EEEE, MMMM d, yyyy")}</span>
                         <ArrowRight className="h-3.5 w-3.5 opacity-0 group-hover:opacity-100 transition-opacity text-primary" />
                       </button>
-                      {isTodayDate && <Badge variant="info">Today</Badge>}
-                      {isSelected && <Badge variant="primary">Selected</Badge>}
+
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        {isTodayDate && (
+                          <span className="text-[10px] font-extrabold px-2.5 py-0.5 rounded-full bg-primary/15 text-primary border border-primary/30 uppercase tracking-wider">
+                            Today
+                          </span>
+                        )}
+                        {isSelected && (
+                          <span className="text-[10px] font-extrabold px-2.5 py-0.5 rounded-full bg-violet-500/15 text-violet-400 border border-violet-500/30 uppercase tracking-wider">
+                            Selected
+                          </span>
+                        )}
+                      </div>
                     </div>
 
-                    <span className="text-xs font-bold text-muted-foreground bg-secondary/60 px-2.5 py-0.5 rounded-full border border-border/40">
+                    <span className="text-xs font-bold text-muted-foreground bg-secondary/50 px-2.5 py-0.5 rounded-full border border-border/40 shrink-0 self-start sm:self-auto">
                       {group.totalCount} {group.totalCount === 1 ? "item" : "items"}
                     </span>
                   </div>
 
                   {/* Day Items List */}
-                  <div className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
+                  <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                     {/* 1. Priorities */}
                     {group.dayPriorities.map((p) => (
                       <div
                         key={p.id}
                         onClick={() => !isPendingToggle && handleTogglePriority(p.id, p.completed)}
-                        className={`flex items-start gap-2.5 rounded-xl border p-3 text-xs transition-all cursor-pointer ${
+                        className={`flex items-start gap-3 rounded-xl border p-3.5 text-xs transition-all cursor-pointer ${
                           p.completed
                             ? "border-border/40 bg-secondary/20 opacity-70"
-                            : "border-border/60 bg-card/60 hover:border-primary/40 shadow-sm"
+                            : "border-border/60 bg-card/45 hover:border-primary/40 shadow-sm"
                         }`}
                       >
                         <button
@@ -603,19 +611,19 @@ export function CalendarView({
                             handleTogglePriority(p.id, p.completed)
                           }}
                           disabled={isPendingToggle}
-                          className={`flex h-4.5 w-4.5 shrink-0 items-center justify-center rounded border transition-all mt-0.5 cursor-pointer disabled:cursor-not-allowed ${
+                          className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-lg border transition-all mt-0.5 cursor-pointer disabled:cursor-not-allowed ${
                             p.completed
                               ? "bg-primary border-primary text-primary-foreground shadow-glow"
                               : "border-border/65 hover:border-primary bg-card"
                           }`}
                         >
-                          {p.completed && <Check className="h-3 w-3 stroke-[3]" />}
+                          {p.completed && <Check className="h-3.5 w-3.5 stroke-[3]" />}
                         </button>
-                        <div className="space-y-0.5 min-w-0 flex-1">
+                        <div className="space-y-1 min-w-0 flex-1">
                           <span className="text-[9px] font-black uppercase tracking-wider text-primary block">
                             Priority
                           </span>
-                          <p className={`font-semibold leading-snug break-words ${p.completed ? "line-through text-muted-foreground" : "text-foreground"}`}>
+                          <p className={`font-semibold leading-relaxed break-words ${p.completed ? "line-through text-muted-foreground" : "text-foreground"}`}>
                             {p.text}
                           </p>
                         </div>
@@ -628,9 +636,10 @@ export function CalendarView({
                       return (
                         <div
                           key={b.id}
-                          className={`rounded-xl border p-3 text-xs space-y-1 bg-card/60 shadow-sm ${color.border}`}
+                          className={`rounded-xl border p-3.5 text-xs space-y-1.5 bg-card/45 shadow-sm border-l-4 ${color.border}`}
+                          style={{ borderLeftColor: `var(--${b.color || "blue"}-500)` }}
                         >
-                          <div className="flex items-center justify-between gap-1.5">
+                          <div className="flex items-center justify-between gap-1.5 flex-wrap">
                             <span className={`text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full ${color.bg} ${color.text}`}>
                               {b.category || "Timetable"}
                             </span>
@@ -638,7 +647,7 @@ export function CalendarView({
                               {b.startTime} - {b.endTime}
                             </span>
                           </div>
-                          <p className="font-bold text-foreground leading-snug break-words">
+                          <p className="font-bold text-foreground leading-relaxed break-words">
                             {b.title}
                           </p>
                         </div>
@@ -649,9 +658,9 @@ export function CalendarView({
                     {group.projectItems.map((item) => (
                       <div
                         key={item.id}
-                        className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-3 text-xs space-y-1 shadow-sm"
+                        className="rounded-xl border border-amber-500/30 border-l-4 border-l-amber-500 bg-amber-500/5 p-3.5 text-xs space-y-1.5 shadow-sm"
                       >
-                        <div className="flex items-center justify-between gap-1.5">
+                        <div className="flex items-center justify-between gap-1.5 flex-wrap">
                           <span className="text-[9px] font-black uppercase tracking-wider text-amber-500 flex items-center gap-1">
                             <Briefcase className="h-3 w-3" /> {item.type === "project" ? "Project Deadline" : "Task Deadline"}
                           </span>
@@ -659,7 +668,7 @@ export function CalendarView({
                             {item.priority}
                           </span>
                         </div>
-                        <p className="font-bold text-foreground leading-snug break-words">
+                        <p className="font-bold text-foreground leading-relaxed break-words">
                           {item.name}
                         </p>
                         {item.projectName && (
