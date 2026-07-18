@@ -17,6 +17,8 @@ import {
   CheckCircle2,
   Edit2,
   MessageSquare,
+  TrendingUp,
+  History,
 } from "lucide-react"
 import { GridCardSkeleton } from "@/components/ui/Skeletons"
 import { StatCard } from "@/components/ui/StatCard"
@@ -24,6 +26,7 @@ import { EmptyState } from "@/components/ui/EmptyState"
 import { ErrorState } from "@/components/ui/ErrorState"
 import { Modal } from "@/components/ui/Modal"
 import { Badge } from "@/components/ui/Badge"
+import { ReadingProgressModal } from "./ReadingProgressModal"
 
 const STATUS_OPTIONS = ["All", "To Read", "Reading", "Completed"]
 
@@ -140,6 +143,8 @@ export function ReadingBoardView({
   isPendingUpdate,
   isPendingDelete,
 }: ReadingBoardViewProps) {
+  const [selectedProgressBook, setSelectedProgressBook] = React.useState<ReadingItem | null>(null)
+
   return (
     <div className="space-y-6">
       {/* 1. Statistics Cards */}
@@ -432,6 +437,13 @@ export function ReadingBoardView({
 
                     <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
                       <button
+                        onClick={() => setSelectedProgressBook(book)}
+                        className="p-1 rounded hover:bg-blue-500/10 text-muted-foreground hover:text-blue-500 transition-all"
+                        title="View Progress History & Log"
+                      >
+                        <History className="h-3.5 w-3.5" />
+                      </button>
+                      <button
                         onClick={() => handleOpenEdit(book)}
                         className="p-1 rounded hover:bg-secondary text-muted-foreground hover:text-foreground transition-all"
                         title="Edit Book Details"
@@ -459,16 +471,25 @@ export function ReadingBoardView({
                     </p>
                   </div>
 
-                  {/* Progress Tracker Display for Reading Books */}
-                  {book.status === "Reading" && book.currentProgress && (
-                    <div className="mt-4 pt-3 border-t border-border/30">
-                      <div className="text-xs text-muted-foreground flex flex-col gap-1.5 font-semibold">
-                        <div className="flex items-center gap-1.5">
+                  {/* Progress Tracker Display & Quick Log */}
+                  {book.status !== "Completed" && (
+                    <div className="mt-4 pt-3 border-t border-border/30 flex items-center justify-between gap-2">
+                      <div className="text-xs text-muted-foreground flex flex-col gap-0.5 font-semibold min-w-0">
+                        <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
                           <BookOpen className="h-3.5 w-3.5 text-blue-500 shrink-0" />
-                          <p>Progress:</p>
+                          <span>Progress:</span>
                         </div>
-                        <p className="text-foreground">{book.currentProgress}</p>
+                        <p className="text-foreground text-xs font-bold truncate">
+                          {book.currentProgress || "No progress logged yet"}
+                        </p>
                       </div>
+                      <button
+                        onClick={() => setSelectedProgressBook(book)}
+                        className="inline-flex items-center gap-1 text-[11px] font-bold text-blue-500 hover:text-blue-600 hover:bg-blue-500/15 transition-all shrink-0 cursor-pointer bg-blue-500/10 px-2.5 py-1 rounded-lg border border-blue-500/20 active:scale-95"
+                        title="Log progress or view history timeline"
+                      >
+                        <TrendingUp className="h-3 w-3" /> Progress
+                      </button>
                     </div>
                   )}
 
@@ -695,6 +716,12 @@ export function ReadingBoardView({
           </form>
         )}
       </Modal>
+
+      {/* Progress History Modal */}
+      <ReadingProgressModal
+        book={selectedProgressBook}
+        onClose={() => setSelectedProgressBook(null)}
+      />
     </div>
   )
 }

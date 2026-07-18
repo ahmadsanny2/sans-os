@@ -59,6 +59,30 @@ export const readingJournal = pgTable("reading_journal", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 })
 
+// 4.1 Reading Progress Logs (History of reading progress updates)
+export const readingProgressLogs = pgTable("reading_progress_logs", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: text("user_id").notNull(),
+  bookId: uuid("book_id")
+    .references(() => readingJournal.id, { onDelete: "cascade" })
+    .notNull(),
+  progress: text("progress").notNull(), // e.g. "Hal. 150" or "+30 Hal"
+  notes: text("notes"), // optional note or key takeaways for this session
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+})
+
+// Relations for Reading Journal & Progress Logs
+export const readingJournalRelations = relations(readingJournal, ({ many }) => ({
+  progressLogs: many(readingProgressLogs),
+}))
+
+export const readingProgressLogsRelations = relations(readingProgressLogs, ({ one }) => ({
+  book: one(readingJournal, {
+    fields: [readingProgressLogs.bookId],
+    references: [readingJournal.id],
+  }),
+}))
+
 // 5. Vision Board (Drag-and-drop custom offset coordinates)
 export const visionBoardItems = pgTable("vision_board_items", {
   id: uuid("id").primaryKey().defaultRandom(),
