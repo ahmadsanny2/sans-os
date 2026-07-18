@@ -16,7 +16,6 @@ import {
   Lightbulb,
   Check,
   CheckCircle2,
-  PencilLine,
   Languages,
   Filter,
   ChevronDown,
@@ -729,33 +728,56 @@ const VocabCard = React.memo(function VocabCard({
     .map((t) => t.trim())
     .filter(Boolean)
 
+  const autoMeanings = vocab.autoTranslation
+    ? vocab.autoTranslation
+        .split(/[,;]/)
+        .map((t) => t.trim())
+        .filter(Boolean)
+    : []
+
+  const hasAuto = autoMeanings.length > 0
+  const isDifferent =
+    hasAuto &&
+    vocab.translation.trim().toLowerCase() !== (vocab.autoTranslation || "").trim().toLowerCase()
+
   return (
     <div
       className={`group relative rounded-2xl border p-5 shadow-sm transition-all duration-300 flex flex-col justify-between backdrop-blur-md ${
         vocab.memorized
-          ? "border-border/40 bg-secondary/10 dark:bg-card/5 opacity-70"
+          ? "border-border/40 bg-secondary/10 dark:bg-card/5 opacity-75"
           : "border-border bg-card/45 dark:bg-card/15 hover:border-primary/40 hover:shadow-md hover:shadow-primary/5 hover:translate-y-[-2px]"
       }`}
     >
       {/* Header row */}
       <div>
         <div className="flex items-center justify-between gap-2 border-b border-border/40 pb-2.5">
-          <div className="flex items-center gap-1.5">
-            <Badge variant="primary">
-              VOCAB
-            </Badge>
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <Badge variant="primary">VOCAB</Badge>
+            {isDifferent && !vocab.memorized && (
+              <span className="text-[9px] font-extrabold px-2 py-0.5 rounded-xl bg-amber-500/10 text-amber-500 border border-amber-500/20">
+                Auto-translate available
+              </span>
+            )}
           </div>
           <div className="flex items-center gap-2">
             {/* Memorized Checklist Toggle */}
             <button
               onClick={() => handleToggleMemorized(vocab.id, vocab.memorized)}
-              className={`flex h-5.5 w-5.5 shrink-0 items-center justify-center rounded-xl border transition-all active:scale-95 cursor-pointer ${
+              className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-xl border transition-all active:scale-95 cursor-pointer ${
                 vocab.memorized
                   ? "bg-primary border-primary text-primary-foreground shadow-glow"
+                  : isDifferent
+                  ? "border-amber-500/50 hover:border-primary/50 bg-amber-500/10 text-amber-500 hover:bg-primary/10"
                   : "border-border/80 hover:border-primary/50 hover:bg-primary/10 bg-card"
               }`}
               aria-label="Toggle word memorized"
-              title={vocab.memorized ? "Mark as learning" : "Mark as memorized"}
+              title={
+                vocab.memorized
+                  ? "Mark as learning"
+                  : isDifferent
+                  ? "Mark as memorized (will sync manual translation to auto-translation)"
+                  : "Mark as memorized"
+              }
             >
               {vocab.memorized && <Check className="h-3.5 w-3.5 stroke-[3]" />}
             </button>
@@ -772,35 +794,84 @@ const VocabCard = React.memo(function VocabCard({
 
         {/* Word */}
         <div className="space-y-2 mt-3.5 flex-1">
-          <h4 className={`text-2xl font-black tracking-tight text-foreground leading-none ${vocab.memorized ? "text-muted-foreground" : ""}`}>
+          <h4
+            className={`text-2xl font-black tracking-tight text-foreground leading-none ${
+              vocab.memorized ? "text-muted-foreground" : ""
+            }`}
+          >
             {capitalizeFirstLetter(vocab.word)}
           </h4>
         </div>
 
-        {/* Translation clicking review block */}
+        {/* Translation review block */}
         <div className="my-4.5">
-          <div className="text-[10px] font-extrabold uppercase tracking-widest text-muted-foreground mb-2 select-none flex items-center gap-1">
-            <Lightbulb className="h-3 w-3 text-violet-500" /> Translation
+          <div className="text-[10px] font-extrabold uppercase tracking-widest text-muted-foreground mb-2 select-none flex items-center justify-between">
+            <span className="flex items-center gap-1">
+              <Lightbulb className="h-3 w-3 text-primary" /> Translation
+            </span>
+            {isDifferent && !vocab.memorized && (
+              <span className="text-[9px] font-semibold text-amber-500">Manual ≠ Auto</span>
+            )}
           </div>
 
           <div
             onClick={() => toggleRevealTranslation(vocab.id)}
-            className={`relative min-h-[56px] flex flex-col items-center justify-center rounded-xl border-2 border-dashed transition-all p-4 cursor-pointer select-none ${
+            className={`relative min-h-[56px] flex flex-col items-center justify-center rounded-xl border-2 border-dashed transition-all p-3.5 cursor-pointer select-none ${
               isRevealed
                 ? "bg-secondary/20 dark:bg-zinc-950/20 border-border/50 text-foreground"
                 : "bg-primary/5 hover:bg-primary/10 border-primary/20 hover:border-primary/45 text-primary hover:scale-[1.01] active:scale-95 shadow-sm"
             }`}
           >
             {isRevealed ? (
-              <div className="flex flex-wrap gap-1.5 justify-center w-full">
-                {meanings.map((meaning, idx) => (
-                  <span
-                    key={idx}
-                    className="px-2.5 py-1.5 text-xs font-bold rounded-xl border bg-card/65 text-foreground border-border/60 shadow-sm transition-all hover:bg-card hover:scale-[1.02]"
-                  >
-                    {capitalizeFirstLetter(meaning)}
-                  </span>
-                ))}
+              <div className="w-full space-y-2.5">
+                {isDifferent ? (
+                  <>
+                    {/* Manual Translation */}
+                    <div className="space-y-1">
+                      <span className="text-[9px] font-black uppercase tracking-wider text-muted-foreground block">
+                        Manual Translation:
+                      </span>
+                      <div className="flex flex-wrap gap-1.5">
+                        {meanings.map((meaning, idx) => (
+                          <span
+                            key={idx}
+                            className="px-2.5 py-1 text-xs font-bold rounded-xl border bg-card/65 text-foreground border-border/60 shadow-sm"
+                          >
+                            {capitalizeFirstLetter(meaning)}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Auto Translation */}
+                    <div className="space-y-1 pt-1 border-t border-border/40">
+                      <span className="text-[9px] font-black uppercase tracking-wider text-primary block">
+                        Auto Translation:
+                      </span>
+                      <div className="flex flex-wrap gap-1.5">
+                        {autoMeanings.map((meaning, idx) => (
+                          <span
+                            key={idx}
+                            className="px-2.5 py-1 text-xs font-bold rounded-xl border bg-primary/10 text-primary border-primary/20 shadow-sm"
+                          >
+                            {capitalizeFirstLetter(meaning)}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <div className="flex flex-wrap gap-1.5 justify-center w-full">
+                    {meanings.map((meaning, idx) => (
+                      <span
+                        key={idx}
+                        className="px-2.5 py-1.5 text-xs font-bold rounded-xl border bg-card/65 text-foreground border-border/60 shadow-sm transition-all hover:bg-card hover:scale-[1.02]"
+                      >
+                        {capitalizeFirstLetter(meaning)}
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
             ) : (
               <div className="flex items-center gap-2 text-xs font-black uppercase tracking-wider transition-colors">
