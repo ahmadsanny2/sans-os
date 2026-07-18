@@ -17,6 +17,7 @@ import {
   Check,
   CheckCircle2,
   PencilLine,
+  Languages,
   Filter,
   ChevronDown,
 } from "lucide-react"
@@ -100,6 +101,31 @@ export function LanguageBoardView({
   const [collapsedLetters, setCollapsedLetters] = useState<Record<string, boolean>>({})
   const [isFilterOpen, setIsFilterOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
+
+  // Optional multi-item batch creation state
+  const [extraRows, setExtraRows] = useState<Array<{ id: string; word: string; translation: string }>>([])
+
+  const handleBatchSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+
+    const primaryWord = word.trim()
+    const primaryTrans = translation.trim()
+    if (!primaryWord || !primaryTrans) return
+
+    await handleAddVocabulary(e)
+
+    if (extraRows.length > 0) {
+      for (const row of extraRows) {
+        if (row.word.trim() && row.translation.trim()) {
+          setWord(row.word.trim())
+          setTranslation(row.translation.trim())
+          const fakeEvent = { preventDefault: () => {} } as React.FormEvent
+          await handleAddVocabulary(fakeEvent)
+        }
+      }
+      setExtraRows([])
+    }
+  }
 
   const toggleLetterCollapse = (key: string) => {
     setCollapsedLetters((prev) => ({
@@ -219,31 +245,32 @@ export function LanguageBoardView({
         />
 
         <StatCard
-          title="Writing Practices"
+          title="Writing Practice Logs"
           value={writingCount}
-          icon={<PencilLine className="h-6 w-6" />}
-          iconBgClass="bg-amber-500/10"
-          iconTextClass="text-amber-500"
+          icon={<Languages className="h-6 w-6" />}
+          iconBgClass="bg-blue-500/10"
+          iconTextClass="text-blue-500"
           isLoading={isLoading}
-          description="Sentences constructed"
+          description="Sentence exercises"
         />
       </div>
 
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between border-b border-border/50 pb-5 animate-in fade-in duration-200">
-        <div className="flex flex-wrap items-center gap-3 flex-1 max-w-4xl">
-          {/* Search text input */}
-          <div className="relative flex-1 min-w-[240px]">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-muted-foreground" />
+      {/* 2. Control Bar (Search, Filters, Add Button) */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-border/40 pb-5">
+        <div className="flex flex-wrap items-center gap-3 flex-1">
+          {/* Search Input */}
+          <div className="relative flex-1 min-w-[200px] max-w-md">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search word, meaning, or translation..."
-              className="w-full rounded-xl border border-border bg-card/60 pl-10 pr-4 py-2 text-sm outline-none transition-all focus:border-sidebar-primary focus:ring-2 focus:ring-sidebar-primary/10"
+              placeholder="Search word or translation..."
+              className="w-full rounded-xl border border-border bg-card/60 pl-10 pr-3.5 py-2 text-xs outline-none transition-all focus:border-sidebar-primary focus:ring-2 focus:ring-sidebar-primary/10 shadow-sm"
             />
           </div>
 
-          {/* Filter Popover Dropdown */}
+          {/* Filter & Actions Dropdown Menu */}
           <div className="relative" ref={dropdownRef}>
             <button
               onClick={() => setIsFilterOpen(!isFilterOpen)}
@@ -405,7 +432,7 @@ export function LanguageBoardView({
           {addMode === "dictionary" ? (
             <DictionaryView vocabList={vocabList} />
           ) : (
-            <form onSubmit={handleAddVocabulary} className="space-y-4 pt-2">
+            <form onSubmit={handleBatchSubmit} className="space-y-4 pt-2">
               <div className="space-y-4">
                 {/* Language Direction Toggle */}
                 <div className="space-y-1.5">
@@ -438,6 +465,7 @@ export function LanguageBoardView({
                   </div>
                 </div>
 
+                {/* Primary Input Row */}
                 <div className="grid gap-4 sm:grid-cols-2">
                   {/* Word Input */}
                   <div className="space-y-1.5">
@@ -471,6 +499,71 @@ export function LanguageBoardView({
                     />
                   </div>
                 </div>
+
+                {/* Extra Vocabulary Rows (Optional Multi-Item Batch Creation) */}
+                {extraRows.map((row, idx) => (
+                  <div key={row.id} className="grid gap-4 sm:grid-cols-2 pt-3 border-t border-dashed border-border/40 relative">
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-bold text-muted-foreground">
+                        Word #{idx + 2} *
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={row.word}
+                        onChange={(e) => {
+                          const updated = [...extraRows]
+                          updated[idx].word = e.target.value
+                          setExtraRows(updated)
+                        }}
+                        placeholder="Word..."
+                        className="w-full rounded-xl border border-border bg-background/50 px-3.5 py-2.5 text-sm outline-none transition-all focus:border-sidebar-primary focus:ring-2 focus:ring-sidebar-primary/10 shadow-sm"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-bold text-muted-foreground">
+                        Translation #{idx + 2} *
+                      </label>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="text"
+                          required
+                          value={row.translation}
+                          onChange={(e) => {
+                            const updated = [...extraRows]
+                            updated[idx].translation = e.target.value
+                            setExtraRows(updated)
+                          }}
+                          placeholder="Translation..."
+                          className="w-full rounded-xl border border-border bg-background/50 px-3.5 py-2.5 text-sm outline-none transition-all focus:border-sidebar-primary focus:ring-2 focus:ring-sidebar-primary/10 shadow-sm"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setExtraRows(extraRows.filter((r) => r.id !== row.id))
+                          }}
+                          className="p-2.5 rounded-xl border border-rose-500/30 text-rose-500 hover:bg-rose-500/10 transition-all shrink-0 cursor-pointer"
+                          title="Remove item"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+
+                {/* + Add Another Word Button */}
+                <div className="pt-1">
+                  <button
+                    type="button"
+                    onClick={() => setExtraRows([...extraRows, { id: Math.random().toString(), word: "", translation: "" }])}
+                    className="inline-flex items-center gap-1.5 text-xs font-bold text-primary hover:text-primary/80 transition-colors py-1 cursor-pointer"
+                  >
+                    <Plus className="h-3.5 w-3.5" />
+                    <span>+ Add Another Word</span>
+                  </button>
+                </div>
               </div>
 
               {formError && (
@@ -483,7 +576,10 @@ export function LanguageBoardView({
               <div className="flex justify-end gap-2 border-t border-border/40 pt-3">
                 <button
                   type="button"
-                  onClick={() => setShowAddForm(false)}
+                  onClick={() => {
+                    setShowAddForm(false)
+                    setExtraRows([])
+                  }}
                   className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-border bg-secondary/30 px-4 py-2.5 text-xs font-semibold text-muted-foreground shadow-sm transition-all hover:bg-secondary/60 hover:text-foreground hover:scale-[1.02] active:scale-95 disabled:opacity-50 disabled:pointer-events-none cursor-pointer"
                 >
                   Cancel
@@ -495,6 +591,8 @@ export function LanguageBoardView({
                 >
                   {vocabCreatePending ? (
                     <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  ) : extraRows.length > 0 ? (
+                    `Save ${extraRows.length + 1} Words`
                   ) : (
                     "Save Word"
                   )}
