@@ -359,6 +359,7 @@ export const usePomodoroStore = create<PomodoroState>()(
           config,
           sessionCount,
           integrationMode,
+          activeBlockSessions,
         } = get()
         if (!isRunning || phase === "idle") return
 
@@ -381,15 +382,28 @@ export const usePomodoroStore = create<PomodoroState>()(
           return
         }
 
-        // Focus session finished -> Prompt Extend Time Modal!
+        // Focus session finished -> Prompt Extend Time Modal ONLY if entering long-break
         if (phase === "focus") {
           const newCount = sessionCount + 1
-          set({
-            sessionCount: newCount,
-            isRunning: false,
-            lastActiveTimestamp: null,
-            showExtendModal: true,
-          })
+          const totalSessions = activeBlockSessions || config.sessionsBeforeLongBreak
+          const isLong = newCount % totalSessions === 0
+
+          if (isLong) {
+            set({
+              sessionCount: newCount,
+              isRunning: false,
+              lastActiveTimestamp: null,
+              showExtendModal: true,
+            })
+          } else {
+            // Directly transition to short break and continue running
+            set({
+              phase: "break",
+              remainingSeconds: config.breakDuration * 60,
+              sessionCount: newCount,
+              lastActiveTimestamp: now,
+            })
+          }
         } else if (phase === "long-break" && get().isLongBreakAfterBlock) {
           // Finished the post-block long break! Stop the timer.
           set({
@@ -452,6 +466,7 @@ export const usePomodoroStore = create<PomodoroState>()(
           config,
           sessionCount,
           integrationMode,
+          activeBlockSessions,
         } = get()
         if (!isRunning || phase === "idle" || !lastActiveTimestamp) return
 
@@ -479,12 +494,25 @@ export const usePomodoroStore = create<PomodoroState>()(
           // Time exceeded
           if (phase === "focus") {
             const newCount = sessionCount + 1
-            set({
-              sessionCount: newCount,
-              isRunning: false,
-              showExtendModal: true,
-              lastActiveTimestamp: null,
-            })
+            const totalSessions = activeBlockSessions || config.sessionsBeforeLongBreak
+            const isLong = newCount % totalSessions === 0
+
+            if (isLong) {
+              set({
+                sessionCount: newCount,
+                isRunning: false,
+                showExtendModal: true,
+                lastActiveTimestamp: null,
+              })
+            } else {
+              set({
+                phase: "break",
+                remainingSeconds: config.breakDuration * 60,
+                sessionCount: newCount,
+                isRunning: false,
+                lastActiveTimestamp: null,
+              })
+            }
           } else {
             set({
               phase: "focus",
