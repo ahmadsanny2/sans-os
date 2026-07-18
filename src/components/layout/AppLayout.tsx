@@ -607,7 +607,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         </header>
 
         {/* Dynamic page view content container */}
-        <main className="flex-1 overflow-y-auto overflow-x-hidden p-3 sm:p-4 md:p-6 bg-background scroll-smooth">
+        <main className="flex-1 overflow-y-auto overflow-x-hidden p-3 sm:p-4 md:p-6 pb-24 sm:pb-6 bg-background scroll-smooth">
           {children}
         </main>
 
