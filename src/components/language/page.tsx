@@ -27,43 +27,43 @@ export default function LanguageComponent() {
       />
 
       {/* Sub-Navigation Tabs */}
-      <div className="flex gap-2 p-1 bg-secondary/35 border border-border/40 rounded-2xl w-fit max-w-full overflow-x-auto select-none backdrop-blur-sm shadow-sm">
+      <div className="flex gap-1.5 p-1.5 bg-secondary/35 border border-border/40 rounded-2xl w-full sm:w-fit overflow-x-auto no-scrollbar select-none backdrop-blur-md shadow-sm shrink-0">
         <button
           onClick={() => setActiveTab("vocab")}
-          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
+          className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 shrink-0 cursor-pointer ${
             activeTab === "vocab"
-              ? "bg-primary text-primary-foreground shadow-glass shadow-glow"
-              : "text-muted-foreground hover:text-foreground"
+              ? "bg-primary text-primary-foreground shadow-glass shadow-glow font-extrabold"
+              : "text-muted-foreground hover:text-foreground hover:bg-secondary/40"
           }`}
         >
           <BookOpen className="h-4 w-4" /> Vocabulary Logs
         </button>
         <button
           onClick={() => setActiveTab("formula")}
-          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
+          className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 shrink-0 cursor-pointer ${
             activeTab === "formula"
-              ? "bg-primary text-primary-foreground shadow-glass shadow-glow"
-              : "text-muted-foreground hover:text-foreground"
+              ? "bg-primary text-primary-foreground shadow-glass shadow-glow font-extrabold"
+              : "text-muted-foreground hover:text-foreground hover:bg-secondary/40"
           }`}
         >
           <Braces className="h-4 w-4" /> Formula List
         </button>
         <button
           onClick={() => setActiveTab("writing")}
-          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
+          className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 shrink-0 cursor-pointer ${
             activeTab === "writing"
-              ? "bg-primary text-primary-foreground shadow-glass shadow-glow"
-              : "text-muted-foreground hover:text-foreground"
+              ? "bg-primary text-primary-foreground shadow-glass shadow-glow font-extrabold"
+              : "text-muted-foreground hover:text-foreground hover:bg-secondary/40"
           }`}
         >
           <PencilLine className="h-4 w-4" /> Writing Practice
         </button>
         <button
           onClick={() => setActiveTab("dialogue")}
-          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
+          className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 shrink-0 cursor-pointer ${
             activeTab === "dialogue"
-              ? "bg-primary text-primary-foreground shadow-glass shadow-glow"
-              : "text-muted-foreground hover:text-foreground"
+              ? "bg-primary text-primary-foreground shadow-glass shadow-glow font-extrabold"
+              : "text-muted-foreground hover:text-foreground hover:bg-secondary/40"
           }`}
         >
           <MessageSquare className="h-4 w-4" /> Dialogue Practice
