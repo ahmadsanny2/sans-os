@@ -471,25 +471,29 @@ export function ReadingBoardView({
                     </p>
                   </div>
 
-                  {/* Progress Tracker Display & Quick Log */}
+                  {/* Progress Tracker Block */}
                   {book.status !== "Completed" && (
-                    <div className="mt-4 pt-3 border-t border-border/30 flex items-center justify-between gap-2">
-                      <div className="text-xs text-muted-foreground flex flex-col gap-0.5 font-semibold min-w-0">
-                        <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
-                          <BookOpen className="h-3.5 w-3.5 text-blue-500 shrink-0" />
-                          <span>Progress:</span>
-                        </div>
-                        <p className="text-foreground text-xs font-bold truncate">
-                          {book.currentProgress || "No progress logged yet"}
-                        </p>
+                    <div className="mt-4 rounded-xl border border-border/50 bg-secondary/20 p-3.5 space-y-2">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-[10px] font-black uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+                          <BookOpen className="h-3.5 w-3.5 text-primary shrink-0" />
+                          <span>Progress</span>
+                        </span>
+                        <button
+                          onClick={() => setSelectedProgressBook(book)}
+                          className="inline-flex items-center gap-1 text-[11px] font-bold text-primary hover:bg-primary/15 transition-all shrink-0 cursor-pointer bg-primary/10 px-2.5 py-1 rounded-lg border border-primary/20 active:scale-95 shadow-sm"
+                          title="Log progress or view history timeline"
+                        >
+                          <TrendingUp className="h-3 w-3" /> Progress
+                        </button>
                       </div>
-                      <button
-                        onClick={() => setSelectedProgressBook(book)}
-                        className="inline-flex items-center gap-1 text-[11px] font-bold text-blue-500 hover:text-blue-600 hover:bg-blue-500/15 transition-all shrink-0 cursor-pointer bg-blue-500/10 px-2.5 py-1 rounded-lg border border-blue-500/20 active:scale-95"
-                        title="Log progress or view history timeline"
-                      >
-                        <TrendingUp className="h-3 w-3" /> Progress
-                      </button>
+                      <p className="text-xs font-semibold text-foreground leading-snug break-words">
+                        {book.currentProgress || (
+                          <span className="text-muted-foreground italic font-normal text-[11px]">
+                            No progress logged yet
+                          </span>
+                        )}
+                      </p>
                     </div>
                   )}
 
