@@ -176,6 +176,12 @@ export function WritingPracticeView({
     id: string
     freeEnglish: string
     freeTranslation: string
+    vocabEngPos: string
+    vocabTransPos: string
+    vocabEngNeg: string
+    vocabTransNeg: string
+    vocabEngInt: string
+    vocabTransInt: string
   }>>([])
 
   const handleWritingBatchSubmit = async (e: React.FormEvent) => {
@@ -184,19 +190,36 @@ export function WritingPracticeView({
 
     if (extraWritingRows.length > 0) {
       for (const row of extraWritingRows) {
-        if (row.freeEnglish.trim() && row.freeTranslation.trim()) {
-          const fakeEvent = { preventDefault: () => {} } as React.FormEvent
-          await handleAddWriting(fakeEvent, {
-            freeEnglish: row.freeEnglish.trim(),
-            freeTranslation: row.freeTranslation.trim(),
-            vocabEngPos: "",
-            vocabTransPos: "",
-            vocabEngNeg: "",
-            vocabTransNeg: "",
-            vocabEngInt: "",
-            vocabTransInt: "",
-            vocabFormula: localVocabFormula,
-          })
+        if (practiceMode === "vocab") {
+          if (row.vocabEngPos.trim() && row.vocabTransPos.trim()) {
+            const fakeEvent = { preventDefault: () => {} } as React.FormEvent
+            await handleAddWriting(fakeEvent, {
+              freeEnglish: "",
+              freeTranslation: "",
+              vocabEngPos: row.vocabEngPos.trim(),
+              vocabTransPos: row.vocabTransPos.trim(),
+              vocabEngNeg: row.vocabEngNeg.trim(),
+              vocabTransNeg: row.vocabTransNeg.trim(),
+              vocabEngInt: row.vocabEngInt.trim(),
+              vocabTransInt: row.vocabTransInt.trim(),
+              vocabFormula: localVocabFormula,
+            })
+          }
+        } else {
+          if (row.freeEnglish.trim() && row.freeTranslation.trim()) {
+            const fakeEvent = { preventDefault: () => {} } as React.FormEvent
+            await handleAddWriting(fakeEvent, {
+              freeEnglish: row.freeEnglish.trim(),
+              freeTranslation: row.freeTranslation.trim(),
+              vocabEngPos: "",
+              vocabTransPos: "",
+              vocabEngNeg: "",
+              vocabTransNeg: "",
+              vocabEngInt: "",
+              vocabTransInt: "",
+              vocabFormula: localVocabFormula,
+            })
+          }
         }
       }
       setExtraWritingRows([])
@@ -683,52 +706,170 @@ export function WritingPracticeView({
 
             {/* Extra Sentence Practice Rows (Optional Multi-Item Batch Creation) */}
             {extraWritingRows.map((row, idx) => (
-              <div key={row.id} className="grid gap-4 sm:grid-cols-2 pt-3 border-t border-dashed border-border/40 relative">
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-muted-foreground">
-                    English Sentence #{idx + 2} *
-                  </label>
-                  <textarea
-                    rows={2}
-                    required
-                    value={row.freeEnglish}
-                    onChange={(e) => {
-                      const updated = [...extraWritingRows]
-                      updated[idx].freeEnglish = e.target.value
-                      setExtraWritingRows(updated)
-                    }}
-                    placeholder="English sentence..."
-                    className="w-full rounded-xl border border-border/60 bg-background px-3.5 py-2 text-xs outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/10 resize-none"
-                  />
+              <div key={row.id} className="pt-3 border-t border-dashed border-border/40 relative space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-muted-foreground">
+                    Sentence Practice #{idx + 2}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setExtraWritingRows(extraWritingRows.filter((r) => r.id !== row.id))}
+                    className="p-1 rounded-lg border border-rose-500/30 text-rose-500 hover:bg-rose-500/10 transition-all shrink-0 cursor-pointer text-xs flex items-center gap-1"
+                    title="Remove practice row"
+                  >
+                    <Plus className="h-3.5 w-3.5 rotate-45" /> Remove
+                  </button>
                 </div>
 
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-muted-foreground">
-                    Indonesian Translation #{idx + 2} *
-                  </label>
-                  <div className="flex items-start gap-2">
-                    <textarea
-                      rows={2}
-                      required
-                      value={row.freeTranslation}
-                      onChange={(e) => {
-                        const updated = [...extraWritingRows]
-                        updated[idx].freeTranslation = e.target.value
-                        setExtraWritingRows(updated)
-                      }}
-                      placeholder="Indonesian translation..."
-                      className="w-full rounded-xl border border-border/60 bg-background px-3.5 py-2 text-xs outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/10 resize-none"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setExtraWritingRows(extraWritingRows.filter((r) => r.id !== row.id))}
-                      className="p-2.5 rounded-xl border border-rose-500/30 text-rose-500 hover:bg-rose-500/10 transition-all shrink-0 cursor-pointer"
-                      title="Remove practice row"
-                    >
-                      <Plus className="h-4 w-4 rotate-45" />
-                    </button>
+                {practiceMode === "vocab" ? (
+                  <div className="grid gap-4 sm:grid-cols-3 animate-in fade-in duration-200">
+                    {/* Positive (+) Sentence Pair */}
+                    <div className="space-y-2.5 border-l-2 border-emerald-500 pl-3">
+                      <div className="flex items-center gap-1">
+                        <Check className="h-3.5 w-3.5 text-emerald-500" />
+                        <span className="text-xs font-extrabold uppercase tracking-wide text-emerald-500">
+                          1. Positive Sentence (+)
+                        </span>
+                      </div>
+                      <div className="space-y-1.5">
+                        <input
+                          type="text"
+                          required
+                          value={row.vocabEngPos}
+                          onChange={(e) => {
+                            const updated = [...extraWritingRows]
+                            updated[idx].vocabEngPos = e.target.value
+                            setExtraWritingRows(updated)
+                          }}
+                          placeholder="English positive sentence..."
+                          className="w-full rounded-lg border border-border/60 bg-background px-3 py-1.5 text-xs outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/10"
+                        />
+                        <input
+                          type="text"
+                          required
+                          value={row.vocabTransPos}
+                          onChange={(e) => {
+                            const updated = [...extraWritingRows]
+                            updated[idx].vocabTransPos = e.target.value
+                            setExtraWritingRows(updated)
+                          }}
+                          placeholder="Indonesian translation..."
+                          className="w-full rounded-lg border border-border/60 bg-background px-3 py-1.5 text-xs outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/10"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Negative (-) Sentence Pair */}
+                    <div className="space-y-2.5 border-l-2 border-rose-500 pl-3">
+                      <div className="flex items-center gap-1">
+                        <Minus className="h-3.5 w-3.5 text-rose-500" />
+                        <span className="text-xs font-extrabold uppercase tracking-wide text-rose-500">
+                          2. Negative Sentence (-)
+                        </span>
+                      </div>
+                      <div className="space-y-1.5">
+                        <input
+                          type="text"
+                          required
+                          value={row.vocabEngNeg}
+                          onChange={(e) => {
+                            const updated = [...extraWritingRows]
+                            updated[idx].vocabEngNeg = e.target.value
+                            setExtraWritingRows(updated)
+                          }}
+                          placeholder="English negative sentence..."
+                          className="w-full rounded-lg border border-border/60 bg-background px-3 py-1.5 text-xs outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/10"
+                        />
+                        <input
+                          type="text"
+                          required
+                          value={row.vocabTransNeg}
+                          onChange={(e) => {
+                            const updated = [...extraWritingRows]
+                            updated[idx].vocabTransNeg = e.target.value
+                            setExtraWritingRows(updated)
+                          }}
+                          placeholder="Indonesian translation..."
+                          className="w-full rounded-lg border border-border/60 bg-background px-3 py-1.5 text-xs outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/10"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Interrogative (?) Sentence Pair */}
+                    <div className="space-y-2.5 border-l-2 border-blue-500 pl-3">
+                      <div className="flex items-center gap-1">
+                        <span className="h-3.5 w-3.5 text-blue-500 font-extrabold text-xs">?</span>
+                        <span className="text-xs font-extrabold uppercase tracking-wide text-blue-500">
+                          3. Interrogative Sentence (?)
+                        </span>
+                      </div>
+                      <div className="space-y-1.5">
+                        <input
+                          type="text"
+                          required
+                          value={row.vocabEngInt}
+                          onChange={(e) => {
+                            const updated = [...extraWritingRows]
+                            updated[idx].vocabEngInt = e.target.value
+                            setExtraWritingRows(updated)
+                          }}
+                          placeholder="English question sentence..."
+                          className="w-full rounded-lg border border-border/60 bg-background px-3 py-1.5 text-xs outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/10"
+                        />
+                        <input
+                          type="text"
+                          required
+                          value={row.vocabTransInt}
+                          onChange={(e) => {
+                            const updated = [...extraWritingRows]
+                            updated[idx].vocabTransInt = e.target.value
+                            setExtraWritingRows(updated)
+                          }}
+                          placeholder="Indonesian translation..."
+                          className="w-full rounded-lg border border-border/60 bg-background px-3 py-1.5 text-xs outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/10"
+                        />
+                      </div>
+                    </div>
                   </div>
-                </div>
+                ) : (
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-bold text-muted-foreground">
+                        English Sentence #{idx + 2} *
+                      </label>
+                      <textarea
+                        rows={2}
+                        required
+                        value={row.freeEnglish}
+                        onChange={(e) => {
+                          const updated = [...extraWritingRows]
+                          updated[idx].freeEnglish = e.target.value
+                          setExtraWritingRows(updated)
+                        }}
+                        placeholder="English sentence..."
+                        className="w-full rounded-xl border border-border/60 bg-background px-3.5 py-2 text-xs outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/10 resize-none"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-bold text-muted-foreground">
+                        Indonesian Translation #{idx + 2} *
+                      </label>
+                      <textarea
+                        rows={2}
+                        required
+                        value={row.freeTranslation}
+                        onChange={(e) => {
+                          const updated = [...extraWritingRows]
+                          updated[idx].freeTranslation = e.target.value
+                          setExtraWritingRows(updated)
+                        }}
+                        placeholder="Indonesian translation..."
+                        className="w-full rounded-xl border border-border/60 bg-background px-3.5 py-2 text-xs outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/10 resize-none"
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
             ))}
 
@@ -739,7 +880,17 @@ export function WritingPracticeView({
                 onClick={() =>
                   setExtraWritingRows([
                     ...extraWritingRows,
-                    { id: Math.random().toString(), freeEnglish: "", freeTranslation: "" },
+                    {
+                      id: Math.random().toString(),
+                      freeEnglish: "",
+                      freeTranslation: "",
+                      vocabEngPos: "",
+                      vocabTransPos: "",
+                      vocabEngNeg: "",
+                      vocabTransNeg: "",
+                      vocabEngInt: "",
+                      vocabTransInt: "",
+                    },
                   ])
                 }
                 className="inline-flex items-center gap-1.5 text-xs font-bold text-primary hover:text-primary/80 transition-colors py-1 cursor-pointer"
