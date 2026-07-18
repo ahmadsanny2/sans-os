@@ -105,7 +105,8 @@ export function DailyTodos({
                   {sortedHabits.map((habit) => (
                     <div
                       key={habit.id}
-                      className={`flex items-center justify-between rounded-xl border p-3.5 transition-all duration-200 ${
+                      onClick={() => !isPendingToggleHabit && handleToggleHabit?.(habit.id)}
+                      className={`flex items-center justify-between rounded-xl border p-3.5 cursor-pointer transition-all duration-200 ${
                         habit.completed
                           ? "border-border/40 bg-secondary/20 opacity-70"
                           : "border-border/60 bg-card/40 shadow-sm hover:border-primary/30 hover:bg-card/70"
@@ -113,7 +114,10 @@ export function DailyTodos({
                     >
                       <div className="flex items-center gap-3 flex-1 min-w-0">
                         <button
-                          onClick={() => handleToggleHabit?.(habit.id)}
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleToggleHabit?.(habit.id)
+                          }}
                           disabled={isPendingToggleHabit}
                           className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-lg border transition-all active:scale-95 ${
                             habit.completed
@@ -149,7 +153,14 @@ export function DailyTodos({
                   {sortedTodos.map((todo) => (
                     <div
                       key={todo.id}
+                      onClick={() => {
+                        if (!isPendingToggleTodo && editingId !== todo.id) {
+                          handleToggleCompleted(todo.id, todo.completed)
+                        }
+                      }}
                       className={`flex items-center justify-between rounded-xl border p-3.5 transition-all duration-200 ${
+                        editingId === todo.id ? "" : "cursor-pointer"
+                      } ${
                         todo.completed
                           ? "border-border/40 bg-secondary/20 opacity-70"
                           : "border-border/60 bg-card/40 shadow-sm hover:border-primary/30 hover:bg-card/70"
@@ -158,7 +169,10 @@ export function DailyTodos({
                       <div className="flex items-center gap-3 flex-1 min-w-0">
                         <button
                           disabled={isPendingToggleTodo || editingId === todo.id}
-                          onClick={() => handleToggleCompleted(todo.id, todo.completed)}
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleToggleCompleted(todo.id, todo.completed)
+                          }}
                           className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-lg border transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed ${
                             todo.completed
                               ? "bg-primary border-primary text-primary-foreground shadow-glow"
@@ -171,7 +185,7 @@ export function DailyTodos({
 
                         <div className="flex flex-col min-w-0 pr-2 flex-1">
                           {editingId === todo.id ? (
-                            <div className="flex flex-col gap-2 w-full">
+                            <div className="flex flex-col gap-2 w-full" onClick={(e) => e.stopPropagation()}>
                               <input
                                 type="text"
                                 value={editText}
@@ -202,6 +216,7 @@ export function DailyTodos({
                                   href={todo.link}
                                   target="_blank"
                                   rel="noopener noreferrer"
+                                  onClick={(e) => e.stopPropagation()}
                                   className="inline-flex items-center text-primary hover:text-primary/80 transition-colors"
                                   title="Open Link"
                                 >
@@ -217,7 +232,8 @@ export function DailyTodos({
                         {editingId === todo.id ? (
                           <>
                             <button
-                              onClick={async () => {
+                              onClick={async (e) => {
+                                e.stopPropagation()
                                 if (!editText.trim()) return
                                 await handleUpdateTodo(todo.id, editText.trim(), editLink.trim())
                                 setEditingId(null)
@@ -229,7 +245,10 @@ export function DailyTodos({
                               <Check className="h-4 w-4 stroke-[3]" />
                             </button>
                             <button
-                              onClick={() => setEditingId(null)}
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                setEditingId(null)
+                              }}
                               className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
                               aria-label="Cancel editing"
                             >
@@ -239,7 +258,8 @@ export function DailyTodos({
                         ) : (
                           <>
                             <button
-                              onClick={() => {
+                              onClick={(e) => {
+                                e.stopPropagation()
                                 setEditingId(todo.id)
                                 setEditText(todo.text)
                                 setEditLink(todo.link || "")
@@ -250,7 +270,10 @@ export function DailyTodos({
                               <Pencil className="h-4 w-4" />
                             </button>
                             <button
-                              onClick={() => handleDeleteTodo(todo.id)}
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                handleDeleteTodo(todo.id)
+                              }}
                               className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
                               aria-label="Delete todo item"
                             >
