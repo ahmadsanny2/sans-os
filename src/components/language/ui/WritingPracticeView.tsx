@@ -171,6 +171,38 @@ export function WritingPracticeView({
     })
   }
 
+  // Optional multi-item batch creation state for writing practice
+  const [extraWritingRows, setExtraWritingRows] = useState<Array<{
+    id: string
+    freeEnglish: string
+    freeTranslation: string
+  }>>([])
+
+  const handleWritingBatchSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    await handleSubmit(e)
+
+    if (extraWritingRows.length > 0) {
+      for (const row of extraWritingRows) {
+        if (row.freeEnglish.trim() && row.freeTranslation.trim()) {
+          const fakeEvent = { preventDefault: () => {} } as React.FormEvent
+          await handleAddWriting(fakeEvent, {
+            freeEnglish: row.freeEnglish.trim(),
+            freeTranslation: row.freeTranslation.trim(),
+            vocabEngPos: "",
+            vocabTransPos: "",
+            vocabEngNeg: "",
+            vocabTransNeg: "",
+            vocabEngInt: "",
+            vocabTransInt: "",
+            vocabFormula: localVocabFormula,
+          })
+        }
+      }
+      setExtraWritingRows([])
+    }
+  }
+
   // Close dropdown on outside click
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -314,7 +346,7 @@ export function WritingPracticeView({
             </button>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleWritingBatchSubmit} className="space-y-4">
             {/* Conditional Fields for Formula-Based Practice */}
             {practiceMode === "formula" && (
               <div className="space-y-4 border-b border-border/40 pb-4 animate-in fade-in duration-200">
@@ -649,6 +681,74 @@ export function WritingPracticeView({
               </div>
             )}
 
+            {/* Extra Sentence Practice Rows (Optional Multi-Item Batch Creation) */}
+            {extraWritingRows.map((row, idx) => (
+              <div key={row.id} className="grid gap-4 sm:grid-cols-2 pt-3 border-t border-dashed border-border/40 relative">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-muted-foreground">
+                    English Sentence #{idx + 2} *
+                  </label>
+                  <textarea
+                    rows={2}
+                    required
+                    value={row.freeEnglish}
+                    onChange={(e) => {
+                      const updated = [...extraWritingRows]
+                      updated[idx].freeEnglish = e.target.value
+                      setExtraWritingRows(updated)
+                    }}
+                    placeholder="English sentence..."
+                    className="w-full rounded-xl border border-border/60 bg-background px-3.5 py-2 text-xs outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/10 resize-none"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-muted-foreground">
+                    Indonesian Translation #{idx + 2} *
+                  </label>
+                  <div className="flex items-start gap-2">
+                    <textarea
+                      rows={2}
+                      required
+                      value={row.freeTranslation}
+                      onChange={(e) => {
+                        const updated = [...extraWritingRows]
+                        updated[idx].freeTranslation = e.target.value
+                        setExtraWritingRows(updated)
+                      }}
+                      placeholder="Indonesian translation..."
+                      className="w-full rounded-xl border border-border/60 bg-background px-3.5 py-2 text-xs outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/10 resize-none"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setExtraWritingRows(extraWritingRows.filter((r) => r.id !== row.id))}
+                      className="p-2.5 rounded-xl border border-rose-500/30 text-rose-500 hover:bg-rose-500/10 transition-all shrink-0 cursor-pointer"
+                      title="Remove practice row"
+                    >
+                      <Plus className="h-4 w-4 rotate-45" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+
+            {/* + Add Another Sentence Practice Button */}
+            <div className="pt-1">
+              <button
+                type="button"
+                onClick={() =>
+                  setExtraWritingRows([
+                    ...extraWritingRows,
+                    { id: Math.random().toString(), freeEnglish: "", freeTranslation: "" },
+                  ])
+                }
+                className="inline-flex items-center gap-1.5 text-xs font-bold text-primary hover:text-primary/80 transition-colors py-1 cursor-pointer"
+              >
+                <Plus className="h-3.5 w-3.5" />
+                <span>+ Add Another Sentence Practice</span>
+              </button>
+            </div>
+
             {writingFormError && (
               <p className="text-xs text-destructive flex items-center gap-1 font-semibold animate-in slide-in-from-top-1">
                 <AlertCircle className="h-3.5 w-3.5" />
@@ -675,6 +775,8 @@ export function WritingPracticeView({
               >
                 {writingCreatePending ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
+                ) : extraWritingRows.length > 0 ? (
+                  `Save ${extraWritingRows.length + 1} Practices`
                 ) : (
                   <>
                     <Plus className="h-4 w-4" /> Save Practice
