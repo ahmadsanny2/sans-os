@@ -75,7 +75,14 @@ export function PrioritiesList({
             {sortedPriorities.map((priority) => (
               <div
                 key={priority.id}
+                onClick={() => {
+                  if (!isPendingToggle && editingId !== priority.id) {
+                    handleToggleCompleted(priority.id, priority.completed)
+                  }
+                }}
                 className={`flex items-center justify-between rounded-xl border p-4 transition-all duration-200 ${
+                  editingId === priority.id ? "" : "cursor-pointer"
+                } ${
                   priority.completed
                     ? "border-border/40 bg-secondary/20 opacity-70"
                     : "border-border/60 bg-card/40 shadow-sm hover:border-primary/30 hover:bg-card/70"
@@ -84,7 +91,10 @@ export function PrioritiesList({
                 <div className="flex items-center gap-3.5 flex-1 min-w-0">
                   <button
                     disabled={isPendingToggle || editingId === priority.id}
-                    onClick={() => handleToggleCompleted(priority.id, priority.completed)}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      handleToggleCompleted(priority.id, priority.completed)
+                    }}
                     className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-lg border transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed ${
                       priority.completed
                         ? "bg-primary border-primary text-primary-foreground shadow-glow"
@@ -97,7 +107,7 @@ export function PrioritiesList({
 
                   <div className="flex flex-col min-w-0 pr-2 flex-1">
                     {editingId === priority.id ? (
-                      <div className="flex flex-col gap-2 w-full">
+                      <div className="flex flex-col gap-2 w-full" onClick={(e) => e.stopPropagation()}>
                         <input
                           type="text"
                           value={editText}
@@ -129,6 +139,7 @@ export function PrioritiesList({
                               href={priority.link}
                               target="_blank"
                               rel="noopener noreferrer"
+                              onClick={(e) => e.stopPropagation()}
                               className="inline-flex items-center text-primary hover:text-primary/80 transition-colors"
                               title="Open Link"
                             >
@@ -151,7 +162,8 @@ export function PrioritiesList({
                   {editingId === priority.id ? (
                     <>
                       <button
-                        onClick={async () => {
+                        onClick={async (e) => {
+                          e.stopPropagation()
                           if (!editText.trim()) return
                           await handleUpdatePriority(priority.id, editText.trim(), editLink.trim())
                           setEditingId(null)
@@ -163,7 +175,10 @@ export function PrioritiesList({
                         <Check className="h-4 w-4 stroke-[3]" />
                       </button>
                       <button
-                        onClick={() => setEditingId(null)}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          setEditingId(null)
+                        }}
                         className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
                         aria-label="Cancel editing"
                       >
@@ -173,7 +188,8 @@ export function PrioritiesList({
                   ) : (
                     <>
                       <button
-                        onClick={() => {
+                        onClick={(e) => {
+                          e.stopPropagation()
                           setEditingId(priority.id)
                           setEditText(priority.text)
                           setEditLink(priority.link || "")
@@ -184,7 +200,10 @@ export function PrioritiesList({
                         <Pencil className="h-4 w-4" />
                       </button>
                       <button
-                        onClick={() => handleDeletePriority(priority.id)}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleDeletePriority(priority.id)
+                        }}
                         className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
                         aria-label="Delete priority"
                       >
