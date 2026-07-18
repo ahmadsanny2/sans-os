@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useMemo } from "react"
+import React, { useMemo, useState } from "react"
 import { Priority, TimetableBlock } from "@/hooks/useDaily"
 import { Project } from "@/hooks/useProjects"
 import { CalendarMonthGrid } from "./CalendarMonthGrid"
@@ -115,7 +115,9 @@ export function CalendarView({
   projectsList,
   isLoadingProjects,
 }: CalendarViewProps) {
-  // Generate days list for the selected agenda month/year
+  const [agendaStatusFilter, setAgendaStatusFilter] = useState<"pending" | "all" | "completed">("pending")
+  const todayStr = useMemo(() => format(new Date(), "yyyy-MM-dd"), [])
+
   const monthDays = useMemo(() => {
     try {
       return eachDayOfInterval({ start: agendaMonthStart, end: agendaMonthEnd })
@@ -140,6 +142,12 @@ export function CalendarView({
       if (searchLower && dayPrios.length > 0) {
         dayPrios = dayPrios.filter((p) => p.text.toLowerCase().includes(searchLower))
       }
+      if (agendaStatusFilter === "pending") {
+        dayPrios = dayPrios.filter((p) => !p.completed)
+      } else if (agendaStatusFilter === "completed") {
+        dayPrios = dayPrios.filter((p) => p.completed)
+      }
+      dayPrios.sort((a, b) => Number(a.completed) - Number(b.completed))
 
       // 2. Timetable Blocks (Exclude "every day" blocks where dayOfWeek === -1)
       let dayBlocks = timetableList.filter((b) => {
@@ -209,6 +217,13 @@ export function CalendarView({
         )
       }
 
+      if (agendaStatusFilter === "pending") {
+        projectItems = projectItems.filter((item) => item.completed !== true)
+      } else if (agendaStatusFilter === "completed") {
+        projectItems = projectItems.filter((item) => item.completed === true)
+      }
+      projectItems.sort((a, b) => Number(a.completed || false) - Number(b.completed || false))
+
       const totalCount = dayPrios.length + dayBlocks.length + projectItems.length
 
       return {
@@ -226,8 +241,21 @@ export function CalendarView({
     timetableList,
     projectsList,
     agendaTypeFilter,
+    agendaStatusFilter,
     agendaSearch,
   ])
+
+  // Sort days so Today and Future dates (dayStr >= todayStr) appear FIRST
+  const sortedGroupedAgendas = useMemo(() => {
+    return [...groupedAgendas].sort((a, b) => {
+      const isAFutureOrToday = a.dayStr >= todayStr
+      const isBFutureOrToday = b.dayStr >= todayStr
+
+      if (isAFutureOrToday && !isBFutureOrToday) return -1
+      if (!isAFutureOrToday && isBFutureOrToday) return 1
+      return a.dayStr.localeCompare(b.dayStr)
+    })
+  }, [groupedAgendas, todayStr])
 
   // Overall Agenda Statistics for selected month & year
   const totalAgendasCount = groupedAgendas.reduce((acc, curr) => acc + curr.totalCount, 0)
@@ -410,37 +438,61 @@ export function CalendarView({
           </div>
         </div>
 
-        {/* Filter Controls (Search & Type Pills) */}
-        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          {/* Type Filter Pills */}
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 min-w-max">
-            {[
-              { id: "all", label: "All Agendas", icon: Layers },
-              { id: "priority", label: "Top Priorities", icon: ListTodo },
-              { id: "timetable", label: "Timetable Blocks", icon: Clock },
-              { id: "project", label: "Project Deadlines", icon: Briefcase },
-            ].map((tab) => {
-              const Icon = tab.icon
-              const isActive = agendaTypeFilter === tab.id
-              return (
+        {/* Filter Controls (Search, Type Pills & Status Filter) */}
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          {/* Type & Status Filter Pills */}
+          <div className="flex flex-wrap items-center gap-2">
+            {/* Type Filter Pills */}
+            <div className="flex items-center gap-1.5 overflow-x-auto min-w-max">
+              {[
+                { id: "all", label: "All Agendas", icon: Layers },
+                { id: "priority", label: "Top Priorities", icon: ListTodo },
+                { id: "timetable", label: "Timetable Blocks", icon: Clock },
+                { id: "project", label: "Project Deadlines", icon: Briefcase },
+              ].map((tab) => {
+                const Icon = tab.icon
+                const isActive = agendaTypeFilter === tab.id
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => setAgendaTypeFilter(tab.id)}
+                    className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all border cursor-pointer ${
+                      isActive
+                        ? "bg-primary text-primary-foreground border-primary shadow-glass shadow-glow"
+                        : "bg-secondary/20 hover:bg-secondary/50 border-border/60 text-muted-foreground"
+                    }`}
+                  >
+                    <Icon className="h-3.5 w-3.5" />
+                    {tab.label}
+                  </button>
+                )
+              })}
+            </div>
+
+            {/* Status Filter Toggle */}
+            <div className="flex items-center gap-1 bg-secondary/30 p-1 rounded-full border border-border/50">
+              {[
+                { id: "pending", label: "Upcoming & Pending" },
+                { id: "all", label: "All Status" },
+                { id: "completed", label: "Completed" },
+              ].map((statusTab) => (
                 <button
-                  key={tab.id}
-                  onClick={() => setAgendaTypeFilter(tab.id)}
-                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all border cursor-pointer ${
-                    isActive
-                      ? "bg-primary text-primary-foreground border-primary shadow-glass shadow-glow"
-                      : "bg-secondary/20 hover:bg-secondary/50 border-border/60 text-muted-foreground"
+                  key={statusTab.id}
+                  onClick={() => setAgendaStatusFilter(statusTab.id as "pending" | "all" | "completed")}
+                  className={`px-2.5 py-1 rounded-full text-[11px] font-bold transition-all cursor-pointer ${
+                    agendaStatusFilter === statusTab.id
+                      ? "bg-card text-foreground shadow-sm border border-border/60"
+                      : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
-                  <Icon className="h-3.5 w-3.5" />
-                  {tab.label}
+                  {statusTab.label}
                 </button>
-              )
-            })}
+              ))}
+            </div>
           </div>
 
           {/* Search Input */}
-          <div className="relative w-full md:w-64">
+          <div className="relative w-full lg:w-60">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
             <input
               type="text"
@@ -484,19 +536,19 @@ export function CalendarView({
             <div className="h-20 w-full bg-muted/20 animate-pulse rounded-xl border border-border/40" />
             <div className="h-20 w-full bg-muted/20 animate-pulse rounded-xl border border-border/40" />
           </div>
-        ) : groupedAgendas.length === 0 ? (
+        ) : sortedGroupedAgendas.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-border/60 py-12 text-center space-y-2">
             <Layers className="h-8 w-8 text-muted-foreground/40 mx-auto" />
             <p className="text-sm font-bold text-foreground">
               No agendas found for {MONTH_NAMES[agendaMonth]} {agendaYear}
             </p>
             <p className="text-xs text-muted-foreground">
-              Try selecting another month/year or clearing your search filters.
+              Try selecting another month/year or changing your status filter.
             </p>
           </div>
         ) : (
           <div className="space-y-4 max-h-[550px] overflow-y-auto pr-1">
-            {groupedAgendas.map((group) => {
+            {sortedGroupedAgendas.map((group) => {
               const isSelected = group.dayStr === selectedDate
               const isTodayDate = isToday(group.dayDate)
 
