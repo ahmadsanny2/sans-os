@@ -164,28 +164,67 @@ export async function PATCH(request: Request): Promise<NextResponse> {
     }
 
     const body = await request.json()
-    const { id, masteryLevel, memorized } = body
+    const { id, masteryLevel, memorized, translation } = body
 
     if (!id) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
     }
 
+    // Fetch existing log
+    const existingLogs = await db
+      .select()
+      .from(vocabularyLogs)
+      .where(and(eq(vocabularyLogs.id, id), eq(vocabularyLogs.userId, user.id)))
+      .limit(1)
+
+    const existingLog = existingLogs[0]
+    if (!existingLog) {
+      return NextResponse.json({ error: "Log not found" }, { status: 404 })
+    }
+
     const updateData: {
       masteryLevel?: number
       memorized?: boolean
+      translation?: string
+      autoTranslation?: string | null
     } = {}
+
     if (masteryLevel !== undefined) updateData.masteryLevel = Number(masteryLevel)
-    if (memorized !== undefined) updateData.memorized = Boolean(memorized)
+    if (memorized !== undefined) {
+      const isMemorized = Boolean(memorized)
+      updateData.memorized = isMemorized
+
+      if (isMemorized) {
+        let autoTrans = existingLog.autoTranslation
+        if (!autoTrans) {
+          const direction = existingLog.langDirection || "en-id"
+          const fromLang = direction.split("-")[0] || "en"
+          const toLang = direction.split("-")[1] || "id"
+          try {
+            autoTrans = await translateText(existingLog.word, fromLang, toLang, false)
+            if (autoTrans) {
+              updateData.autoTranslation = autoTrans
+            }
+          } catch (err) {
+            console.error("Auto translation error during patch:", err)
+          }
+        }
+
+        if (autoTrans && existingLog.translation.trim().toLowerCase() !== autoTrans.trim().toLowerCase()) {
+          updateData.translation = autoTrans
+        }
+      }
+    }
+
+    if (translation !== undefined) {
+      updateData.translation = String(translation)
+    }
 
     const [updatedLog] = await db
       .update(vocabularyLogs)
       .set(updateData)
       .where(and(eq(vocabularyLogs.id, id), eq(vocabularyLogs.userId, user.id)))
       .returning()
-
-    if (!updatedLog) {
-      return NextResponse.json({ error: "Log not found" }, { status: 404 })
-    }
 
     return NextResponse.json(updatedLog)
   } catch (error) {
