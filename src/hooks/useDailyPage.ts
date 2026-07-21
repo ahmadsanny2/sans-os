@@ -151,6 +151,7 @@ export function useDailyPage() {
             text: entryTitle.trim(),
             orderIndex: chooseDate === activeDate ? listPriorities.length : undefined,
             link: entryLink.trim() || undefined,
+            category: timetableCategory,
           })
         )
       }
@@ -189,9 +190,9 @@ export function useDailyPage() {
 
   const updatePriorityMutation = useUpdatePriorityMutation(activeDate)
 
-  const handleUpdatePriority = async (id: string, text: string, link: string): Promise<void> => {
+  const handleUpdatePriority = async (id: string, text: string, link: string, category?: string): Promise<void> => {
     try {
-      await updatePriorityMutation.mutateAsync({ id, text, link: link || undefined })
+      await updatePriorityMutation.mutateAsync({ id, text, link: link || undefined, category })
       showSuccessToast("Priority updated")
     } catch {
       await showError("Error", "Failed to update priority.")
