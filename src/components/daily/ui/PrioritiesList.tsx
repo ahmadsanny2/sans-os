@@ -152,33 +152,35 @@ export function PrioritiesList({
                         </div>
                       </div>
                     ) : (
-                      <>
-                        <div className="flex items-center gap-1.5 flex-wrap">
-                          {priority.category && (
-                            <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 border border-primary/20 px-2 py-0.5 text-[9px] font-bold text-primary">
+                      <div className="space-y-1.5">
+                        {priority.category && (
+                          <div className="flex">
+                            <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 border border-primary/20 px-2 py-0.5 text-[9px] font-bold text-primary uppercase tracking-wider">
                               <Tag className="h-2 w-2" />
                               {priority.category}
                             </span>
-                          )}
+                          </div>
+                        )}
+                        <div className="flex items-start gap-1.5 flex-wrap">
                           <span
                             className={`text-sm font-semibold break-words whitespace-normal leading-snug ${
                               priority.completed ? "line-through text-muted-foreground" : "text-foreground"
                             }`}
                           >
                             {priority.text}
+                            {priority.link && (
+                              <a
+                                href={priority.link}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                onClick={(e) => e.stopPropagation()}
+                                className="inline-flex items-center ml-1.5 text-primary hover:text-primary/80 align-middle transition-colors shrink-0"
+                                title="Open Link"
+                              >
+                                <Link2 className="h-3.5 w-3.5" />
+                              </a>
+                            )}
                           </span>
-                          {priority.link && (
-                            <a
-                              href={priority.link}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              onClick={(e) => e.stopPropagation()}
-                              className="inline-flex items-center text-primary hover:text-primary/80 transition-colors"
-                              title="Open Link"
-                            >
-                              <Link2 className="h-3.5 w-3.5" />
-                            </a>
-                          )}
                         </div>
                         {priority.rolloverCount > 0 && !priority.completed && (
                           <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-500 mt-0.5">
@@ -186,7 +188,7 @@ export function PrioritiesList({
                             {priority.rolloverCount} {priority.rolloverCount === 1 ? "rollover" : "rollovers"}
                           </span>
                         )}
-                      </>
+                      </div>
                     )}
                   </div>
                 </div>
