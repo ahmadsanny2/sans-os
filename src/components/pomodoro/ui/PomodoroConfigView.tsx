@@ -385,12 +385,12 @@ export function PomodoroConfigView({
               </div>
               <div className="flex items-center gap-3">
                 {localConfig.soundEnabled && (
-                  <div className="flex items-center gap-1.5 rounded-xl bg-zinc-800/50 dark:bg-zinc-900/50 border border-border/40 p-1">
+                  <div className="flex items-center gap-1.5 rounded-xl bg-secondary/60 border border-border/40 p-1">
                     <span className="text-[10px] text-muted-foreground font-semibold px-2 uppercase tracking-wider">Test:</span>
                     <button
                       type="button"
                       onClick={() => playPomodoroSound("focus", localConfig)}
-                      className="flex items-center gap-1 rounded-lg hover:bg-zinc-800 dark:hover:bg-zinc-900 px-2.5 py-1 text-xs font-semibold text-zinc-300 hover:text-white transition-all active:scale-95 cursor-pointer"
+                      className="flex items-center gap-1 rounded-lg hover:bg-secondary/90 px-2.5 py-1 text-xs font-semibold text-muted-foreground hover:text-foreground transition-all active:scale-95 cursor-pointer"
                       title="Test focus sound"
                     >
                       Focus
@@ -399,7 +399,7 @@ export function PomodoroConfigView({
                     <button
                       type="button"
                       onClick={() => playPomodoroSound("break", localConfig)}
-                      className="flex items-center gap-1 rounded-lg hover:bg-zinc-800 dark:hover:bg-zinc-900 px-2.5 py-1 text-xs font-semibold text-zinc-300 hover:text-white transition-all active:scale-95 cursor-pointer"
+                      className="flex items-center gap-1 rounded-lg hover:bg-secondary/90 px-2.5 py-1 text-xs font-semibold text-muted-foreground hover:text-foreground transition-all active:scale-95 cursor-pointer"
                       title="Test break sound"
                     >
                       Break
@@ -408,7 +408,7 @@ export function PomodoroConfigView({
                     <button
                       type="button"
                       onClick={() => playPomodoroSound("long-break", localConfig)}
-                      className="flex items-center gap-1 rounded-lg hover:bg-zinc-800 dark:hover:bg-zinc-900 px-2.5 py-1 text-xs font-semibold text-zinc-300 hover:text-white transition-all active:scale-95 cursor-pointer"
+                      className="flex items-center gap-1 rounded-lg hover:bg-secondary/90 px-2.5 py-1 text-xs font-semibold text-muted-foreground hover:text-foreground transition-all active:scale-95 cursor-pointer"
                       title="Test long break sound"
                     >
                       Long
@@ -418,13 +418,13 @@ export function PomodoroConfigView({
                 <button
                   type="button"
                   onClick={() => handleUpdateLocalConfig({ soundEnabled: !localConfig.soundEnabled })}
-                  className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out outline-none ${localConfig.soundEnabled ? "bg-primary" : "bg-zinc-700"
+                  className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out outline-none ${localConfig.soundEnabled ? "bg-primary" : "bg-muted"
                     }`}
                   role="switch"
                   aria-checked={localConfig.soundEnabled}
                 >
                   <span
-                    className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${localConfig.soundEnabled ? "translate-x-5" : "translate-x-0"
+                    className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out ${localConfig.soundEnabled ? "translate-x-5" : "translate-x-0"
                       }`}
                   />
                 </button>
@@ -433,14 +433,12 @@ export function PomodoroConfigView({
 
             {/* Volume and Wave Type Controls */}
             {localConfig.soundEnabled && (
-              <div className="grid gap-4 sm:grid-cols-2 pt-4 border-t border-border/40">
-                {/* Volume Slider */}
+              <div className="grid gap-4 sm:grid-cols-2 pt-2 border-t border-border/30">
+                {/* Sound Volume Slider */}
                 <div className="space-y-2">
-                  <div className="flex items-center justify-between text-xs font-bold text-foreground">
-                    <span>Notification Volume</span>
-                    <span className="text-primary tabular-nums">
-                      {Math.round(localConfig.soundVolume * 100)}%
-                    </span>
+                  <div className="flex justify-between items-center text-xs font-bold text-foreground">
+                    <span>Sound Volume</span>
+                    <span className="text-muted-foreground">{Math.round((localConfig.soundVolume ?? 0.5) * 100)}%</span>
                   </div>
                   <input
                     type="range"
@@ -449,7 +447,7 @@ export function PomodoroConfigView({
                     step={0.05}
                     value={localConfig.soundVolume}
                     onChange={(e) => handleUpdateLocalConfig({ soundVolume: Number(e.target.value) })}
-                    className="w-full h-2 rounded-full appearance-none cursor-pointer accent-primary bg-zinc-800"
+                    className="w-full h-2 rounded-full appearance-none cursor-pointer accent-primary bg-secondary"
                     aria-label="Sound notification volume"
                   />
                 </div>
@@ -462,7 +460,7 @@ export function PomodoroConfigView({
                   <select
                     value={localConfig.soundType}
                     onChange={(e) => handleUpdateLocalConfig({ soundType: e.target.value as "sine" | "triangle" | "square" | "sawtooth" })}
-                    className="w-full rounded-xl border border-border bg-zinc-900/60 px-3.5 py-2 text-xs text-white focus:border-primary outline-none transition-colors cursor-pointer"
+                    className="w-full rounded-xl border border-border bg-card px-3.5 py-2 text-xs text-foreground focus:border-primary outline-none transition-colors cursor-pointer"
                   >
                     <option value="sine">Sine (Soft Chime)</option>
                     <option value="triangle">Triangle (Retro Warm)</option>
