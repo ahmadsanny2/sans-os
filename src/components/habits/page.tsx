@@ -17,6 +17,8 @@ export default function HabitsComponent() {
     isLogged,
     newHabitName,
     setNewHabitName,
+    newHabitCategory,
+    setNewHabitCategory,
     showAddForm,
     setShowAddForm,
     handleAddHabit,
@@ -89,6 +91,8 @@ export default function HabitsComponent() {
         isLogged={isLogged}
         newHabitName={newHabitName}
         setNewHabitName={setNewHabitName}
+        newHabitCategory={newHabitCategory}
+        setNewHabitCategory={setNewHabitCategory}
         showAddForm={showAddForm}
         setShowAddForm={setShowAddForm}
         handleAddHabit={handleAddHabit}
