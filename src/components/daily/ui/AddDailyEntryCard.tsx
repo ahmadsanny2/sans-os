@@ -3,6 +3,7 @@
 import React from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Plus, Calendar, Clock, Loader2, Link2, AlertCircle } from "lucide-react"
+import { useCategories } from "@/hooks/useCategories"
 
 interface AddDailyEntryCardProps {
   entryTitle: string
@@ -73,8 +74,13 @@ export function AddDailyEntryCard({
   setTimetableDayOfWeek,
   onClose,
 }: AddDailyEntryCardProps) {
+  const { categories } = useCategories()
+  const timetableCategories = categories.filter((c) => c.module === "timetable" || c.module === "general")
+  const defaultFallbackCategories = ["Deep Work", "Personal", "Work", "Leisure & Rest", "Education", "General"]
+
   // Optional multi-item batch creation state
   const [extraDailyRows, setExtraDailyRows] = React.useState<Array<{ id: string; title: string; link: string }>>([])
+
 
   const handleDailyBatchSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -351,17 +357,21 @@ export function AddDailyEntryCard({
                       id="category"
                       value={timetableCategory}
                       onChange={(e) => setTimetableCategory(e.target.value)}
-                      className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/10"
+                      className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/10 cursor-pointer"
                     >
-                      <option value="Personal">Personal</option>
-                      <option value="Work">Work</option>
-                      <option value="Business">Business</option>
-                      <option value="Playing">Playing</option>
-                      <option value="Social">Social</option>
-                      <option value="Education">Education</option>
-                      <option value="Project">Project</option>
-                      <option value="Family">Family</option>
-                      <option value="General">General</option>
+                      {timetableCategories.length > 0 ? (
+                        timetableCategories.map((c) => (
+                          <option key={c.id} value={c.name}>
+                            {c.name}
+                          </option>
+                        ))
+                      ) : (
+                        defaultFallbackCategories.map((catName) => (
+                          <option key={catName} value={catName}>
+                            {catName}
+                          </option>
+                        ))
+                      )}
                     </select>
                   </div>
 
