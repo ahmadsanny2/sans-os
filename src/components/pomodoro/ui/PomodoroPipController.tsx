@@ -145,4 +145,3 @@ export function PomodoroPipController() {
 
   return createPortal(<PomodoroPipView />, container)
 }
-export default PomodoroPipController
