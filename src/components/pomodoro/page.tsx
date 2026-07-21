@@ -2,14 +2,14 @@
 
 import React, { useEffect } from "react"
 import { usePomodoroPage } from "@/hooks/usePomodoroPage"
-import { PomodoroConfigView } from "./ui/PomodoroConfigView"
+import { PomodoroTimerView } from "./ui/PomodoroTimerView"
 
 export default function PomodoroComponent() {
   const pageData = usePomodoroPage()
 
   useEffect(() => {
-    document.title = "Pomodoro — SansOS Workspace"
+    document.title = "Pomodoro Focus — SansOS Workspace"
   }, [])
 
-  return <PomodoroConfigView {...pageData} />
+  return <PomodoroTimerView {...pageData} />
 }
