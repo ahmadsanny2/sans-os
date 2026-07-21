@@ -4,6 +4,7 @@ import React from "react"
 import { Habit } from "@/hooks/useHabits"
 import { format } from "date-fns"
 import { Plus, Trash2, Check, Loader2, Sparkles, GripVertical, ChevronUp, ChevronDown } from "lucide-react"
+import { useCategories } from "@/hooks/useCategories"
 
 const CHECKED_THEME = {
   color: "text-primary",
@@ -20,6 +21,8 @@ interface HabitGridProps {
   isLogged: (habitId: string, dateStr: string) => boolean
   newHabitName: string
   setNewHabitName: (name: string) => void
+  newHabitCategory?: string
+  setNewHabitCategory?: (c: string) => void
   showAddForm: boolean
   setShowAddForm: (show: boolean) => void
   handleAddHabit: (e: React.FormEvent) => Promise<void>
@@ -41,6 +44,8 @@ export function HabitGrid({
   isLogged,
   newHabitName,
   setNewHabitName,
+  newHabitCategory = "Health & Fitness",
+  setNewHabitCategory,
   showAddForm,
   setShowAddForm,
   handleAddHabit,
@@ -52,7 +57,12 @@ export function HabitGrid({
   handleReorderHabits,
   isPendingReorder,
 }: HabitGridProps) {
+  const { categories } = useCategories()
+  const habitCategories = categories.filter((c) => c.module === "habits" || c.module === "general")
+  const defaultFallbackCategories = ["Health & Fitness", "Mindset & Reading", "Personal", "Work", "General"]
+
   const [draggedId, setDraggedId] = React.useState<string | null>(null)
+
 
   const handleDragStart = (e: React.DragEvent, id: string) => {
     setDraggedId(id)
@@ -117,19 +127,47 @@ export function HabitGrid({
           onSubmit={handleAddHabit}
           className="bento-card p-4 space-y-4 animate-in slide-in-from-top-4 duration-200"
         >
-          <div className="space-y-1.5">
-            <label htmlFor="habitName" className="text-xs font-bold text-muted-foreground">
-              Habit Name
-            </label>
-            <input
-              id="habitName"
-              type="text"
-              required
-              value={newHabitName}
-              onChange={(e) => setNewHabitName(e.target.value)}
-              placeholder="e.g. Workout, Read books 15 mins..."
-              className="w-full rounded-lg border border-border/60 bg-background px-3.5 py-2 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/10"
-            />
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div className="space-y-1.5">
+              <label htmlFor="habitName" className="text-xs font-bold text-muted-foreground">
+                Habit Name
+              </label>
+              <input
+                id="habitName"
+                type="text"
+                required
+                value={newHabitName}
+                onChange={(e) => setNewHabitName(e.target.value)}
+                placeholder="e.g. Workout, Read books 15 mins..."
+                className="w-full rounded-lg border border-border/60 bg-background px-3.5 py-2 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/10"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label htmlFor="habitCategory" className="text-xs font-bold text-muted-foreground">
+                Category
+              </label>
+              <select
+                id="habitCategory"
+                value={newHabitCategory}
+                onChange={(e) => setNewHabitCategory && setNewHabitCategory(e.target.value)}
+                className="w-full rounded-lg border border-border/60 bg-background px-3.5 py-2 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/10 cursor-pointer"
+              >
+                {habitCategories.length > 0 ? (
+                  habitCategories.map((c) => (
+                    <option key={c.id} value={c.name}>
+                      {c.name}
+                    </option>
+                  ))
+                ) : (
+                  defaultFallbackCategories.map((catName) => (
+                    <option key={catName} value={catName}>
+                      {catName}
+                    </option>
+                  ))
+                )}
+              </select>
+            </div>
           </div>
 
           <div className="flex justify-end gap-2">
