@@ -118,6 +118,7 @@ export const priorities = pgTable("priorities", {
   userId: text("user_id").notNull(),
   date: text("date").notNull(), // timezone-independent ISO string "YYYY-MM-DD"
   text: text("text").notNull(),
+  category: text("category").default("General").notNull(),
   orderIndex: integer("order_index").notNull(), // 0 to 4 (Top 5)
   completed: boolean("completed").default(false).notNull(),
   rolloverCount: integer("rollover_count").default(0).notNull(), // keeps track of rollovers
