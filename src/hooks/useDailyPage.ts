@@ -151,7 +151,7 @@ export function useDailyPage() {
             text: entryTitle.trim(),
             orderIndex: chooseDate === activeDate ? listPriorities.length : undefined,
             link: entryLink.trim() || undefined,
-            category: timetableCategory,
+            category: priorityCategory,
           })
         )
       }
@@ -285,6 +285,7 @@ export function useDailyPage() {
   const [timetableDuration, _setTimetableDuration] = useState("60")
   const [timetableIsTodo, setTimetableIsTodo] = useState(false)
   const [timetableCategory, setTimetableCategory] = useState("General")
+  const [priorityCategory, setPriorityCategory] = useState("General")
   const [timetableScheduleType, setTimetableScheduleType] = useState<"custom" | "weekly" | "fixed">("custom")
   const [prevActiveDate, setPrevActiveDate] = useState(activeDate)
   const [timetableDayOfWeek, setTimetableDayOfWeek] = useState(() => parseISO(activeDate).getDay())
@@ -529,6 +530,8 @@ export function useDailyPage() {
     setTimetableIsTodo,
     timetableCategory,
     setTimetableCategory,
+    priorityCategory,
+    setPriorityCategory,
     timetableScheduleType,
     setTimetableScheduleType,
     timetableDayOfWeek,
