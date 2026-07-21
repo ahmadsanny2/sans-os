@@ -273,18 +273,48 @@ export function AddDailyEntryCard({
               transition={{ duration: 0.2, ease: "easeInOut" }}
               className="overflow-hidden"
             >
-              <div className="space-y-1.5 animate-in fade-in duration-200 max-w-xs">
-                <label htmlFor="chooseDate" className="text-xs font-bold text-muted-foreground">
-                  Choose Date
-                </label>
-                <input
-                  id="chooseDate"
-                  type="date"
-                  required
-                  value={chooseDate}
-                  onChange={(e) => setChooseDate(e.target.value)}
-                  className="w-full rounded-xl border border-border bg-background px-3.5 py-2.5 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/10"
-                />
+              <div className="grid gap-4 sm:grid-cols-2 max-w-xl">
+                <div className="space-y-1.5 animate-in fade-in duration-200">
+                  <label htmlFor="chooseDate" className="text-xs font-bold text-muted-foreground">
+                    Choose Date
+                  </label>
+                  <input
+                    id="chooseDate"
+                    type="date"
+                    required
+                    value={chooseDate}
+                    onChange={(e) => setChooseDate(e.target.value)}
+                    className="w-full rounded-xl border border-border bg-background px-3.5 py-2.5 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/10"
+                  />
+                </div>
+
+                {!targetTimetable && targetPriority && (
+                  <div className="space-y-1.5 animate-in fade-in duration-200">
+                    <label htmlFor="priorityCategory" className="text-xs font-bold text-muted-foreground">
+                      Priority Category
+                    </label>
+                    <select
+                      id="priorityCategory"
+                      value={timetableCategory}
+                      onChange={(e) => setTimetableCategory(e.target.value)}
+                      className="w-full rounded-xl border border-border bg-background px-3.5 py-2.5 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/10 cursor-pointer"
+                    >
+                      {timetableCategories.length > 0 ? (
+                        timetableCategories.map((c) => (
+                          <option key={c.id} value={c.name}>
+                            {c.name}
+                          </option>
+                        ))
+                      ) : (
+                        defaultFallbackCategories.map((catName) => (
+                          <option key={catName} value={catName}>
+                            {catName}
+                          </option>
+                        ))
+                      )}
+                    </select>
+                  </div>
+                )}
               </div>
             </motion.div>
           )}
