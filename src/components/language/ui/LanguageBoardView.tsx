@@ -646,7 +646,7 @@ export function LanguageBoardView({
                         <button
                           type="button"
                           onClick={() => toggleLetterCollapse(groupKey)}
-                          className="w-full flex items-center justify-between p-3 bg-secondary/20 hover:bg-secondary/45 dark:bg-zinc-900/40 dark:hover:bg-zinc-900/60 border border-border/80 rounded-xl transition-all duration-200 select-none cursor-pointer text-left shadow-sm active:scale-[0.995]"
+                          className="w-full flex items-center justify-between p-3 bg-secondary/20 hover:bg-secondary/45 dark:bg-card/40 dark:hover:bg-card/60 border border-border/80 rounded-xl transition-all duration-200 select-none cursor-pointer text-left shadow-sm active:scale-[0.995]"
                         >
                           <div className="flex items-center gap-3">
                             <div className="inline-flex h-8 w-8 items-center justify-center text-xs font-extrabold bg-sidebar-primary text-sidebar-primary-foreground rounded-lg shadow-sm border border-white/5 uppercase select-none">
@@ -818,7 +818,7 @@ const VocabCard = React.memo(function VocabCard({
             onClick={() => toggleRevealTranslation(vocab.id)}
             className={`relative min-h-[56px] flex flex-col items-center justify-center rounded-xl border-2 border-dashed transition-all p-3.5 cursor-pointer select-none ${
               isRevealed
-                ? "bg-secondary/20 dark:bg-zinc-950/20 border-border/50 text-foreground"
+                ? "bg-secondary/20 dark:bg-background/20 border-border/50 text-foreground"
                 : "bg-primary/5 hover:bg-primary/10 border-primary/20 hover:border-primary/45 text-primary hover:scale-[1.01] active:scale-95 shadow-sm"
             }`}
           >
