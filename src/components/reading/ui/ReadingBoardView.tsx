@@ -138,7 +138,6 @@ export function ReadingBoardView({
   totalBooks,
   readingCount,
   completedCount,
-  averageRating,
   filteredBooks,
   isPendingCreate,
   isPendingUpdate,
