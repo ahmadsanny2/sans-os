@@ -647,7 +647,7 @@ export function PomodoroConfigView({
 
         {/* Floating Save Banner */}
         {isDirty && (
-          <div className="flex items-center justify-self-end gap-4 rounded-2xl border border-primary/30 bg-zinc-950/95 backdrop-blur-md px-5 py-3.5 max-w-fit shadow-2xl shadow-glow animate-in fade-in slide-in-from-bottom-4 duration-300">
+          <div className="flex items-center justify-self-end gap-4 rounded-2xl border border-primary/30 bg-background/95 backdrop-blur-md px-5 py-3.5 max-w-fit shadow-2xl shadow-glow animate-in fade-in slide-in-from-bottom-4 duration-300">
             <div className="flex items-center gap-3 min-w-0">
               <div className="rounded-xl bg-primary/10 p-2 text-primary shrink-0">
                 <Zap className="h-5 w-5 animate-pulse" />
