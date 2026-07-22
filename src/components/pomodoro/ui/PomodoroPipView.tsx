@@ -35,9 +35,9 @@ const PHASE_META: Record<
     label: "Ready",
     emoji: "🎯",
     color: "text-primary",
-    border: "border-zinc-700/60",
-    bg: "bg-zinc-800/10",
-    glow: "shadow-zinc-500/5",
+    border: "border-border/60",
+    bg: "bg-secondary/20",
+    glow: "shadow-primary/5",
   },
   focus: {
     label: "Focus",
@@ -135,10 +135,10 @@ export function PomodoroPipView() {
   // Render Circle Mode (Collapsed)
   if (!isPipExpanded) {
     return (
-      <div className="w-full h-full min-h-screen flex items-center justify-center bg-zinc-950 p-1">
+      <div className="w-full h-full min-h-screen flex items-center justify-center bg-background p-1">
         <button
           onClick={() => setIsPipExpanded(true)}
-          className={`w-[138px] h-[138px] rounded-full flex flex-col items-center justify-center border-4 transition-all duration-300 text-left outline-none ${meta.border} ${meta.bg} shadow-lg ${meta.glow} hover:scale-105 hover:bg-zinc-800/40`}
+          className={`w-[138px] h-[138px] rounded-full flex flex-col items-center justify-center border-4 transition-all duration-300 text-left outline-none ${meta.border} ${meta.bg} shadow-lg ${meta.glow} hover:scale-105 hover:bg-card/40`}
           title="Click to expand controls"
         >
           <span className={`text-[10px] font-extrabold tracking-widest uppercase opacity-70 ${meta.color} leading-none mb-0.5`}>
@@ -157,9 +157,9 @@ export function PomodoroPipView() {
 
   // Render Square Mode (Expanded)
   return (
-    <div className="w-full h-full min-h-screen flex flex-col bg-zinc-950 text-white font-sans overflow-hidden">
+    <div className="w-full h-full min-h-screen flex flex-col bg-background text-foreground font-sans overflow-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between px-3.5 py-2 border-b border-white/5 bg-zinc-900/60 shrink-0">
+      <div className="flex items-center justify-between px-3.5 py-2 border-b border-border/10 bg-card/60 shrink-0">
         <div className="flex items-center gap-1.5">
           <Timer className="h-3.5 w-3.5 text-primary" />
           <span className="text-[10px] font-black text-white/80 tracking-widest uppercase">
