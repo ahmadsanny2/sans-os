@@ -48,7 +48,7 @@ export async function startPip(
     
     // Copy the active HTML document classes to support dark/light styling correctly
     targetDoc.documentElement.className = document.documentElement.className
-    targetDoc.body.className = "bg-zinc-950 text-white select-none overflow-hidden m-0 p-0"
+    targetDoc.body.className = "bg-background text-foreground select-none overflow-hidden m-0 p-0"
     targetDoc.title = "Pomodoro Timer"
 
     // Copy stylesheet rules from parent document to PiP document
