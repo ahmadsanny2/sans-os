@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 
 export interface CategoryItem {
   id: string
@@ -23,21 +23,17 @@ const DEFAULT_CATEGORIES: CategoryItem[] = [
 const STORAGE_KEY = "sansos_custom_categories_v1"
 
 export function useCategories() {
-  const [categories, setCategories] = useState<CategoryItem[]>(DEFAULT_CATEGORIES)
-  const [isLoaded, setIsLoaded] = useState(false)
-
-  useEffect(() => {
+  const [categories, setCategories] = useState<CategoryItem[]>(() => {
+    if (typeof window === "undefined") return DEFAULT_CATEGORIES
     try {
       const saved = localStorage.getItem(STORAGE_KEY)
-      if (saved) {
-        setCategories(JSON.parse(saved))
-      }
+      return saved ? JSON.parse(saved) : DEFAULT_CATEGORIES
     } catch (e) {
       console.error("Failed to load categories from localStorage:", e)
-    } finally {
-      setIsLoaded(true)
+      return DEFAULT_CATEGORIES
     }
-  }, [])
+  })
+  const [isLoaded] = useState(true)
 
   const saveCategories = (items: CategoryItem[]) => {
     setCategories(items)
