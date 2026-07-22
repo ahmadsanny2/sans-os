@@ -14,13 +14,10 @@ import {
   Flame,
   CheckCircle2,
   Calendar,
-  Coffee,
-  Star,
   ExternalLink,
 } from "lucide-react"
 import { UsePomodoroPageReturn } from "@/hooks/usePomodoroPage"
 import { usePomodoroStore } from "@/store/pomodoroStore"
-import { startPip } from "./PomodoroPipController"
 
 function formatTime(seconds: number): string {
   const m = Math.floor(seconds / 60)
@@ -39,8 +36,6 @@ export function PomodoroTimerView({
   handleSelectBlock,
   todayBlocks,
   autoActiveBlock,
-  estimatedSessions,
-  timetableLoading,
   currentTime,
   phase,
   handleQuickStart,
