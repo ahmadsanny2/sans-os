@@ -235,7 +235,7 @@ export function CategoryManagementView() {
             <Tag className="h-10 w-10 text-muted-foreground mx-auto opacity-40" />
             <p className="text-sm font-bold text-foreground">No Categories Found</p>
             <p className="text-xs text-muted-foreground max-w-sm mx-auto">
-              No categories exist under the selected module filter. Click "New Category" to create one.
+              No categories exist under the selected module filter. Click &quot;New Category&quot; to create one.
             </p>
           </div>
         )}
