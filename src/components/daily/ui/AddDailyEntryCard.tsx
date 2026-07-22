@@ -472,7 +472,7 @@ export function AddDailyEntryCard({
                       </div>
                       <div
                         className={`relative inline-flex h-4 w-7 shrink-0 items-center rounded-full transition-colors duration-200 ease-in-out px-0.5 ${
-                          timetableIsTodo ? "bg-emerald-500" : "bg-zinc-700"
+                          timetableIsTodo ? "bg-emerald-500" : "bg-secondary"
                         }`}
                       >
                         <span
