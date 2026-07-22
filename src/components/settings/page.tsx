@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useEffect, useState } from "react"
+import React, { useEffect } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
 import { Settings, Tag, Timer } from "lucide-react"
 import { CategoryManagementView } from "./ui/CategoryManagementView"
@@ -12,9 +12,7 @@ export function SettingsComponent() {
   const router = useRouter()
   const tabParam = searchParams.get("tab")
 
-  const [activeTab, setActiveTab] = useState<"category" | "pomodoro">(
-    tabParam === "pomodoro" ? "pomodoro" : "category"
-  )
+  const activeTab: "category" | "pomodoro" = tabParam === "pomodoro" ? "pomodoro" : "category"
 
   const pomodoroPageData = usePomodoroPage()
 
@@ -22,14 +20,7 @@ export function SettingsComponent() {
     document.title = "Settings — SansOS Workspace"
   }, [])
 
-  useEffect(() => {
-    if (tabParam === "pomodoro" || tabParam === "category") {
-      setActiveTab(tabParam)
-    }
-  }, [tabParam])
-
   const handleTabChange = (tab: "category" | "pomodoro") => {
-    setActiveTab(tab)
     router.push(`/settings?tab=${tab}`)
   }
 
