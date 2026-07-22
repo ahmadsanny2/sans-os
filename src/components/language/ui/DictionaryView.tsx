@@ -243,7 +243,7 @@ function LetterSection({
       <button
         type="button"
         onClick={toggleCollapse}
-        className="w-full flex items-center justify-between p-3 bg-secondary/20 hover:bg-secondary/45 dark:bg-zinc-900/40 dark:hover:bg-zinc-900/60 border border-border/40 rounded-xl transition-all duration-200 select-none cursor-pointer text-left shadow-sm active:scale-[0.995]"
+        className="w-full flex items-center justify-between p-3 bg-secondary/20 hover:bg-secondary/45 dark:bg-card/40 dark:hover:bg-card/60 border border-border/40 rounded-xl transition-all duration-200 select-none cursor-pointer text-left shadow-sm active:scale-[0.995]"
       >
         <div className="flex items-center gap-3">
           <div className="inline-flex h-8 w-8 items-center justify-center text-xs font-extrabold bg-primary text-primary-foreground rounded-lg shadow-glass shadow-glow uppercase select-none">
