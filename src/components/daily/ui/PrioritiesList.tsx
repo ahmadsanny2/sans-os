@@ -5,6 +5,7 @@ import { Priority } from "@/hooks/useDaily"
 import { Trash2, Check, RefreshCw, Link2, Pencil, X, Tag } from "lucide-react"
 import { useState } from "react"
 import { useCategories } from "@/hooks/useCategories"
+import { CustomSelect } from "@/components/ui/CustomSelect"
 
 interface PrioritiesListProps {
   listPriorities: Priority[]
@@ -130,25 +131,17 @@ export function PrioritiesList({
                             className="flex-1 rounded-xl border border-border bg-background px-3 py-1.5 text-xs outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/10"
                             placeholder="Reference Link (optional)"
                           />
-                          <select
+                          <CustomSelect
                             value={editCategory}
-                            onChange={(e) => setEditCategory(e.target.value)}
-                            className="rounded-xl border border-border bg-background px-3 py-1.5 text-xs outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/10 cursor-pointer"
-                          >
-                            {priorityCategories.length > 0 ? (
-                              priorityCategories.map((c) => (
-                                <option key={c.id} value={c.name}>
-                                  {c.name}
-                                </option>
-                              ))
-                            ) : (
-                              defaultFallbackCategories.map((catName) => (
-                                <option key={catName} value={catName}>
-                                  {catName}
-                                </option>
-                              ))
-                            )}
-                          </select>
+                            onChange={(val) => setEditCategory(val)}
+                            options={
+                              priorityCategories.length > 0
+                                ? priorityCategories.map((c) => ({ value: c.name, label: c.name }))
+                                : defaultFallbackCategories.map((catName) => ({ value: catName, label: catName }))
+                            }
+                            size="sm"
+                            className="min-w-[120px]"
+                          />
                         </div>
                       </div>
                     ) : (
