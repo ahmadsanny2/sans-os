@@ -11,6 +11,14 @@ export interface CategoryItem {
   isSystemDefault?: boolean
 }
 
+export interface SubCategoryItem {
+  id: string
+  userId: string
+  categoryId: string
+  name: string
+  createdAt: string
+}
+
 async function fetchCategories(): Promise<CategoryItem[]> {
   const res = await fetch("/api/categories")
   if (!res.ok) {
@@ -53,12 +61,61 @@ async function deleteCategoryApi(id: string): Promise<{ success: boolean }> {
   return res.json()
 }
 
+// Subcategory API fetchers
+async function fetchSubCategories(): Promise<SubCategoryItem[]> {
+  const res = await fetch("/api/categories/sub")
+  if (!res.ok) {
+    throw new Error("Failed to fetch sub-categories")
+  }
+  return res.json()
+}
+
+async function createSubCategory(body: { name: string; categoryId: string }): Promise<SubCategoryItem> {
+  const res = await fetch("/api/categories/sub", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  })
+  if (!res.ok) {
+    throw new Error("Failed to create sub-category")
+  }
+  return res.json()
+}
+
+async function updateSubCategoryApi(params: { id: string; name: string }): Promise<SubCategoryItem> {
+  const res = await fetch(`/api/categories/sub/${params.id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name: params.name }),
+  })
+  if (!res.ok) {
+    throw new Error("Failed to update sub-category")
+  }
+  return res.json()
+}
+
+async function deleteSubCategoryApi(id: string): Promise<{ success: boolean }> {
+  const res = await fetch(`/api/categories/sub/${id}`, {
+    method: "DELETE",
+  })
+  if (!res.ok) {
+    throw new Error("Failed to delete sub-category")
+  }
+  return res.json()
+}
+
 export function useCategories() {
   const queryClient = useQueryClient()
 
-  const { data: categories = [], isLoading } = useQuery<CategoryItem[]>({
+  // Categories Queries & Mutations
+  const { data: categories = [], isLoading: isLoadingCategories } = useQuery<CategoryItem[]>({
     queryKey: ["categories"],
     queryFn: fetchCategories,
+  })
+
+  const { data: subCategories = [], isLoading: isLoadingSubs } = useQuery<SubCategoryItem[]>({
+    queryKey: ["subCategories"],
+    queryFn: fetchSubCategories,
   })
 
   const createMutation = useMutation<CategoryItem, Error, Omit<CategoryItem, "id" | "isSystemDefault">>({
@@ -142,6 +199,40 @@ export function useCategories() {
     },
   })
 
+  // Sub-categories Mutations
+  const createSubMutation = useMutation<SubCategoryItem, Error, { name: string; categoryId: string }>({
+    mutationFn: createSubCategory,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["subCategories"] })
+    },
+  })
+
+  const updateSubMutation = useMutation<SubCategoryItem, Error, { id: string; name: string }>({
+    mutationFn: updateSubCategoryApi,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["subCategories"] })
+      queryClient.invalidateQueries({ queryKey: ["timetable"] })
+      queryClient.invalidateQueries({ queryKey: ["habits"] })
+      queryClient.invalidateQueries({ queryKey: ["priorities"] })
+      queryClient.invalidateQueries({ queryKey: ["priorities-range"] })
+      queryClient.invalidateQueries({ queryKey: ["learningSubjects"] })
+      queryClient.invalidateQueries({ queryKey: ["projects"] })
+    },
+  })
+
+  const deleteSubMutation = useMutation<{ success: boolean }, Error, string>({
+    mutationFn: deleteSubCategoryApi,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["subCategories"] })
+      queryClient.invalidateQueries({ queryKey: ["timetable"] })
+      queryClient.invalidateQueries({ queryKey: ["habits"] })
+      queryClient.invalidateQueries({ queryKey: ["priorities"] })
+      queryClient.invalidateQueries({ queryKey: ["priorities-range"] })
+      queryClient.invalidateQueries({ queryKey: ["learningSubjects"] })
+      queryClient.invalidateQueries({ queryKey: ["projects"] })
+    },
+  })
+
   const addCategory = (newItem: Omit<CategoryItem, "id" | "isSystemDefault">) => {
     createMutation.mutate(newItem)
   }
@@ -154,16 +245,32 @@ export function useCategories() {
     deleteMutation.mutate(id)
   }
 
+  const addSubCategory = (categoryId: string, name: string) => {
+    createSubMutation.mutate({ categoryId, name })
+  }
+
+  const updateSubCategory = (id: string, name: string) => {
+    updateSubMutation.mutate({ id, name })
+  }
+
+  const deleteSubCategory = (id: string) => {
+    deleteSubMutation.mutate(id)
+  }
+
   const resetToDefault = () => {
-    // No-op since we deleted the UI button and defaults are handled
+    // No-op
   }
 
   return {
     categories,
-    isLoaded: !isLoading,
+    subCategories,
+    isLoaded: !isLoadingCategories && !isLoadingSubs,
     addCategory,
     updateCategory,
     deleteCategory,
+    addSubCategory,
+    updateSubCategory,
+    deleteSubCategory,
     resetToDefault,
   }
 }
