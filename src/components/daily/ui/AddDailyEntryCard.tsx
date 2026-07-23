@@ -32,8 +32,12 @@ interface AddDailyEntryCardProps {
   setTimetableIsTodo: (t: boolean) => void
   timetableCategory: string
   setTimetableCategory: (c: string) => void
+  timetableSubCategory: string
+  setTimetableSubCategory: (c: string) => void
   priorityCategory: string
   setPriorityCategory: (c: string) => void
+  prioritySubCategory: string
+  setPrioritySubCategory: (c: string) => void
   timetableScheduleType: "custom" | "weekly" | "fixed"
   setTimetableScheduleType: (t: "custom" | "weekly" | "fixed") => void
   chooseDate: string
@@ -69,8 +73,12 @@ export function AddDailyEntryCard({
   setTimetableIsTodo,
   timetableCategory,
   setTimetableCategory,
+  timetableSubCategory,
+  setTimetableSubCategory,
   priorityCategory,
   setPriorityCategory,
+  prioritySubCategory,
+  setPrioritySubCategory,
   timetableScheduleType,
   setTimetableScheduleType,
   chooseDate,
@@ -79,9 +87,15 @@ export function AddDailyEntryCard({
   setTimetableDayOfWeek,
   onClose,
 }: AddDailyEntryCardProps) {
-  const { categories } = useCategories()
+  const { categories, subCategories } = useCategories()
   const timetableCategories = categories.filter((c) => c.module === "timetable" || c.module === "general")
   const defaultFallbackCategories = ["General"]
+
+  const activePriorityCatId = categories.find((c) => c.name.toLowerCase() === priorityCategory.toLowerCase())?.id
+  const availablePrioritySubs = activePriorityCatId ? subCategories.filter((sc) => sc.categoryId === activePriorityCatId) : []
+
+  const activeTimetableCatId = categories.find((c) => c.name.toLowerCase() === timetableCategory.toLowerCase())?.id
+  const availableTimetableSubs = activeTimetableCatId ? subCategories.filter((sc) => sc.categoryId === activeTimetableCatId) : []
 
   // Optional multi-item batch creation state
   const [extraDailyRows, setExtraDailyRows] = React.useState<Array<{ id: string; title: string; link: string }>>([])
@@ -293,21 +307,44 @@ export function AddDailyEntryCard({
                 </div>
 
                 {targetPriority && (
-                  <div className="space-y-1.5 animate-in fade-in duration-200">
-                    <label htmlFor="priorityCategory" className="text-xs font-bold text-muted-foreground">
-                      Priority Category
-                    </label>
-                    <CustomSelect
-                      id="priorityCategory"
-                      value={priorityCategory}
-                      onChange={(val) => setPriorityCategory(val)}
-                      options={
-                        timetableCategories.length > 0
-                          ? timetableCategories.map((c) => ({ value: c.name, label: c.name }))
-                          : defaultFallbackCategories.map((catName) => ({ value: catName, label: catName }))
-                      }
-                      fullWidth
-                    />
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 animate-in fade-in duration-200">
+                    <div className="space-y-1.5">
+                      <label htmlFor="priorityCategory" className="text-xs font-bold text-muted-foreground">
+                        Priority Category
+                      </label>
+                      <CustomSelect
+                        id="priorityCategory"
+                        value={priorityCategory}
+                        onChange={(val) => {
+                          setPriorityCategory(val)
+                          setPrioritySubCategory("")
+                        }}
+                        options={
+                          timetableCategories.length > 0
+                            ? timetableCategories.map((c) => ({ value: c.name, label: c.name }))
+                            : defaultFallbackCategories.map((catName) => ({ value: catName, label: catName }))
+                        }
+                        fullWidth
+                      />
+                    </div>
+
+                    {availablePrioritySubs.length > 0 && (
+                      <div className="space-y-1.5 animate-in fade-in duration-200">
+                        <label htmlFor="prioritySubCategory" className="text-xs font-bold text-muted-foreground">
+                          Priority Sub-category
+                        </label>
+                        <CustomSelect
+                          id="prioritySubCategory"
+                          value={prioritySubCategory}
+                          onChange={(val) => setPrioritySubCategory(val)}
+                          options={[
+                            { value: "", label: "None (No sub-category)" },
+                            ...availablePrioritySubs.map((sc) => ({ value: sc.name, label: sc.name }))
+                          ]}
+                          fullWidth
+                        />
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
@@ -373,21 +410,45 @@ export function AddDailyEntryCard({
                   </div>
 
                   {/* Category */}
-                  <div className="space-y-1.5">
-                    <label htmlFor="category" className="text-xs font-bold text-muted-foreground">
-                      Category
-                    </label>
-                    <CustomSelect
-                      id="category"
-                      value={timetableCategory}
-                      onChange={(val) => setTimetableCategory(val)}
-                      options={
-                        timetableCategories.length > 0
-                          ? timetableCategories.map((c) => ({ value: c.name, label: c.name }))
-                          : defaultFallbackCategories.map((catName) => ({ value: catName, label: catName }))
-                      }
-                      fullWidth
-                    />
+                  {/* Category & Sub-category */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                      <label htmlFor="category" className="text-xs font-bold text-muted-foreground">
+                        Category
+                      </label>
+                      <CustomSelect
+                        id="category"
+                        value={timetableCategory}
+                        onChange={(val) => {
+                          setTimetableCategory(val)
+                          setTimetableSubCategory("")
+                        }}
+                        options={
+                          timetableCategories.length > 0
+                            ? timetableCategories.map((c) => ({ value: c.name, label: c.name }))
+                            : defaultFallbackCategories.map((catName) => ({ value: catName, label: catName }))
+                        }
+                        fullWidth
+                      />
+                    </div>
+
+                    {availableTimetableSubs.length > 0 && (
+                      <div className="space-y-1.5 animate-in fade-in duration-200">
+                        <label htmlFor="timetableSubCategory" className="text-xs font-bold text-muted-foreground">
+                          Sub-category
+                        </label>
+                        <CustomSelect
+                          id="timetableSubCategory"
+                          value={timetableSubCategory}
+                          onChange={(val) => setTimetableSubCategory(val)}
+                          options={[
+                            { value: "", label: "None (No sub-category)" },
+                            ...availableTimetableSubs.map((sc) => ({ value: sc.name, label: sc.name }))
+                          ]}
+                          fullWidth
+                        />
+                      </div>
+                    )}
                   </div>
 
                   {/* Schedule Type */}
