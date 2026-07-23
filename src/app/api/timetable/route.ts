@@ -40,7 +40,7 @@ export async function POST(request: Request): Promise<NextResponse> {
     }
 
     const body = await request.json()
-    const { dayOfWeek, startTime, endTime, title, category, color, date, isTodo, link } = body
+    const { dayOfWeek, startTime, endTime, title, category, subCategory, color, date, isTodo, link } = body
 
     if (dayOfWeek === undefined || !startTime || !endTime || !title) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
@@ -55,6 +55,7 @@ export async function POST(request: Request): Promise<NextResponse> {
         endTime,
         title,
         category: category || "General",
+        subCategory: subCategory || null,
         color: color || "blue",
         date: date || null,
         isTodo: isTodo ?? false,
@@ -158,7 +159,7 @@ export async function PATCH(request: Request): Promise<NextResponse> {
     }
 
     const body = await request.json()
-    const { id, dayOfWeek, startTime, endTime, title, category, color, date, isTodo, link } = body
+    const { id, dayOfWeek, startTime, endTime, title, category, subCategory, color, date, isTodo, link } = body
 
     if (!id) {
       return NextResponse.json({ error: "Missing block ID" }, { status: 400 })
@@ -180,6 +181,7 @@ export async function PATCH(request: Request): Promise<NextResponse> {
     if (endTime !== undefined) updateData.endTime = endTime
     if (title !== undefined) updateData.title = title
     if (category !== undefined) updateData.category = category
+    if (subCategory !== undefined) updateData.subCategory = subCategory || null
     if (color !== undefined) updateData.color = color
     if (date !== undefined) updateData.date = date || null
     if (isTodo !== undefined) updateData.isTodo = isTodo

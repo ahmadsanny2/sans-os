@@ -159,7 +159,7 @@ export async function POST(request: Request): Promise<NextResponse> {
     }
 
     const body = await request.json()
-    const { date, text, orderIndex, link, category } = body
+    const { date, text, orderIndex, link, category, subCategory } = body
 
     if (!date || !text) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
@@ -187,6 +187,7 @@ export async function POST(request: Request): Promise<NextResponse> {
         date,
         text,
         category: category || "General",
+        subCategory: subCategory || null,
         orderIndex: finalOrderIndex,
         completed: false,
         rolloverCount: 0,
@@ -213,7 +214,7 @@ export async function PATCH(request: Request): Promise<NextResponse> {
     }
 
     const body = await request.json()
-    const { id, text, link, category } = body
+    const { id, text, link, category, subCategory } = body
 
     if (!id) {
       return NextResponse.json({ error: "Missing priority ID" }, { status: 400 })
@@ -228,6 +229,9 @@ export async function PATCH(request: Request): Promise<NextResponse> {
     }
     if (category !== undefined) {
       updateData.category = category
+    }
+    if (subCategory !== undefined) {
+      updateData.subCategory = subCategory || null
     }
 
     const [updatedPriority] = await db
