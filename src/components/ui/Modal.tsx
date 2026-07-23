@@ -1,4 +1,5 @@
-import React, { useEffect, useRef } from "react"
+import React, { useEffect, useRef, useState } from "react"
+import { createPortal } from "react-dom"
 import { X } from "lucide-react"
 
 interface ModalProps {
@@ -19,6 +20,13 @@ export function Modal({
   maxWidth = "max-w-lg",
 }: ModalProps) {
   const modalRef = useRef<HTMLDivElement>(null)
+  const [mounted, setMounted] = useState(false)
+
+  // Avoid hydration mismatch in Next.js SSR
+  useEffect(() => {
+    setMounted(true)
+    return () => setMounted(false)
+  }, [])
 
   // Close modal on Escape key press
   useEffect(() => {
@@ -35,9 +43,9 @@ export function Modal({
     }
   }, [isOpen, onClose])
 
-  if (!isOpen) return null
+  if (!isOpen || !mounted) return null
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
       <div
         ref={modalRef}
@@ -64,6 +72,7 @@ export function Modal({
         {/* Modal content */}
         <div className="pt-1">{children}</div>
       </div>
-    </div>
+    </div>,
+    document.body
   )
 }
