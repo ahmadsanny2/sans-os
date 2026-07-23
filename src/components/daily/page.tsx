@@ -79,8 +79,12 @@ export default function DailyComponent() {
           setTimetableIsTodo={dailyData.setTimetableIsTodo}
           timetableCategory={dailyData.timetableCategory}
           setTimetableCategory={dailyData.setTimetableCategory}
+          timetableSubCategory={dailyData.timetableSubCategory}
+          setTimetableSubCategory={dailyData.setTimetableSubCategory}
           priorityCategory={dailyData.priorityCategory}
           setPriorityCategory={dailyData.setPriorityCategory}
+          prioritySubCategory={dailyData.prioritySubCategory}
+          setPrioritySubCategory={dailyData.setPrioritySubCategory}
           timetableScheduleType={dailyData.timetableScheduleType}
           setTimetableScheduleType={dailyData.setTimetableScheduleType}
           chooseDate={dailyData.chooseDate}
