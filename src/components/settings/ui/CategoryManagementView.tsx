@@ -14,6 +14,7 @@ import {
   RotateCcw,
   Sparkles,
   Layers,
+  Check,
 } from "lucide-react"
 import { useCategories, CategoryItem } from "@/hooks/useCategories"
 import { confirmDestructive, showSuccessToast } from "@/lib/sweetalert"
@@ -28,13 +29,18 @@ const MODULE_OPTIONS = [
 ]
 
 const COLOR_OPTIONS = [
-  { value: "primary", label: "Primary Indigo", badgeBg: "bg-primary/10 text-primary border-primary/20" },
-  { value: "emerald", label: "Emerald Green", badgeBg: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20" },
-  { value: "blue", label: "Sky Blue", badgeBg: "bg-blue-500/10 text-blue-500 border-blue-500/20" },
-  { value: "violet", label: "Violet Purple", badgeBg: "bg-violet-500/10 text-violet-500 border-violet-500/20" },
-  { value: "rose", label: "Rose Pink", badgeBg: "bg-rose-500/10 text-rose-500 border-rose-500/20" },
-  { value: "amber", label: "Amber Orange", badgeBg: "bg-amber-500/10 text-amber-500 border-amber-500/20" },
-  { value: "cyan", label: "Cyan Teal", badgeBg: "bg-cyan-500/10 text-cyan-500 border-cyan-500/20" },
+  { value: "primary", label: "Primary Indigo", badgeBg: "bg-primary/10 text-primary border-primary/20", dotClass: "bg-primary" },
+  { value: "emerald", label: "Emerald Green", badgeBg: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20", dotClass: "bg-emerald-500" },
+  { value: "blue", label: "Sky Blue", badgeBg: "bg-blue-500/10 text-blue-500 border-blue-500/20", dotClass: "bg-blue-500" },
+  { value: "violet", label: "Violet Purple", badgeBg: "bg-violet-500/10 text-violet-500 border-violet-500/20", dotClass: "bg-violet-500" },
+  { value: "rose", label: "Rose Pink", badgeBg: "bg-rose-500/10 text-rose-500 border-rose-500/20", dotClass: "bg-rose-500" },
+  { value: "amber", label: "Amber Orange", badgeBg: "bg-amber-500/10 text-amber-500 border-amber-500/20", dotClass: "bg-amber-500" },
+  { value: "cyan", label: "Cyan Teal", badgeBg: "bg-cyan-500/10 text-cyan-500 border-cyan-500/20", dotClass: "bg-cyan-500" },
+  { value: "orange", label: "Orange", badgeBg: "bg-orange-500/10 text-orange-500 border-orange-500/20", dotClass: "bg-orange-500" },
+  { value: "pink", label: "Pink", badgeBg: "bg-pink-500/10 text-pink-500 border-pink-500/20", dotClass: "bg-pink-500" },
+  { value: "teal", label: "Teal", badgeBg: "bg-teal-500/10 text-teal-500 border-teal-500/20", dotClass: "bg-teal-500" },
+  { value: "fuchsia", label: "Fuchsia", badgeBg: "bg-fuchsia-500/10 text-fuchsia-500 border-fuchsia-500/20", dotClass: "bg-fuchsia-500" },
+  { value: "slate", label: "Slate", badgeBg: "bg-slate-500/10 text-slate-500 border-slate-500/20", dotClass: "bg-slate-500" },
 ]
 
 function getBadgeStyle(color: string) {
@@ -288,14 +294,30 @@ export function CategoryManagementView() {
                 />
               </div>
 
-              <div className="space-y-1.5">
+              <div className="space-y-2">
                 <label className="block text-xs font-bold text-foreground">Color Badge Style</label>
-                <CustomSelect
-                  value={color}
-                  onChange={(val) => setColor(val)}
-                  options={COLOR_OPTIONS.map((c) => ({ value: c.value, label: c.label }))}
-                  fullWidth
-                />
+                <div className="grid grid-cols-6 gap-2">
+                  {COLOR_OPTIONS.map((c) => {
+                    const isSelected = color === c.value
+                    return (
+                      <button
+                        key={c.value}
+                        type="button"
+                        onClick={() => setColor(c.value)}
+                        className={`h-8 w-8 rounded-full flex items-center justify-center border transition-all cursor-pointer ${c.dotClass} ${
+                          isSelected
+                            ? "border-primary ring-2 ring-primary/40 scale-110 shadow-sm"
+                            : "border-border/60 hover:border-muted-foreground/45 hover:scale-105"
+                        }`}
+                        title={c.label}
+                      >
+                        {isSelected && (
+                          <Check className="h-4 w-4 text-white drop-shadow-sm animate-in zoom-in duration-200" />
+                        )}
+                      </button>
+                    )
+                  })}
+                </div>
               </div>
 
               <div className="space-y-1.5">
