@@ -4,6 +4,7 @@ import React, { useMemo, useState } from "react"
 import { Priority, TimetableBlock } from "@/hooks/useDaily"
 import { Project } from "@/hooks/useProjects"
 import { CalendarMonthGrid } from "./CalendarMonthGrid"
+import { useCategories } from "@/hooks/useCategories"
 import {
   Calendar,
   Clock,
@@ -25,14 +26,20 @@ import { CustomSelect } from "@/components/ui/CustomSelect"
 const TIMETABLE_COLORS: Record<string, { bg: string; text: string; border: string; bullet: string }> = {
   blue: { bg: "bg-blue-500/10", text: "text-blue-500 dark:text-blue-400", border: "border-blue-500/20", bullet: "bg-blue-500" },
   green: { bg: "bg-emerald-500/10", text: "text-emerald-500 dark:text-emerald-400", border: "border-emerald-500/20", bullet: "bg-emerald-500" },
-  purple: { bg: "bg-purple-500/10", text: "text-purple-500 dark:text-purple-400", border: "border-purple-500/20", bullet: "bg-purple-500" },
+  emerald: { bg: "bg-emerald-500/10", text: "text-emerald-500 dark:text-emerald-400", border: "border-emerald-500/20", bullet: "bg-emerald-500" },
+  purple: { bg: "bg-violet-500/10", text: "text-violet-500 dark:text-violet-400", border: "border-violet-500/20", bullet: "bg-purple-500" },
+  violet: { bg: "bg-violet-500/10", text: "text-violet-500 dark:text-violet-400", border: "border-violet-500/20", bullet: "bg-violet-500" },
   amber: { bg: "bg-amber-500/10", text: "text-amber-500 dark:text-amber-400", border: "border-amber-500/20", bullet: "bg-amber-500" },
   red: { bg: "bg-rose-500/10", text: "text-rose-500 dark:text-rose-400", border: "border-rose-500/20", bullet: "bg-rose-500" },
+  rose: { bg: "bg-rose-500/10", text: "text-rose-500 dark:text-rose-400", border: "border-rose-500/20", bullet: "bg-rose-500" },
   pink: { bg: "bg-pink-500/10", text: "text-pink-500 dark:text-pink-400", border: "border-pink-500/20", bullet: "bg-pink-500" },
   teal: { bg: "bg-teal-500/10", text: "text-teal-500 dark:text-teal-400", border: "border-teal-500/20", bullet: "bg-teal-500" },
   orange: { bg: "bg-orange-500/10", text: "text-orange-500 dark:text-orange-400", border: "border-orange-500/20", bullet: "bg-orange-500" },
   indigo: { bg: "bg-indigo-500/10", text: "text-indigo-500 dark:text-indigo-400", border: "border-indigo-500/20", bullet: "bg-indigo-500" },
   slate: { bg: "bg-slate-500/10", text: "text-slate-500 dark:text-slate-400", border: "border-slate-500/20", bullet: "bg-slate-500" },
+  cyan: { bg: "bg-cyan-500/10", text: "text-cyan-500 dark:text-cyan-400", border: "border-cyan-500/20", bullet: "bg-cyan-500" },
+  fuchsia: { bg: "bg-fuchsia-500/10", text: "text-fuchsia-500 dark:text-fuchsia-400", border: "border-fuchsia-500/20", bullet: "bg-fuchsia-500" },
+  primary: { bg: "bg-primary/10", text: "text-primary", border: "border-primary/20", bullet: "bg-primary" },
 }
 
 const MONTH_NAMES = [
@@ -115,6 +122,7 @@ export function CalendarView({
   isLoadingProjects,
 }: CalendarViewProps) {
   const [agendaStatusFilter, setAgendaStatusFilter] = useState<"pending" | "all" | "completed">("pending")
+  const { categories } = useCategories()
   const todayStr = useMemo(() => format(new Date(), "yyyy-MM-dd"), [])
 
   const monthDays = useMemo(() => {
@@ -364,7 +372,8 @@ export function CalendarView({
               ) : (
                 <div className="space-y-2.5 max-h-60 overflow-y-auto pr-1">
                   {activeTimetableBlocks.map((block) => {
-                    const theme = TIMETABLE_COLORS[block.color || "blue"] || TIMETABLE_COLORS.blue
+                    const blockColor = categories.find((c) => c.name.toLowerCase() === block.category?.toLowerCase())?.color || block.color || "blue"
+                    const theme = TIMETABLE_COLORS[blockColor] || TIMETABLE_COLORS.blue
                     return (
                       <div
                         key={block.id}
@@ -632,12 +641,13 @@ export function CalendarView({
 
                     {/* 2. Timetable Blocks */}
                     {group.timetableBlocks.map((b) => {
-                      const color = TIMETABLE_COLORS[b.color || "blue"] || TIMETABLE_COLORS.blue
+                      const blockColor = categories.find((c) => c.name.toLowerCase() === b.category?.toLowerCase())?.color || b.color || "blue"
+                      const color = TIMETABLE_COLORS[blockColor] || TIMETABLE_COLORS.blue
                       return (
                         <div
                           key={b.id}
                           className={`rounded-xl border p-3.5 text-xs space-y-1.5 bg-card/45 shadow-sm border-l-4 ${color.border}`}
-                          style={{ borderLeftColor: `var(--${b.color || "blue"}-500)` }}
+                          style={{ borderLeftColor: `var(--${blockColor}-500)` }}
                         >
                           <div className="flex items-center justify-between gap-1.5 flex-wrap">
                             <span className={`text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full ${color.bg} ${color.text}`}>
