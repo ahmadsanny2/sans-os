@@ -299,7 +299,7 @@ export function ProjectBoardView({
 }: ProjectBoardViewProps) {
   const { categories } = useCategories()
   const projectCategories = categories.filter((c) => c.module === "projects" || c.module === "general")
-  const defaultFallbackCategories = ["Software Development", "Personal", "Work", "General"]
+  const defaultFallbackCategories = ["General"]
   const categoryOptions = projectCategories.length > 0
     ? projectCategories.map((c) => ({ value: c.name, label: c.name }))
     : defaultFallbackCategories.map((catName) => ({ value: catName, label: catName }))
