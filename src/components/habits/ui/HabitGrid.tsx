@@ -6,6 +6,7 @@ import { format } from "date-fns"
 import { Plus, Trash2, Check, Loader2, Sparkles, GripVertical, ChevronUp, ChevronDown, ChevronLeft, ChevronRight } from "lucide-react"
 import { useCategories } from "@/hooks/useCategories"
 import { CustomSelect } from "@/components/ui/CustomSelect"
+import { getCategoryStyle } from "@/lib/categoryUtils"
 
 const CHECKED_THEME = {
   color: "text-primary",
@@ -378,7 +379,7 @@ export function HabitGrid({
                               {habit.name}
                             </p>
                             {habit.category && (
-                              <span className="inline-flex items-center text-[8px] sm:text-[9px] font-bold text-primary opacity-80 uppercase tracking-wider mt-0.5 truncate max-w-full">
+                              <span className={`inline-flex items-center text-[8px] sm:text-[9px] font-bold opacity-90 uppercase tracking-wider mt-0.5 truncate max-w-full ${getCategoryStyle(habit.category, categories).text}`}>
                                 {habit.category}
                               </span>
                             )}
