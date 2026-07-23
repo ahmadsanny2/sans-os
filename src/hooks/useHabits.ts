@@ -5,6 +5,7 @@ export interface Habit {
   userId: string
   name: string
   category: string
+  subCategory?: string | null
   frequency: string
   orderIndex: number
   createdAt: string
@@ -66,7 +67,7 @@ export function useHabitStatsQuery(month: string) {
 }
 
 // 3. Create habit mutation
-async function createHabit(body: { name: string; category?: string; frequency?: string }): Promise<Habit> {
+async function createHabit(body: { name: string; category?: string; subCategory?: string | null; frequency?: string }): Promise<Habit> {
   const res = await fetch("/api/habits", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -80,7 +81,7 @@ async function createHabit(body: { name: string; category?: string; frequency?: 
 
 export function useCreateHabitMutation() {
   const queryClient = useQueryClient()
-  return useMutation<Habit, Error, { name: string; category?: string; frequency?: string }>({
+  return useMutation<Habit, Error, { name: string; category?: string; subCategory?: string | null; frequency?: string }>({
     mutationFn: createHabit,
     onSuccess: (newHabit) => {
       const queryCache = queryClient.getQueryCache()
