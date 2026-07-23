@@ -23,6 +23,7 @@ import {
 } from "lucide-react"
 import { GridCardSkeleton } from "@/components/ui/Skeletons"
 import { StatCard } from "@/components/ui/StatCard"
+import { CustomSelect } from "@/components/ui/CustomSelect"
 import { EmptyState } from "@/components/ui/EmptyState"
 import { ErrorState } from "@/components/ui/ErrorState"
 import { Modal } from "@/components/ui/Modal"
@@ -303,16 +304,17 @@ export function ReadingBoardView({
               <label htmlFor="addBookStatus" className="text-xs font-bold text-muted-foreground">
                 Reading Status *
               </label>
-              <select
+              <CustomSelect
                 id="addBookStatus"
                 value={addStatus}
-                onChange={(e) => setAddStatus(e.target.value)}
-                className="w-full rounded-xl border border-border bg-background/50 px-3.5 py-2.5 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/10 shadow-sm"
-              >
-                <option value="To Read">To Read</option>
-                <option value="Reading">Reading</option>
-                <option value="Completed">Completed</option>
-              </select>
+                onChange={(val) => setAddStatus(val)}
+                options={[
+                  { value: "To Read", label: "To Read", dotClass: "bg-slate-400 dark:bg-slate-500" },
+                  { value: "Reading", label: "Reading", dotClass: "bg-amber-400 dark:bg-amber-500" },
+                  { value: "Completed", label: "Completed", dotClass: "bg-emerald-400 dark:bg-emerald-500" },
+                ]}
+                fullWidth
+              />
             </div>
           </div>
 
@@ -449,19 +451,20 @@ export function ReadingBoardView({
                   <label className="text-xs font-bold text-muted-foreground">
                     Status #{idx + 2} *
                   </label>
-                  <select
+                  <CustomSelect
                     value={row.status}
-                    onChange={(e) => {
+                    onChange={(val) => {
                       const updated = [...extraBookRows]
-                      updated[idx].status = e.target.value
+                      updated[idx].status = val
                       setExtraBookRows(updated)
                     }}
-                    className="w-full rounded-xl border border-border bg-background/50 px-3.5 py-2.5 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/10 shadow-sm"
-                  >
-                    <option value="To Read">To Read</option>
-                    <option value="Reading">Reading</option>
-                    <option value="Completed">Completed</option>
-                  </select>
+                    options={[
+                      { value: "To Read", label: "To Read", dotClass: "bg-slate-400 dark:bg-slate-500" },
+                      { value: "Reading", label: "Reading", dotClass: "bg-amber-400 dark:bg-amber-500" },
+                      { value: "Completed", label: "Completed", dotClass: "bg-emerald-400 dark:bg-emerald-500" },
+                    ]}
+                    fullWidth
+                  />
                 </div>
               </div>
             </div>
@@ -740,16 +743,17 @@ export function ReadingBoardView({
               {/* Status */}
               <div className="space-y-1.5">
                 <label htmlFor="editBookStatus" className="text-xs font-bold text-muted-foreground">Reading Status *</label>
-                <select
+                <CustomSelect
                   id="editBookStatus"
                   value={editStatus}
-                  onChange={(e) => setEditStatus(e.target.value)}
-                  className="w-full rounded-xl border border-border bg-background/50 px-3.5 py-2.5 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/10 shadow-sm"
-                >
-                  <option value="To Read">To Read</option>
-                  <option value="Reading">Reading</option>
-                  <option value="Completed">Completed</option>
-                </select>
+                  onChange={(val) => setEditStatus(val)}
+                  options={[
+                    { value: "To Read", label: "To Read", dotClass: "bg-slate-400 dark:bg-slate-500" },
+                    { value: "Reading", label: "Reading", dotClass: "bg-amber-400 dark:bg-amber-500" },
+                    { value: "Completed", label: "Completed", dotClass: "bg-emerald-400 dark:bg-emerald-500" },
+                  ]}
+                  fullWidth
+                />
               </div>
             </div>
 
