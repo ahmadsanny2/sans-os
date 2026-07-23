@@ -81,7 +81,7 @@ export function AddDailyEntryCard({
 }: AddDailyEntryCardProps) {
   const { categories } = useCategories()
   const timetableCategories = categories.filter((c) => c.module === "timetable" || c.module === "general")
-  const defaultFallbackCategories = ["Deep Work", "Personal", "Work", "Leisure & Rest", "Education", "General"]
+  const defaultFallbackCategories = ["General"]
 
   // Optional multi-item batch creation state
   const [extraDailyRows, setExtraDailyRows] = React.useState<Array<{ id: string; title: string; link: string }>>([])
