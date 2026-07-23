@@ -19,6 +19,8 @@ export default function HabitsComponent() {
     setNewHabitName,
     newHabitCategory,
     setNewHabitCategory,
+    newHabitSubCategory,
+    setNewHabitSubCategory,
     showAddForm,
     setShowAddForm,
     handleAddHabit,
@@ -94,6 +96,8 @@ export default function HabitsComponent() {
         setNewHabitName={setNewHabitName}
         newHabitCategory={newHabitCategory}
         setNewHabitCategory={setNewHabitCategory}
+        newHabitSubCategory={newHabitSubCategory}
+        setNewHabitSubCategory={setNewHabitSubCategory}
         showAddForm={showAddForm}
         setShowAddForm={setShowAddForm}
         handleAddHabit={handleAddHabit}
