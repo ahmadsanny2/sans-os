@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import { db } from "@/lib/db"
-import { categories } from "@/types/schema"
+import { categories, habits, timetableBlocks, priorities, learningSubjects, projects } from "@/types/schema"
 import { eq, and } from "drizzle-orm"
 import { createServerSupabaseClient } from "@/lib/supabase/server"
 
@@ -22,6 +22,17 @@ export async function PUT(
     const body = await request.json()
     const { name, module, color, description } = body
 
+    // 1. Get the existing category to check if name is changing
+    const [existing] = await db
+      .select()
+      .from(categories)
+      .where(and(eq(categories.id, id), eq(categories.userId, user.id)))
+      .limit(1)
+
+    if (!existing) {
+      return NextResponse.json({ error: "Category not found" }, { status: 404 })
+    }
+
     const updateData: Partial<typeof categories.$inferInsert> = {}
     if (name !== undefined) updateData.name = name
     if (module !== undefined) updateData.module = module
@@ -34,8 +45,32 @@ export async function PUT(
       .where(and(eq(categories.id, id), eq(categories.userId, user.id)))
       .returning()
 
-    if (!updatedCategory) {
-      return NextResponse.json({ error: "Category not found" }, { status: 404 })
+    // 2. If the category name was changed, sync the renaming across other tables
+    if (name && name !== existing.name) {
+      await db
+        .update(habits)
+        .set({ category: name })
+        .where(and(eq(habits.userId, user.id), eq(habits.category, existing.name)))
+
+      await db
+        .update(timetableBlocks)
+        .set({ category: name })
+        .where(and(eq(timetableBlocks.userId, user.id), eq(timetableBlocks.category, existing.name)))
+
+      await db
+        .update(priorities)
+        .set({ category: name })
+        .where(and(eq(priorities.userId, user.id), eq(priorities.category, existing.name)))
+
+      await db
+        .update(learningSubjects)
+        .set({ category: name })
+        .where(and(eq(learningSubjects.userId, user.id), eq(learningSubjects.category, existing.name)))
+
+      await db
+        .update(projects)
+        .set({ category: name })
+        .where(and(eq(projects.userId, user.id), eq(projects.category, existing.name)))
     }
 
     return NextResponse.json(updatedCategory)
@@ -61,14 +96,47 @@ export async function DELETE(
 
     const { id } = await params
 
-    const [deletedCategory] = await db
-      .delete(categories)
+    // 1. Get the existing category name before deleting
+    const [existing] = await db
+      .select()
+      .from(categories)
       .where(and(eq(categories.id, id), eq(categories.userId, user.id)))
-      .returning()
+      .limit(1)
 
-    if (!deletedCategory) {
+    if (!existing) {
       return NextResponse.json({ error: "Category not found" }, { status: 404 })
     }
+
+    // 2. Delete the category
+    await db
+      .delete(categories)
+      .where(and(eq(categories.id, id), eq(categories.userId, user.id)))
+
+    // 3. Fallback deleted category references to 'General'
+    await db
+      .update(habits)
+      .set({ category: "General" })
+      .where(and(eq(habits.userId, user.id), eq(habits.category, existing.name)))
+
+    await db
+      .update(timetableBlocks)
+      .set({ category: "General" })
+      .where(and(eq(timetableBlocks.userId, user.id), eq(timetableBlocks.category, existing.name)))
+
+    await db
+      .update(priorities)
+      .set({ category: "General" })
+      .where(and(eq(priorities.userId, user.id), eq(priorities.category, existing.name)))
+
+    await db
+      .update(learningSubjects)
+      .set({ category: "General" })
+      .where(and(eq(learningSubjects.userId, user.id), eq(learningSubjects.category, existing.name)))
+
+    await db
+      .update(projects)
+      .set({ category: "General" })
+      .where(and(eq(projects.userId, user.id), eq(projects.category, existing.name)))
 
     return NextResponse.json({ success: true })
   } catch (error) {
