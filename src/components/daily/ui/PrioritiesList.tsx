@@ -14,7 +14,7 @@ interface PrioritiesListProps {
   isError: boolean
   handleToggleCompleted: (id: string, completed: boolean) => void
   handleDeletePriority: (id: string) => Promise<void>
-  handleUpdatePriority: (id: string, text: string, link: string, category: string) => Promise<void>
+  handleUpdatePriority: (id: string, text: string, link: string, category: string, subCategory: string | null) => Promise<void>
   isPendingToggle?: boolean
 }
 
@@ -31,10 +31,13 @@ export function PrioritiesList({
   const [editText, setEditText] = useState("")
   const [editLink, setEditLink] = useState("")
   const [editCategory, setEditCategory] = useState("General")
-
-  const { categories } = useCategories()
+  const [editSubCategory, setEditSubCategory] = useState<string | null>(null)
+  const { categories, subCategories } = useCategories()
   const priorityCategories = categories.filter((c) => c.module === "timetable" || c.module === "general")
   const defaultFallbackCategories = ["General"]
+
+  const activeCatId = categories.find((c) => c.name.toLowerCase() === editCategory.toLowerCase())?.id
+  const availableSubs = activeCatId ? subCategories.filter((sc) => sc.categoryId === activeCatId) : []
 
   const sortedPriorities = [...listPriorities].sort((a, b) => {
     if (a.completed === b.completed) {
@@ -134,7 +137,10 @@ export function PrioritiesList({
                           />
                           <CustomSelect
                             value={editCategory}
-                            onChange={(val) => setEditCategory(val)}
+                            onChange={(val) => {
+                              setEditCategory(val)
+                              setEditSubCategory("")
+                            }}
                             options={
                               priorityCategories.length > 0
                                 ? priorityCategories.map((c) => ({ value: c.name, label: c.name }))
@@ -143,6 +149,18 @@ export function PrioritiesList({
                             size="sm"
                             className="min-w-[120px]"
                           />
+                          {availableSubs.length > 0 && (
+                            <CustomSelect
+                              value={editSubCategory || ""}
+                              onChange={(val) => setEditSubCategory(String(val) || null)}
+                              options={[
+                                { value: "", label: "None" },
+                                ...availableSubs.map((sc) => ({ value: sc.name, label: sc.name }))
+                              ]}
+                              size="sm"
+                              className="min-w-[120px] animate-in fade-in duration-200"
+                            />
+                          )}
                         </div>
                       </div>
                     ) : (
@@ -152,6 +170,7 @@ export function PrioritiesList({
                             <span className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider ${getCategoryStyle(priority.category, categories).badgeBg}`}>
                               <Tag className="h-2 w-2" />
                               {priority.category}
+                              {priority.subCategory && <span className="opacity-70 font-medium"> • {priority.subCategory}</span>}
                             </span>
                           </div>
                         )}
@@ -194,7 +213,7 @@ export function PrioritiesList({
                         onClick={async (e) => {
                           e.stopPropagation()
                           if (!editText.trim()) return
-                          await handleUpdatePriority(priority.id, editText.trim(), editLink.trim(), editCategory)
+                          await handleUpdatePriority(priority.id, editText.trim(), editLink.trim(), editCategory, editSubCategory || null)
                           setEditingId(null)
                         }}
                         disabled={!editText.trim()}
@@ -223,6 +242,7 @@ export function PrioritiesList({
                           setEditText(priority.text)
                           setEditLink(priority.link || "")
                           setEditCategory(priority.category || "General")
+                          setEditSubCategory(priority.subCategory || "")
                         }}
                         className="p-1.5 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
                         aria-label="Edit priority"
