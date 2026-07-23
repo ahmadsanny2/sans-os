@@ -87,7 +87,7 @@ export function CategoryManagementView() {
   const handleOpenAddModal = () => {
     setEditingId(null)
     setName("")
-    setSelectedTargetModules(["habits"])
+    setSelectedTargetModules(selectedModule === "all" ? ["general"] : [selectedModule])
     setColor("primary")
     setDescription("")
     setIsModalOpen(true)
