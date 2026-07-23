@@ -272,7 +272,7 @@ export function HabitGrid({
         <table className="w-full border-collapse text-center text-sm min-w-[850px] sm:min-w-[1200px]">
           <thead>
             <tr className="bg-secondary/50 text-xs font-bold text-muted-foreground border-b border-border/60 uppercase tracking-wider">
-              <th className="px-2 sm:px-6 py-3 sm:py-4 text-left font-bold text-muted-foreground w-32 sm:w-64 min-w-[128px] sm:min-w-[256px] select-none sticky left-0 bg-card/95 backdrop-blur-md z-20 border-r border-border/60 shadow-sm">
+              <th className="px-2 sm:px-6 py-3 sm:py-4 text-left font-bold text-muted-foreground w-32 sm:w-64 min-w-[128px] sm:min-w-[256px] select-none  bg-card/95 backdrop-blur-md z-20 border-r border-border/60 shadow-sm">
                 Habit
               </th>
               {monthDays.map((day) => {
@@ -343,7 +343,7 @@ export function HabitGrid({
                     }`}
                   >
                     {/* Habit Info Cell (Sticky left) */}
-                    <td className="px-2 sm:px-4 py-2 sm:py-3 text-left w-32 sm:w-64 min-w-[128px] sm:min-w-[256px] sticky left-0 bg-card/95 backdrop-blur-md z-10 border-r border-border/60 select-none">
+                    <td className="px-2 sm:px-4 py-2 sm:py-3 text-left w-32 sm:w-64 min-w-[128px] sm:min-w-[256px] bg-card/95 backdrop-blur-md z-10 border-r border-border/60 select-none">
                       <div className="flex items-center justify-between gap-1 sm:gap-1.5">
                         <div className="flex items-center gap-0.5 sm:gap-1 min-w-0 flex-1">
                           {/* Drag handle */}
