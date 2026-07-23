@@ -40,6 +40,7 @@ export default function HabitsComponent() {
     handlePrevMonth,
     handleNextMonth,
     handleGoToToday,
+    setActiveDate,
 
     // Reorder
     handleReorderHabits,
@@ -103,6 +104,7 @@ export default function HabitsComponent() {
         isPendingCreate={isPendingCreate}
         handleReorderHabits={handleReorderHabits}
         isPendingReorder={isPendingReorder}
+        onSelectDate={setActiveDate}
       />
     </div>
   )
