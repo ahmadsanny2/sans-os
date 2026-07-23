@@ -272,11 +272,10 @@ export function AddDailyEntryCard({
         <AnimatePresence initial={false}>
           {(targetTodo || targetPriority || (targetTimetable && timetableScheduleType === "custom")) && (
             <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
+              initial={{ height: 0, opacity: 0, overflow: "hidden" }}
+              animate={{ height: "auto", opacity: 1, transitionEnd: { overflow: "visible" } }}
+              exit={{ height: 0, opacity: 0, overflow: "hidden" }}
               transition={{ duration: 0.2, ease: "easeInOut" }}
-              className="overflow-hidden"
             >
               <div className="grid gap-4 sm:grid-cols-2 max-w-xl">
                 <div className="space-y-1.5 animate-in fade-in duration-200">
@@ -320,11 +319,10 @@ export function AddDailyEntryCard({
         <AnimatePresence initial={false}>
           {targetTimetable && (
             <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
+              initial={{ height: 0, opacity: 0, overflow: "hidden" }}
+              animate={{ height: "auto", opacity: 1, transitionEnd: { overflow: "visible" } }}
+              exit={{ height: 0, opacity: 0, overflow: "hidden" }}
               transition={{ duration: 0.25, ease: "easeInOut" }}
-              className="overflow-hidden"
             >
               <div className="border-t border-dashed border-border pt-4 mt-4 space-y-4">
                 <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
