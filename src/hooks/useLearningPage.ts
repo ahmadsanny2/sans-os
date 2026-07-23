@@ -43,6 +43,7 @@ export function useLearningPage() {
   const [subjectName, setSubjectName] = useState("")
   const [subjectDesc, setSubjectDesc] = useState("")
   const [subjectCategory, setSubjectCategory] = useState("Computer Science")
+  const [subjectSubCategory, setSubjectSubCategory] = useState("")
   const [subjectStatus, setSubjectStatus] = useState<"Planned" | "Learning" | "Completed">("Learning")
 
   // Form states - Material Add
@@ -79,6 +80,7 @@ export function useLearningPage() {
     setSubjectName("")
     setSubjectDesc("")
     setSubjectCategory("Computer Science")
+    setSubjectSubCategory("")
     setSubjectStatus("Learning")
     setShowAddSubjectModal(true)
   }
@@ -89,6 +91,7 @@ export function useLearningPage() {
     setSubjectName(subj.name)
     setSubjectDesc(subj.description || "")
     setSubjectCategory(subj.category || "Computer Science")
+    setSubjectSubCategory(subj.subCategory || "")
     setSubjectStatus(subj.status)
     setShowAddSubjectModal(true)
   }
@@ -106,6 +109,7 @@ export function useLearningPage() {
           status: subjectStatus,
           color: "#8b5cf6",
           category: subjectCategory,
+          subCategory: subjectSubCategory || null,
         })
         showSuccessToast("Subject updated successfully")
       } else {
@@ -115,6 +119,7 @@ export function useLearningPage() {
           status: subjectStatus,
           color: "#8b5cf6",
           category: subjectCategory,
+          subCategory: subjectSubCategory || null,
         })
         showSuccessToast("Subject added successfully")
       }
@@ -269,6 +274,8 @@ export function useLearningPage() {
     setSubjectDesc,
     subjectCategory,
     setSubjectCategory,
+    subjectSubCategory,
+    setSubjectSubCategory,
     subjectStatus,
     setSubjectStatus,
 
