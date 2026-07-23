@@ -28,6 +28,7 @@ import {
 } from "@/hooks/useHabits"
 import { format, parseISO, addDays, subDays } from "date-fns"
 import { confirmDestructive, showError, showSuccessToast } from "@/lib/sweetalert"
+import { useCategories } from "@/hooks/useCategories"
 
 type TabType = "journal" | "gratitude" | "notes"
 
@@ -57,6 +58,7 @@ const CATEGORY_COLORS: Record<string, string> = {
 }
 
 export function useDailyPage() {
+  const { categories } = useCategories()
   const activeDate = useWorkspaceStore((state) => state.activeDate)
   const setActiveDate = useWorkspaceStore((state) => state.setActiveDate)
 
@@ -123,7 +125,7 @@ export function useDailyPage() {
             endTime: timetableEndTime,
             title: entryTitle.trim(),
             category: timetableCategory,
-            color: CATEGORY_COLORS[timetableCategory] || "blue",
+            color: categories.find((c) => c.name === timetableCategory)?.color || "blue",
             date: targetDate,
             isTodo: timetableIsTodo,
             link: entryLink.trim() || undefined,
