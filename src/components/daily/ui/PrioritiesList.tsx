@@ -6,6 +6,7 @@ import { Trash2, Check, RefreshCw, Link2, Pencil, X, Tag } from "lucide-react"
 import { useState } from "react"
 import { useCategories } from "@/hooks/useCategories"
 import { CustomSelect } from "@/components/ui/CustomSelect"
+import { getCategoryStyle } from "@/lib/categoryUtils"
 
 interface PrioritiesListProps {
   listPriorities: Priority[]
@@ -148,7 +149,7 @@ export function PrioritiesList({
                       <div className="space-y-1.5">
                         {priority.category && (
                           <div className="flex">
-                            <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 border border-primary/20 px-2 py-0.5 text-[9px] font-bold text-primary uppercase tracking-wider">
+                            <span className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider ${getCategoryStyle(priority.category, categories).badgeBg}`}>
                               <Tag className="h-2 w-2" />
                               {priority.category}
                             </span>
