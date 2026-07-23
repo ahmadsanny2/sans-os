@@ -17,6 +17,7 @@ import {
 } from "lucide-react"
 import { useCategories, CategoryItem } from "@/hooks/useCategories"
 import { confirmDestructive, showSuccessToast } from "@/lib/sweetalert"
+import { CustomSelect } from "@/components/ui/CustomSelect"
 
 const MODULE_OPTIONS = [
   { value: "all", label: "All Modules", icon: Layers },
@@ -273,32 +274,28 @@ export function CategoryManagementView() {
 
               <div className="space-y-1.5">
                 <label className="block text-xs font-bold text-foreground">Target Module</label>
-                <select
+                <CustomSelect
                   value={module}
-                  onChange={(e) => setModule(e.target.value as CategoryItem["module"])}
-                  className="w-full rounded-xl border border-border bg-secondary/30 px-3.5 py-2 text-xs text-foreground focus:border-primary outline-none transition-colors cursor-pointer"
-                >
-                  <option value="habits">Habits</option>
-                  <option value="timetable">Daily Flow / Timetable</option>
-                  <option value="learning">Learning Hub</option>
-                  <option value="projects">Projects</option>
-                  <option value="general">General / Universal</option>
-                </select>
+                  onChange={(val) => setModule(val as CategoryItem["module"])}
+                  options={[
+                    { value: "habits", label: "Habits" },
+                    { value: "timetable", label: "Daily Flow / Timetable" },
+                    { value: "learning", label: "Learning Hub" },
+                    { value: "projects", label: "Projects" },
+                    { value: "general", label: "General / Universal" },
+                  ]}
+                  fullWidth
+                />
               </div>
 
               <div className="space-y-1.5">
                 <label className="block text-xs font-bold text-foreground">Color Badge Style</label>
-                <select
+                <CustomSelect
                   value={color}
-                  onChange={(e) => setColor(e.target.value)}
-                  className="w-full rounded-xl border border-border bg-secondary/30 px-3.5 py-2 text-xs text-foreground focus:border-primary outline-none transition-colors cursor-pointer"
-                >
-                  {COLOR_OPTIONS.map((c) => (
-                    <option key={c.value} value={c.value}>
-                      {c.label}
-                    </option>
-                  ))}
-                </select>
+                  onChange={(val) => setColor(val)}
+                  options={COLOR_OPTIONS.map((c) => ({ value: c.value, label: c.label }))}
+                  fullWidth
+                />
               </div>
 
               <div className="space-y-1.5">
