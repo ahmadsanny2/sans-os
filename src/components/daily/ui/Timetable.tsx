@@ -253,7 +253,7 @@ export function Timetable({
                             onChange={(val) => {
                               const cat = String(val)
                               setEditCategory(cat)
-                              setEditColor(CATEGORY_COLORS[cat] || "blue")
+                              setEditColor(categories.find((c) => c.name === cat)?.color || "blue")
                             }}
                             options={
                               timetableCategories.length > 0
