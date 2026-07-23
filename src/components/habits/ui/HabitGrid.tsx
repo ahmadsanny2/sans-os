@@ -3,7 +3,7 @@
 import React from "react"
 import { Habit } from "@/hooks/useHabits"
 import { format } from "date-fns"
-import { Plus, Trash2, Check, Loader2, Sparkles, GripVertical, ChevronUp, ChevronDown } from "lucide-react"
+import { Plus, Trash2, Check, Loader2, Sparkles, GripVertical, ChevronUp, ChevronDown, ChevronLeft, ChevronRight } from "lucide-react"
 import { useCategories } from "@/hooks/useCategories"
 
 const CHECKED_THEME = {
@@ -108,6 +108,18 @@ export function HabitGrid({
   const scrollContainerRef = React.useRef<HTMLDivElement>(null)
   const prevActiveDateRef = React.useRef<string | null>(null)
 
+  const handleScrollLeft = () => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollBy({ left: -200, behavior: "smooth" })
+    }
+  }
+
+  const handleScrollRight = () => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollBy({ left: 200, behavior: "smooth" })
+    }
+  }
+
   // Auto scroll table to active date column ONLY when activeDate explicitly changes
   React.useEffect(() => {
     if (!scrollContainerRef.current) return
@@ -138,13 +150,36 @@ export function HabitGrid({
           <Sparkles className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
           Habits List
         </h3>
-        <button
-          onClick={() => setShowAddForm(!showAddForm)}
-          className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-2.5 sm:px-3 py-1.5 text-xs font-semibold text-primary-foreground shadow-sm transition-all hover:bg-primary/95 hover:scale-[1.02] active:scale-95"
-        >
-          <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-          {showAddForm ? "Cancel" : "Add Habit"}
-        </button>
+        <div className="flex items-center gap-2">
+          {/* Mobile Scroll Controls */}
+          <div className="flex items-center gap-1 sm:hidden">
+            <button
+              type="button"
+              onClick={handleScrollLeft}
+              className="p-1.5 rounded-lg bg-secondary/80 hover:bg-secondary text-muted-foreground hover:text-foreground active:scale-95 transition-all border border-border/40"
+              title="Scroll dates left"
+              aria-label="Scroll dates left"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </button>
+            <button
+              type="button"
+              onClick={handleScrollRight}
+              className="p-1.5 rounded-lg bg-secondary/80 hover:bg-secondary text-muted-foreground hover:text-foreground active:scale-95 transition-all border border-border/40"
+              title="Scroll dates right"
+              aria-label="Scroll dates right"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </button>
+          </div>
+          <button
+            onClick={() => setShowAddForm(!showAddForm)}
+            className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-2.5 sm:px-3 py-1.5 text-xs font-semibold text-primary-foreground shadow-sm transition-all hover:bg-primary/95 hover:scale-[1.02] active:scale-95"
+          >
+            <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+            {showAddForm ? "Cancel" : "Add Habit"}
+          </button>
+        </div>
       </div>
 
       {/* Slide-out Add Habit Card */}
@@ -220,7 +255,7 @@ export function HabitGrid({
       ) : null}
 
       {/* Habits Grid Table Card */}
-      <div ref={scrollContainerRef} className="overflow-x-auto bento-card scroll-smooth">
+      <div ref={scrollContainerRef} style={{ overflowX: "auto" }} className="bento-card scroll-smooth touch-pan-x">
         <table className="w-full border-collapse text-center text-sm min-w-[900px] sm:min-w-[1200px]">
           <thead>
             <tr className="bg-secondary/50 text-xs font-bold text-muted-foreground border-b border-border/60 uppercase tracking-wider">
