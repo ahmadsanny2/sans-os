@@ -70,6 +70,7 @@ export function useProjectsPage() {
   const [projectPriority, setProjectPriority] = useState("Medium")
   const [projectStatus, setProjectStatus] = useState("Planning")
   const [projectCategory, setProjectCategory] = useState("Software Development")
+  const [projectSubCategory, setProjectSubCategory] = useState("")
   const [projectDeadline, setProjectDeadline] = useState(getOneWeekFromTodayStr)
   const [projectError, setProjectError] = useState<string | null>(null)
 
@@ -99,12 +100,14 @@ export function useProjectsPage() {
         status: projectStatus,
         deadline: projectDeadline || undefined,
         category: projectCategory,
+        subCategory: projectSubCategory || null,
       })
       setProjectName("")
       setProjectDesc("")
       setProjectPriority("Medium")
       setProjectStatus("Planning")
       setProjectCategory("Software Development")
+      setProjectSubCategory("")
       setProjectDeadline(getOneWeekFromTodayStr())
       setShowAddProject(false)
       setSelectedProjectId(newProj.id)
@@ -271,9 +274,9 @@ export function useProjectsPage() {
     }
   }
 
-  const handleUpdateProjectCategory = async (id: string, category: string): Promise<void> => {
+  const handleUpdateProjectCategory = async (id: string, category: string, subCategory: string | null): Promise<void> => {
     try {
-      await updateProjectMutation.mutateAsync({ id, category })
+      await updateProjectMutation.mutateAsync({ id, category, subCategory })
       showSuccessToast("Project category updated successfully")
     } catch {
       await showError("Update Failed", "Failed to update project category.")
@@ -310,6 +313,8 @@ export function useProjectsPage() {
     setProjectDeadline,
     projectCategory,
     setProjectCategory,
+    projectSubCategory,
+    setProjectSubCategory,
     projectError,
     taskName,
     setTaskName,
