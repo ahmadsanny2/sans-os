@@ -6,7 +6,7 @@ import { format } from "date-fns"
 import { Plus, Trash2, Check, Loader2, Sparkles, GripVertical, ChevronUp, ChevronDown, ChevronLeft, ChevronRight } from "lucide-react"
 import { useCategories } from "@/hooks/useCategories"
 import { CustomSelect } from "@/components/ui/CustomSelect"
-import { getCategoryStyle } from "@/lib/categoryUtils"
+import { getCategoryStyle, isCategoryInModule } from "@/lib/categoryUtils"
 
 const CHECKED_THEME = {
   color: "text-primary",
@@ -66,7 +66,7 @@ export function HabitGrid({
   onSelectDate,
 }: HabitGridProps) {
   const { categories, subCategories } = useCategories()
-  const habitCategories = categories.filter((c) => c.module === "habits" || c.module === "general")
+  const habitCategories = categories.filter((c) => isCategoryInModule(c.module, "habits"))
   const defaultFallbackCategories = ["General"]
 
   const activeCatId = categories.find((c) => c.name.toLowerCase() === newHabitCategory.toLowerCase())?.id

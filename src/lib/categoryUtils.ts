@@ -97,3 +97,10 @@ export function getCategoryStyle(
   const colorKey = found ? found.color : "primary"
   return CATEGORY_COLOR_MAP[colorKey] || CATEGORY_COLOR_MAP.primary
 }
+
+export function isCategoryInModule(catModule: string | undefined | null, targetModule: string): boolean {
+  if (!catModule) return true
+  if (catModule === "all" || catModule === "general" || targetModule === "all") return true
+  const modules = catModule.split(",").map((m) => m.trim().toLowerCase())
+  return modules.includes(targetModule.toLowerCase()) || modules.includes("general") || modules.includes("all")
+}

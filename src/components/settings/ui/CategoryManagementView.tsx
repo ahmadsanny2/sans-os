@@ -19,7 +19,7 @@ import {
 import { useCategories, CategoryItem } from "@/hooks/useCategories"
 import { confirmDestructive, showSuccessToast } from "@/lib/sweetalert"
 import { CustomSelect } from "@/components/ui/CustomSelect"
-import { CATEGORY_COLOR_MAP } from "@/lib/categoryUtils"
+import { CATEGORY_COLOR_MAP, isCategoryInModule } from "@/lib/categoryUtils"
 import Swal from "sweetalert2"
 
 const MODULE_OPTIONS = [
@@ -68,20 +68,19 @@ export function CategoryManagementView() {
 
   // Form State
   const [name, setName] = useState("")
-  const [module, setModule] = useState<CategoryItem["module"]>("habits")
+  const [selectedTargetModules, setSelectedTargetModules] = useState<string[]>(["habits"])
   const [color, setColor] = useState("primary")
   const [description, setDescription] = useState("")
 
   const filteredCategories = categories.filter((cat) => {
     if (cat.isSystemDefault) return false
-    if (selectedModule === "all") return true
-    return cat.module === selectedModule
+    return isCategoryInModule(cat.module, selectedModule)
   })
 
   const handleOpenAddModal = () => {
     setEditingId(null)
     setName("")
-    setModule("habits")
+    setSelectedTargetModules(["habits"])
     setColor("primary")
     setDescription("")
     setIsModalOpen(true)
@@ -90,7 +89,7 @@ export function CategoryManagementView() {
   const handleOpenEditModal = (cat: CategoryItem) => {
     setEditingId(cat.id)
     setName(cat.name)
-    setModule(cat.module)
+    setSelectedTargetModules(cat.module ? cat.module.split(",").map((m) => m.trim()) : ["general"])
     setColor(cat.color)
     setDescription(cat.description || "")
     setIsModalOpen(true)
@@ -100,11 +99,13 @@ export function CategoryManagementView() {
     e.preventDefault()
     if (!name.trim()) return
 
+    const moduleValue = selectedTargetModules.length > 0 ? selectedTargetModules.join(",") : "general"
+
     if (editingId) {
-      updateCategory(editingId, { name, module, color, description })
+      updateCategory(editingId, { name, module: moduleValue, color, description })
       showSuccessToast("Category updated")
     } else {
-      addCategory({ name, module, color, description })
+      addCategory({ name, module: moduleValue, color, description })
       showSuccessToast("Category created")
     }
     setIsModalOpen(false)
@@ -295,9 +296,23 @@ export function CategoryManagementView() {
               </div>
 
               <div className="flex items-center justify-between pt-1 text-xs">
-                <span className="text-[9px] uppercase font-bold text-muted-foreground tracking-wider bg-secondary/60 dark:bg-card/60 px-2 py-0.5 rounded-md border border-border/40">
-                  {cat.module}
-                </span>
+                <div className="flex flex-wrap gap-1">
+                  {(cat.module || "general").split(",").map((m) => {
+                    const modName = m.trim()
+                    const labelMap: Record<string, string> = {
+                      timetable: "Daily Flow",
+                      habits: "Habits",
+                      learning: "Learning",
+                      projects: "Projects",
+                      general: "General",
+                    }
+                    return (
+                      <span key={modName} className="text-[9px] uppercase font-bold text-muted-foreground tracking-wider bg-secondary/60 dark:bg-card/60 px-2 py-0.5 rounded-md border border-border/40">
+                        {labelMap[modName] || modName}
+                      </span>
+                    )
+                  })}
+                </div>
 
                 <div className="flex items-center gap-1">
                   <button
@@ -363,20 +378,54 @@ export function CategoryManagementView() {
                 />
               </div>
 
-              <div className="space-y-1.5">
-                <label className="block text-xs font-bold text-foreground">Target Module</label>
-                <CustomSelect
-                  value={module}
-                  onChange={(val) => setModule(val as CategoryItem["module"])}
-                  options={[
-                    { value: "habits", label: "Habits" },
-                    { value: "timetable", label: "Daily Flow / Timetable" },
-                    { value: "learning", label: "Learning Hub" },
-                    { value: "projects", label: "Projects" },
-                    { value: "general", label: "General / Universal" },
-                  ]}
-                  fullWidth
-                />
+              {/* Target Modules Checklist */}
+              <div className="space-y-2">
+                <label className="block text-xs font-bold text-foreground">Target Modules (Check all that apply)</label>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 bg-secondary/20 border border-border/60 p-3 rounded-xl">
+                  {[
+                    { id: "timetable", label: "Daily Flow / Timetable", icon: Clock },
+                    { id: "habits", label: "Habits", icon: CheckSquare },
+                    { id: "learning", label: "Learning Hub", icon: GraduationCap },
+                    { id: "projects", label: "Projects", icon: Briefcase },
+                    { id: "general", label: "General / Universal", icon: Layers },
+                  ].map((item) => {
+                    const isChecked = selectedTargetModules.includes(item.id)
+                    const Icon = item.icon
+                    return (
+                      <label
+                        key={item.id}
+                        className={`flex items-center gap-2.5 p-2 rounded-lg border text-xs font-semibold cursor-pointer transition-all ${
+                          isChecked
+                            ? "bg-primary/10 border-primary/40 text-primary shadow-xs"
+                            : "bg-background/60 border-border/60 text-muted-foreground hover:bg-card hover:text-foreground"
+                        }`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={isChecked}
+                          onChange={(e) => {
+                            if (item.id === "general") {
+                              if (e.target.checked) {
+                                setSelectedTargetModules(["general"])
+                              } else {
+                                setSelectedTargetModules([])
+                              }
+                            } else {
+                              let updated = isChecked
+                                ? selectedTargetModules.filter((m) => m !== item.id)
+                                : [...selectedTargetModules.filter((m) => m !== "general"), item.id]
+                              if (updated.length === 0) updated = ["general"]
+                              setSelectedTargetModules(updated)
+                            }
+                          }}
+                          className="rounded border-border text-primary focus:ring-primary h-4 w-4"
+                        />
+                        <Icon className="h-4 w-4 shrink-0" />
+                        <span>{item.label}</span>
+                      </label>
+                    )
+                  })}
+                </div>
               </div>
 
               <div className="space-y-2">

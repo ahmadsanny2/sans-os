@@ -6,7 +6,7 @@ import { Trash2, Check, RefreshCw, Link2, Pencil, X, Tag } from "lucide-react"
 import { useState } from "react"
 import { useCategories } from "@/hooks/useCategories"
 import { CustomSelect } from "@/components/ui/CustomSelect"
-import { getCategoryStyle } from "@/lib/categoryUtils"
+import { getCategoryStyle, isCategoryInModule } from "@/lib/categoryUtils"
 
 interface PrioritiesListProps {
   listPriorities: Priority[]
@@ -33,7 +33,7 @@ export function PrioritiesList({
   const [editCategory, setEditCategory] = useState("General")
   const [editSubCategory, setEditSubCategory] = useState<string | null>(null)
   const { categories, subCategories } = useCategories()
-  const priorityCategories = categories.filter((c) => c.module === "timetable" || c.module === "general")
+  const priorityCategories = categories.filter((c) => isCategoryInModule(c.module, "timetable"))
   const defaultFallbackCategories = ["General"]
 
   const activeCatId = categories.find((c) => c.name.toLowerCase() === editCategory.toLowerCase())?.id

@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import { Plus, Calendar, Clock, Loader2, Link2, AlertCircle } from "lucide-react"
 import { useCategories } from "@/hooks/useCategories"
 import { CustomSelect } from "@/components/ui/CustomSelect"
+import { getCategoryStyle, isCategoryInModule } from "@/lib/categoryUtils"
 
 interface AddDailyEntryCardProps {
   entryTitle: string
@@ -88,7 +89,7 @@ export function AddDailyEntryCard({
   onClose,
 }: AddDailyEntryCardProps) {
   const { categories, subCategories } = useCategories()
-  const timetableCategories = categories.filter((c) => c.module === "timetable" || c.module === "general")
+  const timetableCategories = categories.filter((c) => isCategoryInModule(c.module, "timetable"))
   const defaultFallbackCategories = ["General"]
 
   const activePriorityCatId = categories.find((c) => c.name.toLowerCase() === priorityCategory.toLowerCase())?.id

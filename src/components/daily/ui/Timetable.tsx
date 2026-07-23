@@ -6,6 +6,7 @@ import { Trash2, Clock, CalendarRange, Link2, Pencil } from "lucide-react"
 import { useState } from "react"
 import { useCategories } from "@/hooks/useCategories"
 import { CustomSelect } from "@/components/ui/CustomSelect"
+import { isCategoryInModule } from "@/lib/categoryUtils"
 
 const COLORS: Record<string, { bg: string; text: string; border: string; bullet: string }> = {
   blue: { bg: "bg-blue-500/10", text: "text-blue-500 dark:text-blue-400", border: "border-blue-500/20", bullet: "bg-blue-500" },
@@ -106,7 +107,7 @@ export function Timetable({
   const [editDate, setEditDate] = useState("")
   const [editDayOfWeek, setEditDayOfWeek] = useState(0)
   const { categories, subCategories } = useCategories()
-  const timetableCategories = categories.filter((c) => c.module === "timetable" || c.module === "general")
+  const timetableCategories = categories.filter((c) => isCategoryInModule(c.module, "timetable"))
   const defaultFallbackCategories = ["General"]
 
   const activeCatId = categories.find((c) => c.name.toLowerCase() === editCategory.toLowerCase())?.id

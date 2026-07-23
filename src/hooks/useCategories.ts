@@ -5,7 +5,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 export interface CategoryItem {
   id: string
   name: string
-  module: "habits" | "timetable" | "learning" | "projects" | "general"
+  module: string
   color: string
   description?: string
   isSystemDefault?: boolean

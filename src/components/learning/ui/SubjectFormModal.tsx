@@ -4,6 +4,7 @@ import { LearningSubject } from "@/hooks/useLearning"
 import { Modal } from "@/components/ui/Modal"
 import { useCategories } from "@/hooks/useCategories"
 import { CustomSelect } from "@/components/ui/CustomSelect"
+import { isCategoryInModule } from "@/lib/categoryUtils"
 
 interface SubjectFormModalProps {
   isOpen: boolean
@@ -41,7 +42,7 @@ export function SubjectFormModal({
   isPending,
 }: SubjectFormModalProps) {
   const { categories, subCategories } = useCategories()
-  const learningCategories = categories.filter((c) => c.module === "learning" || c.module === "general")
+  const learningCategories = categories.filter((c) => isCategoryInModule(c.module, "learning"))
   const defaultFallbackCategories = ["General"]
 
   const activeCatId = categories.find((c) => c.name.toLowerCase() === category.toLowerCase())?.id

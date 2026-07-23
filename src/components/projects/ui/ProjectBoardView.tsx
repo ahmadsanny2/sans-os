@@ -24,7 +24,7 @@ import { ListSkeleton } from "@/components/ui/Skeletons"
 import { EmptyState } from "@/components/ui/EmptyState"
 import { ErrorState } from "@/components/ui/ErrorState"
 import { CustomSelect } from "@/components/ui/CustomSelect"
-import { getCategoryStyle } from "@/lib/categoryUtils"
+import { getCategoryStyle, isCategoryInModule } from "@/lib/categoryUtils"
 
 interface DropdownOption {
   value: string
@@ -302,7 +302,7 @@ export function ProjectBoardView({
   isPendingTaskUpdate,
 }: ProjectBoardViewProps) {
   const { categories, subCategories } = useCategories()
-  const projectCategories = categories.filter((c) => c.module === "projects" || c.module === "general")
+  const projectCategories = categories.filter((c) => isCategoryInModule(c.module, "projects"))
   const defaultFallbackCategories = ["General"]
 
   const activeAddCatId = categories.find((c) => c.name.toLowerCase() === projectCategory.toLowerCase())?.id
