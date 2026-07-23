@@ -340,3 +340,15 @@ export const learningTasksRelations = relations(learningTasks, ({ one }) => ({
   }),
 }))
 
+// 15. Custom Categories Table
+export const categories = pgTable("categories", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: text("user_id").notNull(),
+  name: text("name").notNull(),
+  module: text("module").default("general").notNull(), // habits, timetable, learning, projects, general
+  color: text("color").default("primary").notNull(),
+  description: text("description"),
+  isSystemDefault: boolean("is_system_default").default(false).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+})
+
