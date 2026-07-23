@@ -118,49 +118,99 @@ export function PrioritiesList({
 
                   <div className="flex flex-col min-w-0 pr-2 flex-1">
                     {editingId === priority.id ? (
-                      <div className="flex flex-col gap-2 w-full" onClick={(e) => e.stopPropagation()}>
-                        <input
-                          type="text"
-                          value={editText}
-                          onChange={(e) => setEditText(e.target.value)}
-                          className="w-full rounded-xl border border-border bg-background px-3 py-1.5 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/10"
-                          placeholder="Priority text"
-                          autoFocus
-                        />
-                        <div className="flex gap-2">
+                      <div className="flex flex-col gap-3 w-full py-1" onClick={(e) => e.stopPropagation()}>
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                            Priority Title
+                          </label>
+                          <input
+                            type="text"
+                            value={editText}
+                            onChange={(e) => setEditText(e.target.value)}
+                            className="w-full rounded-xl border border-border/80 bg-background px-3.5 py-2 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/15"
+                            placeholder="Priority title..."
+                            autoFocus
+                          />
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                          <div className="space-y-1">
+                            <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                              Category
+                            </label>
+                            <CustomSelect
+                              value={editCategory}
+                              onChange={(val) => {
+                                setEditCategory(val)
+                                setEditSubCategory("")
+                              }}
+                              options={
+                                priorityCategories.length > 0
+                                  ? priorityCategories.map((c) => ({ value: c.name, label: c.name }))
+                                  : defaultFallbackCategories.map((catName) => ({ value: catName, label: catName }))
+                              }
+                              size="sm"
+                              fullWidth
+                            />
+                          </div>
+
+                          {availableSubs.length > 0 && (
+                            <div className="space-y-1 animate-in fade-in duration-200">
+                              <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                                Sub-category
+                              </label>
+                              <CustomSelect
+                                value={editSubCategory || ""}
+                                onChange={(val) => setEditSubCategory(String(val) || null)}
+                                options={[
+                                  { value: "", label: "None (No sub-category)" },
+                                  ...availableSubs.map((sc) => ({ value: sc.name, label: sc.name }))
+                                ]}
+                                size="sm"
+                                fullWidth
+                              />
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                            Reference Link (Optional)
+                          </label>
                           <input
                             type="url"
                             value={editLink}
                             onChange={(e) => setEditLink(e.target.value)}
-                            className="flex-1 rounded-xl border border-border bg-background px-3 py-1.5 text-xs outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/10"
-                            placeholder="Reference Link (optional)"
+                            className="w-full rounded-xl border border-border/80 bg-background px-3.5 py-1.5 text-xs outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/15"
+                            placeholder="https://..."
                           />
-                          <CustomSelect
-                            value={editCategory}
-                            onChange={(val) => {
-                              setEditCategory(val)
-                              setEditSubCategory("")
+                        </div>
+
+                        <div className="flex items-center justify-end gap-2 pt-1">
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              setEditingId(null)
                             }}
-                            options={
-                              priorityCategories.length > 0
-                                ? priorityCategories.map((c) => ({ value: c.name, label: c.name }))
-                                : defaultFallbackCategories.map((catName) => ({ value: catName, label: catName }))
-                            }
-                            size="sm"
-                            className="min-w-[120px]"
-                          />
-                          {availableSubs.length > 0 && (
-                            <CustomSelect
-                              value={editSubCategory || ""}
-                              onChange={(val) => setEditSubCategory(String(val) || null)}
-                              options={[
-                                { value: "", label: "None" },
-                                ...availableSubs.map((sc) => ({ value: sc.name, label: sc.name }))
-                              ]}
-                              size="sm"
-                              className="min-w-[120px] animate-in fade-in duration-200"
-                            />
-                          )}
+                            className="px-3 py-1.5 rounded-xl border border-border text-xs font-bold text-muted-foreground hover:bg-secondary transition-colors cursor-pointer"
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            type="button"
+                            onClick={async (e) => {
+                              e.stopPropagation()
+                              if (!editText.trim()) return
+                              await handleUpdatePriority(priority.id, editText.trim(), editLink.trim(), editCategory, editSubCategory || null)
+                              setEditingId(null)
+                            }}
+                            disabled={!editText.trim()}
+                            className="px-3.5 py-1.5 rounded-xl bg-primary text-primary-foreground text-xs font-bold hover:bg-primary/90 transition-colors disabled:opacity-50 flex items-center gap-1.5 shadow-sm cursor-pointer"
+                          >
+                            <Check className="h-3.5 w-3.5 stroke-[3]" />
+                            Save Changes
+                          </button>
                         </div>
                       </div>
                     ) : (
@@ -206,62 +256,34 @@ export function PrioritiesList({
                   </div>
                 </div>
 
-                <div className="flex items-center gap-1 shrink-0 ml-2">
-                  {editingId === priority.id ? (
-                    <>
-                      <button
-                        onClick={async (e) => {
-                          e.stopPropagation()
-                          if (!editText.trim()) return
-                          await handleUpdatePriority(priority.id, editText.trim(), editLink.trim(), editCategory, editSubCategory || null)
-                          setEditingId(null)
-                        }}
-                        disabled={!editText.trim()}
-                        className="p-1.5 rounded-lg text-emerald-500 hover:bg-emerald-500/10 transition-colors disabled:opacity-50"
-                        aria-label="Save priority changes"
-                      >
-                        <Check className="h-4 w-4 stroke-[3]" />
-                      </button>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          setEditingId(null)
-                        }}
-                        className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
-                        aria-label="Cancel editing"
-                      >
-                        <X className="h-4 w-4" />
-                      </button>
-                    </>
-                  ) : (
-                    <>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          setEditingId(priority.id)
-                          setEditText(priority.text)
-                          setEditLink(priority.link || "")
-                          setEditCategory(priority.category || "General")
-                          setEditSubCategory(priority.subCategory || "")
-                        }}
-                        className="p-1.5 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
-                        aria-label="Edit priority"
-                      >
-                        <Pencil className="h-4 w-4" />
-                      </button>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          handleDeletePriority(priority.id)
-                        }}
-                        className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
-                        aria-label="Delete priority"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
-                    </>
-                  )}
-                </div>
+                {editingId !== priority.id && (
+                  <div className="flex items-center gap-1 shrink-0 ml-2">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setEditingId(priority.id)
+                        setEditText(priority.text)
+                        setEditLink(priority.link || "")
+                        setEditCategory(priority.category || "General")
+                        setEditSubCategory(priority.subCategory || "")
+                      }}
+                      className="p-1.5 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
+                      aria-label="Edit priority"
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handleDeletePriority(priority.id)
+                      }}
+                      className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+                      aria-label="Delete priority"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
+                )}
               </div>
             ))}
           </div>
