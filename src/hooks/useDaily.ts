@@ -7,6 +7,7 @@ export interface Priority {
   date: string
   text: string
   category: string
+  subCategory?: string | null
   orderIndex: number
   completed: boolean
   rolloverCount: number
@@ -22,6 +23,7 @@ export interface TimetableBlock {
   endTime: string
   title: string
   category: string
+  subCategory?: string | null
   color: string
   link: string | null
   createdAt: string
@@ -68,7 +70,7 @@ export function usePrioritiesRangeQuery(startDate: string, endDate: string) {
   })
 }
 
-async function createPriority(body: { date: string; text: string; orderIndex?: number; link?: string; category?: string }): Promise<Priority> {
+async function createPriority(body: { date: string; text: string; orderIndex?: number; link?: string; category?: string; subCategory?: string | null }): Promise<Priority> {
   const res = await fetch("/api/priorities", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -83,7 +85,7 @@ async function createPriority(body: { date: string; text: string; orderIndex?: n
 
 export function useCreatePriorityMutation() {
   const queryClient = useQueryClient()
-  return useMutation<Priority, Error, { date: string; text: string; orderIndex?: number; link?: string; category?: string }>({
+  return useMutation<Priority, Error, { date: string; text: string; orderIndex?: number; link?: string; category?: string; subCategory?: string | null }>({
     mutationFn: createPriority,
     onSuccess: (newPriority, variables) => {
       queryClient.setQueryData<Priority[]>(["priorities", variables.date], (old) => {
@@ -304,7 +306,7 @@ export function useDeleteTimetableBlockMutation() {
   })
 }
 
-async function updatePriority(body: { id: string; text?: string; link?: string; category?: string }): Promise<Priority> {
+async function updatePriority(body: { id: string; text?: string; link?: string; category?: string; subCategory?: string | null }): Promise<Priority> {
   const res = await fetch("/api/priorities", {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
@@ -319,7 +321,7 @@ async function updatePriority(body: { id: string; text?: string; link?: string; 
 
 export function useUpdatePriorityMutation(date: string) {
   const queryClient = useQueryClient()
-  return useMutation<Priority, Error, { id: string; text?: string; link?: string; category?: string }>({
+  return useMutation<Priority, Error, { id: string; text?: string; link?: string; category?: string; subCategory?: string | null }>({
     mutationFn: updatePriority,
     onSuccess: (updatedPriority) => {
       queryClient.setQueryData<Priority[]>(["priorities", date], (old) => {
@@ -343,6 +345,7 @@ async function updateTimetableBlock(body: {
   date?: string | null
   isTodo?: boolean
   link?: string
+  subCategory?: string | null
 }): Promise<TimetableBlock> {
   const res = await fetch("/api/timetable", {
     method: "PATCH",
@@ -372,6 +375,7 @@ export function useUpdateTimetableBlockMutation() {
       date?: string | null
       isTodo?: boolean
       link?: string
+      subCategory?: string | null
     }
   >({
     mutationFn: updateTimetableBlock,
