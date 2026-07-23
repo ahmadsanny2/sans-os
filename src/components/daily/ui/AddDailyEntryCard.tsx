@@ -283,17 +283,17 @@ export function AddDailyEntryCard({
           </div>
         </div>
 
-        {/* Unified Date Selection */}
+        {/* Unified Date & Priority Selection */}
         <AnimatePresence initial={false}>
           {(targetTodo || targetPriority || (targetTimetable && timetableScheduleType === "custom")) && (
             <motion.div
-              className="relative z-30"
+              className="relative z-30 pb-2"
               initial={{ height: 0, opacity: 0, overflow: "hidden" }}
               animate={{ height: "auto", opacity: 1, transitionEnd: { overflow: "visible" } }}
               exit={{ height: 0, opacity: 0, overflow: "hidden" }}
               transition={{ duration: 0.2, ease: "easeInOut" }}
             >
-              <div className="grid gap-4 sm:grid-cols-2 max-w-xl">
+              <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
                 <div className="space-y-1.5 animate-in fade-in duration-200">
                   <label htmlFor="chooseDate" className="text-xs font-bold text-muted-foreground">
                     Choose Date
@@ -309,8 +309,8 @@ export function AddDailyEntryCard({
                 </div>
 
                 {targetPriority && (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 animate-in fade-in duration-200">
-                    <div className="space-y-1.5">
+                  <>
+                    <div className="space-y-1.5 animate-in fade-in duration-200">
                       <label htmlFor="priorityCategory" className="text-xs font-bold text-muted-foreground">
                         Priority Category
                       </label>
@@ -347,7 +347,7 @@ export function AddDailyEntryCard({
                         />
                       </div>
                     )}
-                  </div>
+                  </>
                 )}
               </div>
             </motion.div>
