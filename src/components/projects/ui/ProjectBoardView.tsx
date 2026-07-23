@@ -196,6 +196,8 @@ interface ProjectBoardViewProps {
   setProjectDeadline: (deadline: string) => void
   projectCategory: string
   setProjectCategory: (category: string) => void
+  projectSubCategory: string
+  setProjectSubCategory: (category: string) => void
   projectError: string | null
   taskName: string
   setTaskName: (name: string) => void
@@ -223,7 +225,7 @@ interface ProjectBoardViewProps {
   handleUpdateTaskDeadline: (id: string, deadline: string) => Promise<void>
   handleUpdateProjectName: (id: string, name: string) => Promise<void>
   handleUpdateProjectDesc: (id: string, description: string | null) => Promise<void>
-  handleUpdateProjectCategory: (id: string, category: string) => Promise<void>
+  handleUpdateProjectCategory: (id: string, category: string, subCategory: string | null) => Promise<void>
   handleUpdateTaskName: (id: string, name: string) => Promise<void>
   isPendingProjectCreate: boolean
   isPendingProjectDelete: boolean
@@ -257,6 +259,8 @@ export function ProjectBoardView({
   setProjectDeadline,
   projectCategory,
   setProjectCategory,
+  projectSubCategory,
+  setProjectSubCategory,
   projectError,
   taskName,
   setTaskName,
@@ -297,9 +301,16 @@ export function ProjectBoardView({
   isPendingProjectUpdate,
   isPendingTaskUpdate,
 }: ProjectBoardViewProps) {
-  const { categories } = useCategories()
+  const { categories, subCategories } = useCategories()
   const projectCategories = categories.filter((c) => c.module === "projects" || c.module === "general")
   const defaultFallbackCategories = ["General"]
+
+  const activeAddCatId = categories.find((c) => c.name.toLowerCase() === projectCategory.toLowerCase())?.id
+  const availableAddSubs = activeAddCatId ? subCategories.filter((sc) => sc.categoryId === activeAddCatId) : []
+
+  const activeProjectCatId = activeProject ? categories.find((c) => c.name.toLowerCase() === activeProject.category.toLowerCase())?.id : undefined
+  const activeProjectSubCategories = activeProjectCatId ? subCategories.filter((sc) => sc.categoryId === activeProjectCatId) : []
+
   const categoryOptions = projectCategories.length > 0
     ? projectCategories.map((c) => ({ value: c.name, label: c.name }))
     : defaultFallbackCategories.map((catName) => ({ value: catName, label: catName }))
@@ -452,21 +463,45 @@ export function ProjectBoardView({
               />
             </div>
 
-            <div className="space-y-1.5">
-              <label htmlFor="projectCategory" className="text-xs font-bold text-muted-foreground">
-                Category
-              </label>
-              <CustomSelect
-                id="projectCategory"
-                value={projectCategory}
-                onChange={(val) => setProjectCategory(val)}
-                options={
-                  projectCategories.length > 0
-                    ? projectCategories.map((c) => ({ value: c.name, label: c.name }))
-                    : defaultFallbackCategories.map((catName) => ({ value: catName, label: catName }))
-                }
-                fullWidth
-              />
+            {/* Category & Sub-category */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <label htmlFor="projectCategory" className="text-xs font-bold text-muted-foreground">
+                  Category
+                </label>
+                <CustomSelect
+                  id="projectCategory"
+                  value={projectCategory}
+                  onChange={(val) => {
+                    setProjectCategory(val)
+                    setProjectSubCategory("")
+                  }}
+                  options={
+                    projectCategories.length > 0
+                      ? projectCategories.map((c) => ({ value: c.name, label: c.name }))
+                      : defaultFallbackCategories.map((catName) => ({ value: catName, label: catName }))
+                  }
+                  fullWidth
+                />
+              </div>
+
+              {availableAddSubs.length > 0 && (
+                <div className="space-y-1.5 animate-in fade-in duration-200">
+                  <label htmlFor="projectSubCategory" className="text-xs font-bold text-muted-foreground">
+                    Sub-category
+                  </label>
+                  <CustomSelect
+                    id="projectSubCategory"
+                    value={projectSubCategory}
+                    onChange={(val) => setProjectSubCategory(val)}
+                    options={[
+                      { value: "", label: "None (No sub-category)" },
+                      ...availableAddSubs.map((sc) => ({ value: sc.name, label: sc.name }))
+                    ]}
+                    fullWidth
+                  />
+                </div>
+              )}
             </div>
 
             <div className="grid gap-3 sm:grid-cols-2">
@@ -613,6 +648,7 @@ export function ProjectBoardView({
                             {project.category && (
                               <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[9px] font-bold border uppercase tracking-wider ${getCategoryStyle(project.category, categories).badgeBg}`}>
                                 {project.category}
+                                {project.subCategory && <span className="opacity-70 font-medium ml-1"> • {project.subCategory}</span>}
                               </span>
                             )}
                           </div>
@@ -770,7 +806,7 @@ export function ProjectBoardView({
                   <CustomBadgeDropdown
                     value={activeProject.category || "General"}
                     options={categoryOptions}
-                    onChange={(val) => handleUpdateProjectCategory(activeProject.id, val)}
+                    onChange={(val) => handleUpdateProjectCategory(activeProject.id, val, null)}
                     disabled={isPendingProjectUpdate}
                     theme={{
                       bg: "bg-primary/10",
@@ -779,6 +815,23 @@ export function ProjectBoardView({
                     }}
                     align="right"
                   />
+                  {activeProjectSubCategories.length > 0 && (
+                     <CustomBadgeDropdown
+                       value={activeProject.subCategory || "None"}
+                       options={[
+                         { value: "", label: "None" },
+                         ...activeProjectSubCategories.map((sc) => ({ value: sc.name, label: sc.name }))
+                       ]}
+                       onChange={(val) => handleUpdateProjectCategory(activeProject.id, activeProject.category, val || null)}
+                       disabled={isPendingProjectUpdate}
+                       theme={{
+                         bg: "bg-primary/10",
+                         text: "text-primary/80",
+                         border: "border-primary/15",
+                       }}
+                       align="right"
+                     />
+                   )}
                   <CustomBadgeDropdown
                     value={activeProject.status}
                     options={PROJECT_STATUS_OPTIONS}
