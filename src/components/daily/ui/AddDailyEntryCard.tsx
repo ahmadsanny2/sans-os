@@ -4,6 +4,7 @@ import React from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Plus, Calendar, Clock, Loader2, Link2, AlertCircle } from "lucide-react"
 import { useCategories } from "@/hooks/useCategories"
+import { CustomSelect } from "@/components/ui/CustomSelect"
 
 interface AddDailyEntryCardProps {
   entryTitle: string
@@ -297,26 +298,17 @@ export function AddDailyEntryCard({
                     <label htmlFor="priorityCategory" className="text-xs font-bold text-muted-foreground">
                       Priority Category
                     </label>
-                    <select
+                    <CustomSelect
                       id="priorityCategory"
                       value={priorityCategory}
-                      onChange={(e) => setPriorityCategory(e.target.value)}
-                      className="w-full rounded-xl border border-border bg-background px-3.5 py-2.5 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/10 cursor-pointer"
-                    >
-                      {timetableCategories.length > 0 ? (
-                        timetableCategories.map((c) => (
-                          <option key={c.id} value={c.name}>
-                            {c.name}
-                          </option>
-                        ))
-                      ) : (
-                        defaultFallbackCategories.map((catName) => (
-                          <option key={catName} value={catName}>
-                            {catName}
-                          </option>
-                        ))
-                      )}
-                    </select>
+                      onChange={(val) => setPriorityCategory(val)}
+                      options={
+                        timetableCategories.length > 0
+                          ? timetableCategories.map((c) => ({ value: c.name, label: c.name }))
+                          : defaultFallbackCategories.map((catName) => ({ value: catName, label: catName }))
+                      }
+                      fullWidth
+                    />
                   </div>
                 )}
               </div>
@@ -387,26 +379,17 @@ export function AddDailyEntryCard({
                     <label htmlFor="category" className="text-xs font-bold text-muted-foreground">
                       Category
                     </label>
-                    <select
+                    <CustomSelect
                       id="category"
                       value={timetableCategory}
-                      onChange={(e) => setTimetableCategory(e.target.value)}
-                      className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/10 cursor-pointer"
-                    >
-                      {timetableCategories.length > 0 ? (
-                        timetableCategories.map((c) => (
-                          <option key={c.id} value={c.name}>
-                            {c.name}
-                          </option>
-                        ))
-                      ) : (
-                        defaultFallbackCategories.map((catName) => (
-                          <option key={catName} value={catName}>
-                            {catName}
-                          </option>
-                        ))
-                      )}
-                    </select>
+                      onChange={(val) => setTimetableCategory(val)}
+                      options={
+                        timetableCategories.length > 0
+                          ? timetableCategories.map((c) => ({ value: c.name, label: c.name }))
+                          : defaultFallbackCategories.map((catName) => ({ value: catName, label: catName }))
+                      }
+                      fullWidth
+                    />
                   </div>
 
                   {/* Schedule Type */}
@@ -414,16 +397,17 @@ export function AddDailyEntryCard({
                     <label htmlFor="scheduleType" className="text-xs font-bold text-muted-foreground">
                       Schedule Type
                     </label>
-                    <select
+                    <CustomSelect
                       id="scheduleType"
                       value={timetableScheduleType}
-                      onChange={(e) => setTimetableScheduleType(e.target.value as "custom" | "weekly" | "fixed")}
-                      className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/10"
-                    >
-                      <option value="custom">Specific Date (One-off)</option>
-                      <option value="weekly">Specific Day of Week (Weekly)</option>
-                      <option value="fixed">Every Day (Fixed)</option>
-                    </select>
+                      onChange={(val) => setTimetableScheduleType(val as "custom" | "weekly" | "fixed")}
+                      options={[
+                        { value: "custom", label: "Specific Date (One-off)" },
+                        { value: "weekly", label: "Specific Day of Week (Weekly)" },
+                        { value: "fixed", label: "Every Day (Fixed)" },
+                      ]}
+                      fullWidth
+                    />
                   </div>
 
 
@@ -434,20 +418,21 @@ export function AddDailyEntryCard({
                       <label htmlFor="timetableDayOfWeek" className="text-xs font-bold text-muted-foreground">
                         Choose Day
                       </label>
-                      <select
+                      <CustomSelect
                         id="timetableDayOfWeek"
                         value={timetableDayOfWeek}
-                        onChange={(e) => setTimetableDayOfWeek(Number(e.target.value))}
-                        className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/10"
-                      >
-                        <option value={0}>Sunday</option>
-                        <option value={1}>Monday</option>
-                        <option value={2}>Tuesday</option>
-                        <option value={3}>Wednesday</option>
-                        <option value={4}>Thursday</option>
-                        <option value={5}>Friday</option>
-                        <option value={6}>Saturday</option>
-                      </select>
+                        onChange={(val) => setTimetableDayOfWeek(Number(val))}
+                        options={[
+                          { value: 0, label: "Sunday" },
+                          { value: 1, label: "Monday" },
+                          { value: 2, label: "Tuesday" },
+                          { value: 3, label: "Wednesday" },
+                          { value: 4, label: "Thursday" },
+                          { value: 5, label: "Friday" },
+                          { value: 6, label: "Saturday" },
+                        ]}
+                        fullWidth
+                      />
                     </div>
                   )}
 
