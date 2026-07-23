@@ -16,6 +16,8 @@ interface SubjectFormModalProps {
   setDescription: (s: string) => void
   category: string
   setCategory: (s: string) => void
+  subCategory: string
+  setSubCategory: (s: string) => void
   status: "Planned" | "Learning" | "Completed"
   setStatus: (s: "Planned" | "Learning" | "Completed") => void
   isPending: boolean
@@ -32,13 +34,18 @@ export function SubjectFormModal({
   setDescription,
   category,
   setCategory,
+  subCategory,
+  setSubCategory,
   status,
   setStatus,
   isPending,
 }: SubjectFormModalProps) {
-  const { categories } = useCategories()
+  const { categories, subCategories } = useCategories()
   const learningCategories = categories.filter((c) => c.module === "learning" || c.module === "general")
   const defaultFallbackCategories = ["General"]
+
+  const activeCatId = categories.find((c) => c.name.toLowerCase() === category.toLowerCase())?.id
+  const availableSubs = activeCatId ? subCategories.filter((sc) => sc.categoryId === activeCatId) : []
 
   return (
     <Modal
@@ -64,22 +71,45 @@ export function SubjectFormModal({
           />
         </div>
 
-        {/* Category */}
-        <div className="space-y-1.5">
-          <label htmlFor="subjCategory" className="text-xs font-bold text-muted-foreground">
-            Category
-          </label>
-          <CustomSelect
-            id="subjCategory"
-            value={category}
-            onChange={(val) => setCategory(val)}
-            options={
-              learningCategories.length > 0
-                ? learningCategories.map((c) => ({ value: c.name, label: c.name }))
-                : defaultFallbackCategories.map((catName) => ({ value: catName, label: catName }))
-            }
-            fullWidth
-          />
+        {/* Category & Sub-category */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="space-y-1.5">
+            <label htmlFor="subjCategory" className="text-xs font-bold text-muted-foreground">
+              Category
+            </label>
+            <CustomSelect
+              id="subjCategory"
+              value={category}
+              onChange={(val) => {
+                setCategory(val)
+                setSubCategory("")
+              }}
+              options={
+                learningCategories.length > 0
+                  ? learningCategories.map((c) => ({ value: c.name, label: c.name }))
+                  : defaultFallbackCategories.map((catName) => ({ value: catName, label: catName }))
+              }
+              fullWidth
+            />
+          </div>
+
+          {availableSubs.length > 0 && (
+            <div className="space-y-1.5 animate-in fade-in duration-200">
+              <label htmlFor="subjSubCategory" className="text-xs font-bold text-muted-foreground">
+                Sub-category
+              </label>
+              <CustomSelect
+                id="subjSubCategory"
+                value={subCategory}
+                onChange={(val) => setSubCategory(val)}
+                options={[
+                  { value: "", label: "None (No sub-category)" },
+                  ...availableSubs.map((sc) => ({ value: sc.name, label: sc.name }))
+                ]}
+                fullWidth
+              />
+            </div>
+          )}
         </div>
 
         {/* Description */}
