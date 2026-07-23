@@ -110,27 +110,23 @@ export function HabitGrid({
 
   const handleScrollLeft = () => {
     if (scrollContainerRef.current) {
-      scrollContainerRef.current.scrollBy({ left: -200, behavior: "smooth" })
+      scrollContainerRef.current.scrollBy({ left: -240, behavior: "smooth" })
     }
   }
 
   const handleScrollRight = () => {
     if (scrollContainerRef.current) {
-      scrollContainerRef.current.scrollBy({ left: 200, behavior: "smooth" })
+      scrollContainerRef.current.scrollBy({ left: 240, behavior: "smooth" })
     }
   }
 
-  // Auto scroll table to active date column ONLY when activeDate explicitly changes
-  React.useEffect(() => {
+  const handleScrollToActive = () => {
     if (!scrollContainerRef.current) return
-    if (prevActiveDateRef.current === activeDate) return
-    prevActiveDateRef.current = activeDate
-
     const activeEl = scrollContainerRef.current.querySelector<HTMLElement>("[data-active-date='true']")
     if (activeEl) {
       const container = scrollContainerRef.current
       const containerWidth = container.clientWidth
-      const stickyWidth = window.innerWidth < 640 ? 144 : 256
+      const stickyWidth = window.innerWidth < 640 ? 128 : 256
       const elLeft = activeEl.offsetLeft
       const elWidth = activeEl.clientWidth
       
@@ -140,12 +136,21 @@ export function HabitGrid({
         behavior: "smooth",
       })
     }
+  }
+
+  // Auto scroll table to active date column ONLY when activeDate explicitly changes
+  React.useEffect(() => {
+    if (!scrollContainerRef.current) return
+    if (prevActiveDateRef.current === activeDate) return
+    prevActiveDateRef.current = activeDate
+
+    handleScrollToActive()
   }, [activeDate])
 
   return (
     <div className="space-y-6">
       {/* Header and Toggle Button */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-2 flex-wrap">
         <h3 className="text-lg sm:text-xl font-bold tracking-tight text-foreground flex items-center gap-2">
           <Sparkles className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
           Habits List
@@ -157,19 +162,27 @@ export function HabitGrid({
               type="button"
               onClick={handleScrollLeft}
               className="p-1.5 rounded-lg bg-secondary/80 hover:bg-secondary text-muted-foreground hover:text-foreground active:scale-95 transition-all border border-border/40"
-              title="Scroll dates left"
+              title="Scroll left"
               aria-label="Scroll dates left"
             >
-              <ChevronLeft className="h-4 w-4" />
+              <ChevronLeft className="h-3.5 w-3.5" />
+            </button>
+            <button
+              type="button"
+              onClick={handleScrollToActive}
+              className="px-2 py-1 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary text-[10px] font-bold tracking-wide active:scale-95 transition-all border border-primary/20"
+              title="Go to active date"
+            >
+              Today
             </button>
             <button
               type="button"
               onClick={handleScrollRight}
               className="p-1.5 rounded-lg bg-secondary/80 hover:bg-secondary text-muted-foreground hover:text-foreground active:scale-95 transition-all border border-border/40"
-              title="Scroll dates right"
+              title="Scroll right"
               aria-label="Scroll dates right"
             >
-              <ChevronRight className="h-4 w-4" />
+              <ChevronRight className="h-3.5 w-3.5" />
             </button>
           </div>
           <button
@@ -255,11 +268,11 @@ export function HabitGrid({
       ) : null}
 
       {/* Habits Grid Table Card */}
-      <div ref={scrollContainerRef} style={{ overflowX: "auto" }} className="bento-card scroll-smooth touch-pan-x">
-        <table className="w-full border-collapse text-center text-sm min-w-[900px] sm:min-w-[1200px]">
+      <div ref={scrollContainerRef} style={{ overflowX: "auto" }} className="bento-card scroll-smooth">
+        <table className="w-full border-collapse text-center text-sm min-w-[850px] sm:min-w-[1200px]">
           <thead>
             <tr className="bg-secondary/50 text-xs font-bold text-muted-foreground border-b border-border/60 uppercase tracking-wider">
-              <th className="px-2.5 sm:px-6 py-3 sm:py-4 text-left font-bold text-muted-foreground w-36 sm:w-64 min-w-[144px] sm:min-w-[256px] select-none sticky left-0 bg-card/95 backdrop-blur-md z-20 border-r border-border/60 shadow-sm">
+              <th className="px-2 sm:px-6 py-3 sm:py-4 text-left font-bold text-muted-foreground w-32 sm:w-64 min-w-[128px] sm:min-w-[256px] select-none sticky left-0 bg-card/95 backdrop-blur-md z-20 border-r border-border/60 shadow-sm">
                 Habit
               </th>
               {monthDays.map((day) => {
@@ -330,7 +343,7 @@ export function HabitGrid({
                     }`}
                   >
                     {/* Habit Info Cell (Sticky left) */}
-                    <td className="px-2 sm:px-4 py-2 sm:py-3 text-left w-36 sm:w-64 min-w-[144px] sm:min-w-[256px] sticky left-0 bg-card/95 backdrop-blur-md z-10 border-r border-border/60 select-none">
+                    <td className="px-2 sm:px-4 py-2 sm:py-3 text-left w-32 sm:w-64 min-w-[128px] sm:min-w-[256px] sticky left-0 bg-card/95 backdrop-blur-md z-10 border-r border-border/60 select-none">
                       <div className="flex items-center justify-between gap-1 sm:gap-1.5">
                         <div className="flex items-center gap-0.5 sm:gap-1 min-w-0 flex-1">
                           {/* Drag handle */}
