@@ -4,19 +4,25 @@ import React from "react"
 import Link from "next/link"
 import { TimetableBlock } from "@/hooks/useDaily"
 import { Clock, ArrowRight } from "lucide-react"
+import { useCategories } from "@/hooks/useCategories"
 
-// Color scheme mapping for timetable blocks
 const TIMETABLE_COLORS: Record<string, { bg: string; text: string; border: string; bullet: string }> = {
   blue: { bg: "bg-blue-500/10", text: "text-blue-500 dark:text-blue-400", border: "border-blue-500/20", bullet: "bg-blue-500" },
   green: { bg: "bg-emerald-500/10", text: "text-emerald-500 dark:text-emerald-400", border: "border-emerald-500/20", bullet: "bg-emerald-500" },
-  purple: { bg: "bg-purple-500/10", text: "text-purple-500 dark:text-purple-400", border: "border-purple-500/20", bullet: "bg-purple-500" },
+  emerald: { bg: "bg-emerald-500/10", text: "text-emerald-500 dark:text-emerald-400", border: "border-emerald-500/20", bullet: "bg-emerald-500" },
+  purple: { bg: "bg-violet-500/10", text: "text-violet-500 dark:text-violet-400", border: "border-violet-500/20", bullet: "bg-purple-500" },
+  violet: { bg: "bg-violet-500/10", text: "text-violet-500 dark:text-violet-400", border: "border-violet-500/20", bullet: "bg-violet-500" },
   amber: { bg: "bg-amber-500/10", text: "text-amber-500 dark:text-amber-400", border: "border-amber-500/20", bullet: "bg-amber-500" },
   red: { bg: "bg-rose-500/10", text: "text-rose-500 dark:text-rose-400", border: "border-rose-500/20", bullet: "bg-rose-500" },
+  rose: { bg: "bg-rose-500/10", text: "text-rose-500 dark:text-rose-400", border: "border-rose-500/20", bullet: "bg-rose-500" },
   pink: { bg: "bg-pink-500/10", text: "text-pink-500 dark:text-pink-400", border: "border-pink-500/20", bullet: "bg-pink-500" },
   teal: { bg: "bg-teal-500/10", text: "text-teal-500 dark:text-teal-400", border: "border-teal-500/20", bullet: "bg-teal-500" },
   orange: { bg: "bg-orange-500/10", text: "text-orange-500 dark:text-orange-400", border: "border-orange-500/20", bullet: "bg-orange-500" },
   indigo: { bg: "bg-indigo-500/10", text: "text-indigo-500 dark:text-indigo-400", border: "border-indigo-500/20", bullet: "bg-indigo-500" },
   slate: { bg: "bg-slate-500/10", text: "text-slate-500 dark:text-slate-400", border: "border-slate-500/20", bullet: "bg-slate-500" },
+  cyan: { bg: "bg-cyan-500/10", text: "text-cyan-500 dark:text-cyan-400", border: "border-cyan-500/20", bullet: "bg-cyan-500" },
+  fuchsia: { bg: "bg-fuchsia-500/10", text: "text-fuchsia-500 dark:text-fuchsia-400", border: "border-fuchsia-500/20", bullet: "bg-fuchsia-500" },
+  primary: { bg: "bg-primary/10", text: "text-primary", border: "border-primary/20", bullet: "bg-primary" },
 }
 
 interface TimetableWidgetProps {
@@ -30,6 +36,7 @@ export function TimetableWidget({
   isLoading,
   isError,
 }: TimetableWidgetProps) {
+  const { categories } = useCategories()
   return (
     <div className="bento-card p-6 space-y-4">
       <div className="flex items-center justify-between">
@@ -65,7 +72,8 @@ export function TimetableWidget({
         ) : (
           <div className="relative border-l border-border/40 ml-2.5 pl-6 space-y-4">
             {activeDayBlocks.map((block) => {
-              const color = TIMETABLE_COLORS[block.color || "blue"] || TIMETABLE_COLORS.blue
+              const blockColor = categories.find((c) => c.name.toLowerCase() === block.category?.toLowerCase())?.color || block.color || "blue"
+              const color = TIMETABLE_COLORS[blockColor] || TIMETABLE_COLORS.blue
               return (
                 <div key={block.id} className="relative">
                   {/* Bullet Marker */}
