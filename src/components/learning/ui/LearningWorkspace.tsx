@@ -18,10 +18,13 @@ import { StatCard } from "@/components/ui/StatCard"
 import { GridCardSkeleton } from "@/components/ui/Skeletons"
 import { EmptyState } from "@/components/ui/EmptyState"
 import { ErrorState } from "@/components/ui/ErrorState"
+import { useCategories } from "@/hooks/useCategories"
+import { getCategoryStyle } from "@/lib/categoryUtils"
 import { Badge } from "@/components/ui/Badge"
 
 export function LearningWorkspace() {
   const router = useRouter()
+  const { categories } = useCategories()
   const {
     filteredSubjects,
     isLoading,
@@ -213,7 +216,7 @@ export function LearningWorkspace() {
                           {subj.status}
                         </Badge>
                         {subj.category && (
-                          <span className="inline-flex items-center rounded-full bg-secondary px-2.5 py-0.5 text-[9px] font-bold text-muted-foreground border border-border/40 uppercase tracking-wider">
+                          <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[9px] font-bold border uppercase tracking-wider ${getCategoryStyle(subj.category, categories).badgeBg}`}>
                             {subj.category}
                           </span>
                         )}
