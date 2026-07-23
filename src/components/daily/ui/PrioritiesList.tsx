@@ -34,7 +34,7 @@ export function PrioritiesList({
 
   const { categories } = useCategories()
   const priorityCategories = categories.filter((c) => c.module === "timetable" || c.module === "general")
-  const defaultFallbackCategories = ["Deep Work", "Personal", "Work", "Leisure & Rest", "Education", "General"]
+  const defaultFallbackCategories = ["General"]
 
   const sortedPriorities = [...listPriorities].sort((a, b) => {
     if (a.completed === b.completed) {
