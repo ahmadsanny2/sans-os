@@ -106,7 +106,7 @@ export function CustomSelect({
             <span className={`h-2 w-2 rounded-full shrink-0 ${selectedOption.dotClass}`} />
           )}
           {selectedOption?.icon}
-          {selectedOption ? selectedOption.label : placeholder}
+          {selectedOption ? selectedOption.label : (value !== undefined && value !== null && value !== "" ? String(value) : placeholder)}
         </span>
         <ChevronDown
           className={`h-4 w-4 text-muted-foreground shrink-0 transition-transform duration-200 ${
