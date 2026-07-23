@@ -15,6 +15,7 @@ export const habits = pgTable("habits", {
   userId: text("user_id").notNull(),
   name: text("name").notNull(),
   category: text("category").default("General"), // e.g. Health, Work, Mind, Finance
+  subCategory: text("sub_category"),
   frequency: text("frequency").default("daily").notNull(), // daily, weekly, or specific days
   orderIndex: integer("order_index").default(0).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -105,6 +106,7 @@ export const timetableBlocks = pgTable("timetable_blocks", {
   endTime: text("end_time").notNull(), // e.g. "10:00"
   title: text("title").notNull(),
   category: text("category").default("General"), // Work, Health, Leisure, Study
+  subCategory: text("sub_category"),
   color: text("color").default("blue"), // css class or hex color
   date: text("date"), // YYYY-MM-DD for one-off custom blocks (null for everyday fixed)
   isTodo: boolean("is_todo").default(false).notNull(),
@@ -119,6 +121,7 @@ export const priorities = pgTable("priorities", {
   date: text("date").notNull(), // timezone-independent ISO string "YYYY-MM-DD"
   text: text("text").notNull(),
   category: text("category").default("General").notNull(),
+  subCategory: text("sub_category"),
   orderIndex: integer("order_index").notNull(), // 0 to 4 (Top 5)
   completed: boolean("completed").default(false).notNull(),
   rolloverCount: integer("rollover_count").default(0).notNull(), // keeps track of rollovers
@@ -199,6 +202,7 @@ export const projects = pgTable("projects", {
   name: text("name").notNull(),
   description: text("description"),
   category: text("category").default("General").notNull(),
+  subCategory: text("sub_category"),
   status: text("status").default("Planning").notNull(), // Planning, In Progress, On Hold, Completed
   priority: text("priority").default("Medium").notNull(), // Low, Medium, High
   deadline: timestamp("deadline"),
@@ -292,6 +296,7 @@ export const learningSubjects = pgTable("learning_subjects", {
   name: text("name").notNull(),
   description: text("description"),
   category: text("category").default("General").notNull(),
+  subCategory: text("sub_category"),
   status: text("status").default("Learning").notNull(), // Planned, Learning, Completed
   color: text("color").default("hsl(var(--primary))").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -349,6 +354,17 @@ export const categories = pgTable("categories", {
   color: text("color").default("primary").notNull(),
   description: text("description"),
   isSystemDefault: boolean("is_system_default").default(false).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+})
+
+// 16. Custom Sub-Categories Table
+export const subCategories = pgTable("sub_categories", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: text("user_id").notNull(),
+  categoryId: uuid("category_id")
+    .references(() => categories.id, { onDelete: "cascade" })
+    .notNull(),
+  name: text("name").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 })
 
