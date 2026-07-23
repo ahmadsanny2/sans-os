@@ -195,11 +195,7 @@ export function CategoryManagementView() {
                 )}
               </div>
 
-              <div className="flex items-center justify-between pt-3 border-t border-border/40 text-xs">
-                <span className="text-[11px] font-semibold text-muted-foreground">
-                  {cat.isSystemDefault ? "System Default" : "Custom User Category"}
-                </span>
-
+              <div className="flex items-center justify-end pt-3 border-t border-border/40 text-xs">
                 <div className="flex items-center gap-1">
                   <button
                     onClick={() => handleOpenEditModal(cat)}
