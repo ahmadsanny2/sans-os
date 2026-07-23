@@ -24,6 +24,7 @@ import { ListSkeleton } from "@/components/ui/Skeletons"
 import { EmptyState } from "@/components/ui/EmptyState"
 import { ErrorState } from "@/components/ui/ErrorState"
 import { CustomSelect } from "@/components/ui/CustomSelect"
+import { getCategoryStyle } from "@/lib/categoryUtils"
 
 interface DropdownOption {
   value: string
@@ -610,7 +611,7 @@ export function ProjectBoardView({
                               Added: {formatDate(project.createdAt)}
                             </div>
                             {project.category && (
-                              <span className="inline-flex items-center rounded-full bg-primary/10 px-2 py-0.5 text-[9px] font-bold text-primary border border-primary/20 uppercase tracking-wider">
+                              <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[9px] font-bold border uppercase tracking-wider ${getCategoryStyle(project.category, categories).badgeBg}`}>
                                 {project.category}
                               </span>
                             )}
