@@ -55,6 +55,7 @@ interface TimetableProps {
     date?: string | null
     isTodo?: boolean
     link?: string
+    subCategory?: string | null
   }) => Promise<void>
   activeDayBlocks: TimetableBlock[]
 }
@@ -98,14 +99,18 @@ export function Timetable({
   const [editEndTime, setEditEndTime] = useState("09:00")
   const [editDuration, setEditDuration] = useState("60")
   const [editCategory, setEditCategory] = useState("General")
+  const [editSubCategory, setEditSubCategory] = useState<string | null>(null)
   const [editColor, setEditColor] = useState("blue")
   const [editIsTodo, setEditIsTodo] = useState(false)
   const [editScheduleType, setEditScheduleType] = useState<"custom" | "weekly" | "fixed">("custom")
   const [editDate, setEditDate] = useState("")
   const [editDayOfWeek, setEditDayOfWeek] = useState(0)
-  const { categories } = useCategories()
+  const { categories, subCategories } = useCategories()
   const timetableCategories = categories.filter((c) => c.module === "timetable" || c.module === "general")
   const defaultFallbackCategories = ["General"]
+
+  const activeCatId = categories.find((c) => c.name.toLowerCase() === editCategory.toLowerCase())?.id
+  const availableSubs = activeCatId ? subCategories.filter((sc) => sc.categoryId === activeCatId) : []
 
   const handleStartEdit = (block: TimetableBlock) => {
     setEditingId(block.id)
@@ -114,6 +119,7 @@ export function Timetable({
     setEditStartTime(block.startTime)
     setEditEndTime(block.endTime)
     setEditCategory(block.category || "General")
+    setEditSubCategory(block.subCategory || "")
     setEditColor(block.color || "blue")
     setEditIsTodo(block.isTodo)
     
@@ -252,23 +258,41 @@ export function Timetable({
                           />
                         </div>
 
-                        {/* Category */}
-                        <div className="space-y-1.5">
-                          <label className="text-xs font-bold text-muted-foreground">Category</label>
-                          <CustomSelect
-                            value={editCategory}
-                            onChange={(val) => {
-                              const cat = String(val)
-                              setEditCategory(cat)
-                              setEditColor(categories.find((c) => c.name.toLowerCase() === cat.toLowerCase())?.color || "blue")
-                            }}
-                            options={
-                              timetableCategories.length > 0
-                                ? timetableCategories.map((c) => ({ value: c.name, label: c.name }))
-                                : defaultFallbackCategories.map((catName) => ({ value: catName, label: catName }))
-                            }
-                            fullWidth
-                          />
+                        {/* Category & Sub-category */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div className="space-y-1.5">
+                            <label className="text-xs font-bold text-muted-foreground">Category</label>
+                            <CustomSelect
+                              value={editCategory}
+                              onChange={(val) => {
+                                const cat = String(val)
+                                setEditCategory(cat)
+                                setEditColor(categories.find((c) => c.name.toLowerCase() === cat.toLowerCase())?.color || "blue")
+                                setEditSubCategory("")
+                              }}
+                              options={
+                                timetableCategories.length > 0
+                                  ? timetableCategories.map((c) => ({ value: c.name, label: c.name }))
+                                  : defaultFallbackCategories.map((catName) => ({ value: catName, label: catName }))
+                              }
+                              fullWidth
+                            />
+                          </div>
+
+                          {availableSubs.length > 0 && (
+                            <div className="space-y-1.5 animate-in fade-in duration-200">
+                              <label className="text-xs font-bold text-muted-foreground">Sub-category</label>
+                              <CustomSelect
+                                value={editSubCategory || ""}
+                                onChange={(val) => setEditSubCategory(String(val) || null)}
+                                options={[
+                                  { value: "", label: "None (No sub-category)" },
+                                  ...availableSubs.map((sc) => ({ value: sc.name, label: sc.name }))
+                                ]}
+                                fullWidth
+                              />
+                            </div>
+                          )}
                         </div>
 
                         {/* Start Time */}
@@ -422,6 +446,7 @@ export function Timetable({
                               isTodo: editIsTodo,
                               dayOfWeek: finalDayOfWeek,
                               date: finalDate,
+                              subCategory: editSubCategory || null,
                             })
                             setEditingId(null)
                           }}
@@ -478,6 +503,7 @@ export function Timetable({
                         {block.category && (
                           <span className={`inline-block text-[10px] font-bold tracking-wide uppercase ${theme.text}`}>
                             {block.category}
+                            {block.subCategory && <span className="opacity-70 font-medium"> • {block.subCategory}</span>}
                           </span>
                         )}
                       </div>
