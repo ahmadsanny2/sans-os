@@ -125,6 +125,7 @@ export function useDailyPage() {
             endTime: timetableEndTime,
             title: entryTitle.trim(),
             category: timetableCategory,
+            subCategory: timetableSubCategory || null,
             color: categories.find((c) => c.name === timetableCategory)?.color || "blue",
             date: targetDate,
             isTodo: timetableIsTodo,
@@ -154,6 +155,7 @@ export function useDailyPage() {
             orderIndex: chooseDate === activeDate ? listPriorities.length : undefined,
             link: entryLink.trim() || undefined,
             category: priorityCategory,
+            subCategory: prioritySubCategory || null,
           })
         )
       }
@@ -165,6 +167,8 @@ export function useDailyPage() {
       await Promise.all(promises)
       setEntryTitle("")
       setEntryLink("")
+      setTimetableSubCategory("")
+      setPrioritySubCategory("")
       // Uncheck all destinations to reset cleanly
       setTargetTimetable(false)
       setTargetTodo(false)
@@ -287,7 +291,9 @@ export function useDailyPage() {
   const [timetableDuration, _setTimetableDuration] = useState("60")
   const [timetableIsTodo, setTimetableIsTodo] = useState(false)
   const [timetableCategory, setTimetableCategory] = useState("General")
+  const [timetableSubCategory, setTimetableSubCategory] = useState("")
   const [priorityCategory, setPriorityCategory] = useState("General")
+  const [prioritySubCategory, setPrioritySubCategory] = useState("")
   const [timetableScheduleType, setTimetableScheduleType] = useState<"custom" | "weekly" | "fixed">("custom")
   const [prevActiveDate, setPrevActiveDate] = useState(activeDate)
   const [timetableDayOfWeek, setTimetableDayOfWeek] = useState(() => parseISO(activeDate).getDay())
@@ -532,8 +538,12 @@ export function useDailyPage() {
     setTimetableIsTodo,
     timetableCategory,
     setTimetableCategory,
+    timetableSubCategory,
+    setTimetableSubCategory,
     priorityCategory,
     setPriorityCategory,
+    prioritySubCategory,
+    setPrioritySubCategory,
     timetableScheduleType,
     setTimetableScheduleType,
     timetableDayOfWeek,
